@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "core";
+
+package authentication;
+
+
+service Authentication {
+  rpc Authenticate (AuthRequest) returns (AuthReply);
+}
+
+message AuthRequest {
+  string source = 1;
+  string code = 2;
+}
+
+message AuthReply {
+  string token = 1;
+  basicprofile profile = 2;
+}
+
+message basicprofile{
+	string name = 1;	
+	string email = 3;
+	string id = 4;
+	string pictureUrl = 5;
+	string status = 6;
+}

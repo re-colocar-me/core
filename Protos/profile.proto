@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option csharp_namespace = "core";
+
+import "Protos/common.proto";
+import "google/protobuf/timestamp.proto";
+
+
+package profile;
+
+service Profile{
+	rpc SetBio (SetBioRequest) returns (common.defaultReply);
+	rpc SetAdditionalData (SetAdditionalDataRequest) returns (common.defaultReply);
+	rpc GetFullProfile (GetFullProfileRequest) returns (common.defaultReply);
+}
+
+message SetBioRequest{
+	string ownerId = 1;
+	string text=2;
+}
+
+message SetAdditionalDataRequest{
+	string ownerId = 1;
+	string telCountryCode =2;
+	string telLocalCode =3;
+	string telephoneCountryCode = 4;
+	string telephoneAreaCode = 5;
+	string telephoneNumber = 6;
+	string genderCode = 7;
+	google.protobuf.Timestamp  birthDate = 8;
+}
+
+message GetFullProfileRequest{
+	string ownerId =1;
+}
+
+message GetFullProfileReply{
+	string id = 1;
+    string email =2;
+    string source=3;
+    string firstName =4;
+    string pictureUrl = 5;
+    string bioText = 6;
+    string status = 7;
+    google.protobuf.Timestamp lastAccess = 8;
+    string telephoneCountryCode = 9;
+	string telephoneAreaCode = 10;
+	string telephoneNumber = 11;
+	google.protobuf.Timestamp birthDate = 12;
+	string lastName =13;
+	string genderCode = 14;
+	string role = 15;
+}

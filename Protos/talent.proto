@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option csharp_namespace = "core";
+
+import "Protos/common.proto";
+
+package talent;
+
+
+service Talent {
+  rpc ListConsultants (FilterRequest) returns (common.defaultReply);
+  rpc Connect (ConnectRequest) returns (common.defaultReply);
+}
+
+message FilterRequest{
+	string name = 1;
+	string services = 2;
+}
+
+message ListConsultantsReply{
+
+   repeated consultant consultants = 1;
+
+}
+
+message consultant {
+	string name = 1;
+	repeated string services = 2;
+	repeated common.availability availabilities = 3;
+}
+
+message ConnectRequest{
+	string candidateId = 1;
+	string consultantId = 2;
+}

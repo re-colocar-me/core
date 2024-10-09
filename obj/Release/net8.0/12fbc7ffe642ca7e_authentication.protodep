@@ -1,0 +1,2 @@
+obj\Release\net8.0\Protos/Authentication.cs \
+obj\Release\net8.0\Protos/AuthenticationGrpc.cs: Protos/authentication.proto

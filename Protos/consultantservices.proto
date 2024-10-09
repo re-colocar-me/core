@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option csharp_namespace = "core";
+
+import "Protos/common.proto";
+
+package consultantServices;
+
+service ConsultantServices{
+	rpc ListCategories (common.Empty) returns (common.defaultReply);
+	rpc ListServicesByCategory (ListServicesByCategoryRequest) returns (common.defaultReply);
+	rpc ListAllServices (common.Empty) returns (common.defaultReply);
+}
+
+message ListCategoriesReply{
+	repeated category Categories = 1;
+	int32 statuscode = 2;
+	common.error error = 3;
+}
+
+message category{
+	string name = 1;
+	string description = 2;
+	repeated common.service services = 3;
+}
+
+message ListServicesByCategoryRequest {
+	string categoryId = 1;
+}
+
+message ListServicesByCategoryReply{
+	repeated common.service services =1;	
+}
+
+
+message ListAllServicesReply{
+	repeated common.service services =1;
+	int32 statuscode = 2;
+	common.error error = 3;
+}

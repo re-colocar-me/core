@@ -1,0 +1,5 @@
+obj\Debug\net8.0\Protos/Profile.cs \
+obj\Debug\net8.0\Protos/ProfileGrpc.cs: C:/Users/adolf/.nuget/packages/grpc.tools/2.57.0/build/native/include/google/protobuf/any.proto\
+ Protos/common.proto\
+ C:/Users/adolf/.nuget/packages/grpc.tools/2.57.0/build/native/include/google/protobuf/timestamp.proto\
+ Protos/profile.proto

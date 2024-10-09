@@ -1,0 +1,40 @@
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+option csharp_namespace = "core";
+
+package common;
+
+message error{
+	int32 code = 1;
+	string message = 2;
+}
+
+message defaultReply{
+	google.protobuf.Any data = 1;
+	int32 statuscode = 2;
+	error error = 3;
+}
+
+message Empty{
+	
+}
+
+message availability{	
+	string weekday = 1;
+	repeated availabilityitem items = 2;	
+}
+
+message availabilityitem{
+	string id = 1;
+	string starttime = 2;
+	string endtime = 3;
+}
+
+message service{
+	string name = 1;
+	string description = 2;
+	string categoryname = 3;
+	string id = 4;
+}

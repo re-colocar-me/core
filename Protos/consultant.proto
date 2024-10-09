@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+option csharp_namespace = "core";
+
+import "Protos/common.proto";
+
+package consultant;
+
+
+service Consultant {
+  rpc SetAvailability (SetAvailabilityRequest) returns (common.defaultReply);
+  rpc GetAvailabiltyListByOwner(GetAvailabiltyListByOwnerRequest) returns (common.defaultReply);
+  rpc DeleteAvailability(DeleteAvailabilityRequest)  returns (common.defaultReply);
+  rpc SetService (SetServiceRequest) returns (common.defaultReply);
+  rpc GetSchedules(OwnerIdRequest) returns (common.defaultReply);
+  rpc CancelSchedule (ChangeScheduleStatusRequest) returns (common.defaultReply);
+  rpc ConfirmSchedule (ChangeScheduleStatusRequest) returns (common.defaultReply);  
+  rpc RemoveService (SetServiceRequest) returns (common.defaultReply);
+  rpc GetProvidedServices (OwnerIdRequest) returns (common.defaultReply);
+  rpc PublishResumeUploadedEvent (PublishResumeUploadedEventRequest) returns (common.defaultReply);
+  rpc SetResumeData(SetResumeDataRequest) returns (common.defaultReply);
+  rpc GetResumeData(OwnerIdRequest) returns (common.defaultReply);  
+
+}
+
+message SetAvailabilityRequest {
+  string ownerId = 1;
+  string wday = 2;
+  string start = 3;
+  string end = 4;
+}
+
+message GetAvailabiltyListByOwnerRequest{
+	string ownerId = 1;
+}
+
+message GetAvailabiltyListByOwnerReply{
+	repeated common.availability availabilies = 1;	
+}
+
+message DeleteAvailabilityRequest{
+	string availabilityid = 1;
+	string ownerid = 2;
+}
+
+message SetServiceRequest{
+	string ownerId = 1;
+	string serviceId = 2;
+}
+
+message OwnerIdRequest{
+	string ownerId =1;
+}
+
+message GetScheduleReply{
+	repeated schedule schedules = 1;
+}
+
+message schedule{
+	candidate candidate = 1;
+	string dateTime = 2;
+	string subject = 3;
+	string notes = 4;
+	string status = 5;
+	string id = 6;
+}
+
+message candidate{
+	string Name = 1;
+	string pictureUrl = 2;
+}
+
+message ChangeScheduleStatusRequest{
+	repeated string idList = 1;
+}
+
+message GetProvidedServicesReply{
+	repeated common.service services =1;
+}
+
+message PublishResumeUploadedEventRequest{
+	string ownerId = 1;
+	string blobName = 2;
+	string ownerName  = 3;
+	string ownerEmail =4;
+}
+
+message SetResumeDataRequest{
+	contacts contact = 1;
+    identification identification = 2;
+    string summary = 3;
+    string experience = 4;
+    repeated education education = 5;
+    repeated language languages = 6;
+	string ownerId = 7;
+}
+
+message contacts{
+	string email =1; 
+	string linkedIn=2;
+}
+
+message identification{
+	string name =1;
+	string title =2;
+	string region =3;
+}
+
+message education{
+	string school =1;
+	string title =2;
+	string TtmeRange =3;
+}
+
+message language{
+	string name = 1;
+	string level =2;
+}
+
+message GetResumeDataReply{
+	contacts contact = 1;
+    identification identification = 2;
+    string summary = 3;
+    string experience = 4;
+    repeated education education = 5;
+    repeated language languages = 6;
+	string ownerId = 7;
+}

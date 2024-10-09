@@ -1,0 +1,2 @@
+obj\Debug\net8.0\Protos/Authentication.cs \
+obj\Debug\net8.0\Protos/AuthenticationGrpc.cs: Protos/authentication.proto
