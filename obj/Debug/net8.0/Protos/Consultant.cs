@@ -43,45 +43,48 @@ namespace core {
             "IAMoCSI9ChhHZXRQcm92aWRlZFNlcnZpY2VzUmVwbHkSIQoIc2VydmljZXMY",
             "ASADKAsyDy5jb21tb24uc2VydmljZSJtCiFQdWJsaXNoUmVzdW1lVXBsb2Fk",
             "ZWRFdmVudFJlcXVlc3QSDwoHb3duZXJJZBgBIAEoCRIQCghibG9iTmFtZRgC",
-            "IAEoCRIRCglvd25lck5hbWUYAyABKAkSEgoKb3duZXJFbWFpbBgEIAEoCSL6",
-            "AQoUU2V0UmVzdW1lRGF0YVJlcXVlc3QSJQoHY29udGFjdBgBIAEoCzIULmNv",
+            "IAEoCRIRCglvd25lck5hbWUYAyABKAkSEgoKb3duZXJFbWFpbBgEIAEoCSKw",
+            "AgoUU2V0UmVzdW1lRGF0YVJlcXVlc3QSJQoHY29udGFjdBgBIAEoCzIULmNv",
             "bnN1bHRhbnQuY29udGFjdHMSMgoOaWRlbnRpZmljYXRpb24YAiABKAsyGi5j",
             "b25zdWx0YW50LmlkZW50aWZpY2F0aW9uEg8KB3N1bW1hcnkYAyABKAkSEgoK",
-            "ZXhwZXJpZW5jZRgEIAEoCRIoCgllZHVjYXRpb24YBSADKAsyFS5jb25zdWx0",
+            "ZXhwZXJpZW5jZRgEIAMoCRIoCgllZHVjYXRpb24YBSADKAsyFS5jb25zdWx0",
             "YW50LmVkdWNhdGlvbhInCglsYW5ndWFnZXMYBiADKAsyFC5jb25zdWx0YW50",
-            "Lmxhbmd1YWdlEg8KB293bmVySWQYByABKAkiKwoIY29udGFjdHMSDQoFZW1h",
-            "aWwYASABKAkSEAoIbGlua2VkSW4YAiABKAkiPQoOaWRlbnRpZmljYXRpb24S",
-            "DAoEbmFtZRgBIAEoCRINCgV0aXRsZRgCIAEoCRIOCgZyZWdpb24YAyABKAki",
-            "PQoJZWR1Y2F0aW9uEg4KBnNjaG9vbBgBIAEoCRINCgV0aXRsZRgCIAEoCRIR",
-            "CglUdG1lUmFuZ2UYAyABKAkiJwoIbGFuZ3VhZ2USDAoEbmFtZRgBIAEoCRIN",
-            "CgVsZXZlbBgCIAEoCSL4AQoSR2V0UmVzdW1lRGF0YVJlcGx5EiUKB2NvbnRh",
-            "Y3QYASABKAsyFC5jb25zdWx0YW50LmNvbnRhY3RzEjIKDmlkZW50aWZpY2F0",
-            "aW9uGAIgASgLMhouY29uc3VsdGFudC5pZGVudGlmaWNhdGlvbhIPCgdzdW1t",
-            "YXJ5GAMgASgJEhIKCmV4cGVyaWVuY2UYBCABKAkSKAoJZWR1Y2F0aW9uGAUg",
-            "AygLMhUuY29uc3VsdGFudC5lZHVjYXRpb24SJwoJbGFuZ3VhZ2VzGAYgAygL",
-            "MhQuY29uc3VsdGFudC5sYW5ndWFnZRIPCgdvd25lcklkGAcgASgJMrMHCgpD",
-            "b25zdWx0YW50EksKD1NldEF2YWlsYWJpbGl0eRIiLmNvbnN1bHRhbnQuU2V0",
-            "QXZhaWxhYmlsaXR5UmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSXwoZ",
-            "R2V0QXZhaWxhYmlsdHlMaXN0QnlPd25lchIsLmNvbnN1bHRhbnQuR2V0QXZh",
-            "aWxhYmlsdHlMaXN0QnlPd25lclJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJl",
-            "cGx5ElEKEkRlbGV0ZUF2YWlsYWJpbGl0eRIlLmNvbnN1bHRhbnQuRGVsZXRl",
-            "QXZhaWxhYmlsaXR5UmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSQQoK",
-            "U2V0U2VydmljZRIdLmNvbnN1bHRhbnQuU2V0U2VydmljZVJlcXVlc3QaFC5j",
-            "b21tb24uZGVmYXVsdFJlcGx5EkAKDEdldFNjaGVkdWxlcxIaLmNvbnN1bHRh",
-            "bnQuT3duZXJJZFJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5Ek8KDkNh",
-            "bmNlbFNjaGVkdWxlEicuY29uc3VsdGFudC5DaGFuZ2VTY2hlZHVsZVN0YXR1",
-            "c1JlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5ElAKD0NvbmZpcm1TY2hl",
-            "ZHVsZRInLmNvbnN1bHRhbnQuQ2hhbmdlU2NoZWR1bGVTdGF0dXNSZXF1ZXN0",
-            "GhQuY29tbW9uLmRlZmF1bHRSZXBseRJECg1SZW1vdmVTZXJ2aWNlEh0uY29u",
-            "c3VsdGFudC5TZXRTZXJ2aWNlUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVw",
-            "bHkSRwoTR2V0UHJvdmlkZWRTZXJ2aWNlcxIaLmNvbnN1bHRhbnQuT3duZXJJ",
-            "ZFJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EmEKGlB1Ymxpc2hSZXN1",
-            "bWVVcGxvYWRlZEV2ZW50Ei0uY29uc3VsdGFudC5QdWJsaXNoUmVzdW1lVXBs",
-            "b2FkZWRFdmVudFJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkcKDVNl",
-            "dFJlc3VtZURhdGESIC5jb25zdWx0YW50LlNldFJlc3VtZURhdGFSZXF1ZXN0",
-            "GhQuY29tbW9uLmRlZmF1bHRSZXBseRJBCg1HZXRSZXN1bWVEYXRhEhouY29u",
-            "c3VsdGFudC5Pd25lcklkUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHlC",
-            "B6oCBGNvcmViBnByb3RvMw=="));
+            "Lmxhbmd1YWdlEg8KB293bmVySWQYByABKAkSNAoUc3RydWN0dXJlZEV4cGVy",
+            "aWVuY2UYCCABKAsyFi5jb25zdWx0YW50LmV4cGVyaWVuY2UiKwoIY29udGFj",
+            "dHMSDQoFZW1haWwYASABKAkSEAoIbGlua2VkSW4YAiABKAkiPQoOaWRlbnRp",
+            "ZmljYXRpb24SDAoEbmFtZRgBIAEoCRINCgV0aXRsZRgCIAEoCRIOCgZyZWdp",
+            "b24YAyABKAkiPQoJZWR1Y2F0aW9uEg4KBnNjaG9vbBgBIAEoCRINCgV0aXRs",
+            "ZRgCIAEoCRIRCglUdG1lUmFuZ2UYAyABKAkiJwoIbGFuZ3VhZ2USDAoEbmFt",
+            "ZRgBIAEoCRINCgVsZXZlbBgCIAEoCSIyCgpleHBlcmllbmNlEhEKCWNvbXBh",
+            "bmllcxgBIAMoCRIRCglwb3NpdGlvbnMYAiADKAkirgIKEkdldFJlc3VtZURh",
+            "dGFSZXBseRIlCgdjb250YWN0GAEgASgLMhQuY29uc3VsdGFudC5jb250YWN0",
+            "cxIyCg5pZGVudGlmaWNhdGlvbhgCIAEoCzIaLmNvbnN1bHRhbnQuaWRlbnRp",
+            "ZmljYXRpb24SDwoHc3VtbWFyeRgDIAEoCRISCgpleHBlcmllbmNlGAQgAygJ",
+            "EigKCWVkdWNhdGlvbhgFIAMoCzIVLmNvbnN1bHRhbnQuZWR1Y2F0aW9uEicK",
+            "CWxhbmd1YWdlcxgGIAMoCzIULmNvbnN1bHRhbnQubGFuZ3VhZ2USDwoHb3du",
+            "ZXJJZBgHIAEoCRI0ChRzdHJ1Y3R1cmVkRXhwZXJpZW5jZRgIIAEoCzIWLmNv",
+            "bnN1bHRhbnQuZXhwZXJpZW5jZTKzBwoKQ29uc3VsdGFudBJLCg9TZXRBdmFp",
+            "bGFiaWxpdHkSIi5jb25zdWx0YW50LlNldEF2YWlsYWJpbGl0eVJlcXVlc3Qa",
+            "FC5jb21tb24uZGVmYXVsdFJlcGx5El8KGUdldEF2YWlsYWJpbHR5TGlzdEJ5",
+            "T3duZXISLC5jb25zdWx0YW50LkdldEF2YWlsYWJpbHR5TGlzdEJ5T3duZXJS",
+            "ZXF1ZXN0GhQuY29tbW9uLmRlZmF1bHRSZXBseRJRChJEZWxldGVBdmFpbGFi",
+            "aWxpdHkSJS5jb25zdWx0YW50LkRlbGV0ZUF2YWlsYWJpbGl0eVJlcXVlc3Qa",
+            "FC5jb21tb24uZGVmYXVsdFJlcGx5EkEKClNldFNlcnZpY2USHS5jb25zdWx0",
+            "YW50LlNldFNlcnZpY2VSZXF1ZXN0GhQuY29tbW9uLmRlZmF1bHRSZXBseRJA",
+            "CgxHZXRTY2hlZHVsZXMSGi5jb25zdWx0YW50Lk93bmVySWRSZXF1ZXN0GhQu",
+            "Y29tbW9uLmRlZmF1bHRSZXBseRJPCg5DYW5jZWxTY2hlZHVsZRInLmNvbnN1",
+            "bHRhbnQuQ2hhbmdlU2NoZWR1bGVTdGF0dXNSZXF1ZXN0GhQuY29tbW9uLmRl",
+            "ZmF1bHRSZXBseRJQCg9Db25maXJtU2NoZWR1bGUSJy5jb25zdWx0YW50LkNo",
+            "YW5nZVNjaGVkdWxlU3RhdHVzUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVw",
+            "bHkSRAoNUmVtb3ZlU2VydmljZRIdLmNvbnN1bHRhbnQuU2V0U2VydmljZVJl",
+            "cXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkcKE0dldFByb3ZpZGVkU2Vy",
+            "dmljZXMSGi5jb25zdWx0YW50Lk93bmVySWRSZXF1ZXN0GhQuY29tbW9uLmRl",
+            "ZmF1bHRSZXBseRJhChpQdWJsaXNoUmVzdW1lVXBsb2FkZWRFdmVudBItLmNv",
+            "bnN1bHRhbnQuUHVibGlzaFJlc3VtZVVwbG9hZGVkRXZlbnRSZXF1ZXN0GhQu",
+            "Y29tbW9uLmRlZmF1bHRSZXBseRJHCg1TZXRSZXN1bWVEYXRhEiAuY29uc3Vs",
+            "dGFudC5TZXRSZXN1bWVEYXRhUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVw",
+            "bHkSQQoNR2V0UmVzdW1lRGF0YRIaLmNvbnN1bHRhbnQuT3duZXJJZFJlcXVl",
+            "c3QaFC5jb21tb24uZGVmYXVsdFJlcGx5QgeqAgRjb3JlYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::core.CommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -97,12 +100,13 @@ namespace core {
             new pbr::GeneratedClrTypeInfo(typeof(global::core.ChangeScheduleStatusRequest), global::core.ChangeScheduleStatusRequest.Parser, new[]{ "IdList" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetProvidedServicesReply), global::core.GetProvidedServicesReply.Parser, new[]{ "Services" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.PublishResumeUploadedEventRequest), global::core.PublishResumeUploadedEventRequest.Parser, new[]{ "OwnerId", "BlobName", "OwnerName", "OwnerEmail" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetResumeDataRequest), global::core.SetResumeDataRequest.Parser, new[]{ "Contact", "Identification", "Summary", "Experience", "Education", "Languages", "OwnerId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetResumeDataRequest), global::core.SetResumeDataRequest.Parser, new[]{ "Contact", "Identification", "Summary", "Experience", "Education", "Languages", "OwnerId", "StructuredExperience" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.contacts), global::core.contacts.Parser, new[]{ "Email", "LinkedIn" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.identification), global::core.identification.Parser, new[]{ "Name", "Title", "Region" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.education), global::core.education.Parser, new[]{ "School", "Title", "TtmeRange" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.language), global::core.language.Parser, new[]{ "Name", "Level" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.GetResumeDataReply), global::core.GetResumeDataReply.Parser, new[]{ "Contact", "Identification", "Summary", "Experience", "Education", "Languages", "OwnerId" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.experience), global::core.experience.Parser, new[]{ "Companies", "Positions" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.GetResumeDataReply), global::core.GetResumeDataReply.Parser, new[]{ "Contact", "Identification", "Summary", "Experience", "Education", "Languages", "OwnerId", "StructuredExperience" }, null, null, null, null)
           }));
     }
     #endregion
@@ -2897,10 +2901,11 @@ namespace core {
       contact_ = other.contact_ != null ? other.contact_.Clone() : null;
       identification_ = other.identification_ != null ? other.identification_.Clone() : null;
       summary_ = other.summary_;
-      experience_ = other.experience_;
+      experience_ = other.experience_.Clone();
       education_ = other.education_.Clone();
       languages_ = other.languages_.Clone();
       ownerId_ = other.ownerId_;
+      structuredExperience_ = other.structuredExperience_ != null ? other.structuredExperience_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2948,14 +2953,13 @@ namespace core {
 
     /// <summary>Field number for the "experience" field.</summary>
     public const int ExperienceFieldNumber = 4;
-    private string experience_ = "";
+    private static readonly pb::FieldCodec<string> _repeated_experience_codec
+        = pb::FieldCodec.ForString(34);
+    private readonly pbc::RepeatedField<string> experience_ = new pbc::RepeatedField<string>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string Experience {
+    public pbc::RepeatedField<string> Experience {
       get { return experience_; }
-      set {
-        experience_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
     }
 
     /// <summary>Field number for the "education" field.</summary>
@@ -2992,6 +2996,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "structuredExperience" field.</summary>
+    public const int StructuredExperienceFieldNumber = 8;
+    private global::core.experience structuredExperience_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::core.experience StructuredExperience {
+      get { return structuredExperience_; }
+      set {
+        structuredExperience_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -3010,10 +3026,11 @@ namespace core {
       if (!object.Equals(Contact, other.Contact)) return false;
       if (!object.Equals(Identification, other.Identification)) return false;
       if (Summary != other.Summary) return false;
-      if (Experience != other.Experience) return false;
+      if(!experience_.Equals(other.experience_)) return false;
       if(!education_.Equals(other.education_)) return false;
       if(!languages_.Equals(other.languages_)) return false;
       if (OwnerId != other.OwnerId) return false;
+      if (!object.Equals(StructuredExperience, other.StructuredExperience)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3024,10 +3041,11 @@ namespace core {
       if (contact_ != null) hash ^= Contact.GetHashCode();
       if (identification_ != null) hash ^= Identification.GetHashCode();
       if (Summary.Length != 0) hash ^= Summary.GetHashCode();
-      if (Experience.Length != 0) hash ^= Experience.GetHashCode();
+      hash ^= experience_.GetHashCode();
       hash ^= education_.GetHashCode();
       hash ^= languages_.GetHashCode();
       if (OwnerId.Length != 0) hash ^= OwnerId.GetHashCode();
+      if (structuredExperience_ != null) hash ^= StructuredExperience.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3058,15 +3076,16 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Summary);
       }
-      if (Experience.Length != 0) {
-        output.WriteRawTag(34);
-        output.WriteString(Experience);
-      }
+      experience_.WriteTo(output, _repeated_experience_codec);
       education_.WriteTo(output, _repeated_education_codec);
       languages_.WriteTo(output, _repeated_languages_codec);
       if (OwnerId.Length != 0) {
         output.WriteRawTag(58);
         output.WriteString(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(StructuredExperience);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -3090,15 +3109,16 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Summary);
       }
-      if (Experience.Length != 0) {
-        output.WriteRawTag(34);
-        output.WriteString(Experience);
-      }
+      experience_.WriteTo(ref output, _repeated_experience_codec);
       education_.WriteTo(ref output, _repeated_education_codec);
       languages_.WriteTo(ref output, _repeated_languages_codec);
       if (OwnerId.Length != 0) {
         output.WriteRawTag(58);
         output.WriteString(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(StructuredExperience);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -3119,13 +3139,14 @@ namespace core {
       if (Summary.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Summary);
       }
-      if (Experience.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Experience);
-      }
+      size += experience_.CalculateSize(_repeated_experience_codec);
       size += education_.CalculateSize(_repeated_education_codec);
       size += languages_.CalculateSize(_repeated_languages_codec);
       if (OwnerId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(StructuredExperience);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3154,13 +3175,17 @@ namespace core {
       if (other.Summary.Length != 0) {
         Summary = other.Summary;
       }
-      if (other.Experience.Length != 0) {
-        Experience = other.Experience;
-      }
+      experience_.Add(other.experience_);
       education_.Add(other.education_);
       languages_.Add(other.languages_);
       if (other.OwnerId.Length != 0) {
         OwnerId = other.OwnerId;
+      }
+      if (other.structuredExperience_ != null) {
+        if (structuredExperience_ == null) {
+          StructuredExperience = new global::core.experience();
+        }
+        StructuredExperience.MergeFrom(other.StructuredExperience);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3196,7 +3221,7 @@ namespace core {
             break;
           }
           case 34: {
-            Experience = input.ReadString();
+            experience_.AddEntriesFrom(input, _repeated_experience_codec);
             break;
           }
           case 42: {
@@ -3209,6 +3234,13 @@ namespace core {
           }
           case 58: {
             OwnerId = input.ReadString();
+            break;
+          }
+          case 66: {
+            if (structuredExperience_ == null) {
+              StructuredExperience = new global::core.experience();
+            }
+            input.ReadMessage(StructuredExperience);
             break;
           }
         }
@@ -3245,7 +3277,7 @@ namespace core {
             break;
           }
           case 34: {
-            Experience = input.ReadString();
+            experience_.AddEntriesFrom(ref input, _repeated_experience_codec);
             break;
           }
           case 42: {
@@ -3258,6 +3290,13 @@ namespace core {
           }
           case 58: {
             OwnerId = input.ReadString();
+            break;
+          }
+          case 66: {
+            if (structuredExperience_ == null) {
+              StructuredExperience = new global::core.experience();
+            }
+            input.ReadMessage(StructuredExperience);
             break;
           }
         }
@@ -4245,6 +4284,210 @@ namespace core {
 
   }
 
+  public sealed partial class experience : pb::IMessage<experience>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<experience> _parser = new pb::MessageParser<experience>(() => new experience());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<experience> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::core.ConsultantReflection.Descriptor.MessageTypes[17]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public experience() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public experience(experience other) : this() {
+      companies_ = other.companies_.Clone();
+      positions_ = other.positions_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public experience Clone() {
+      return new experience(this);
+    }
+
+    /// <summary>Field number for the "companies" field.</summary>
+    public const int CompaniesFieldNumber = 1;
+    private static readonly pb::FieldCodec<string> _repeated_companies_codec
+        = pb::FieldCodec.ForString(10);
+    private readonly pbc::RepeatedField<string> companies_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<string> Companies {
+      get { return companies_; }
+    }
+
+    /// <summary>Field number for the "positions" field.</summary>
+    public const int PositionsFieldNumber = 2;
+    private static readonly pb::FieldCodec<string> _repeated_positions_codec
+        = pb::FieldCodec.ForString(18);
+    private readonly pbc::RepeatedField<string> positions_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<string> Positions {
+      get { return positions_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as experience);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(experience other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!companies_.Equals(other.companies_)) return false;
+      if(!positions_.Equals(other.positions_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= companies_.GetHashCode();
+      hash ^= positions_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      companies_.WriteTo(output, _repeated_companies_codec);
+      positions_.WriteTo(output, _repeated_positions_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      companies_.WriteTo(ref output, _repeated_companies_codec);
+      positions_.WriteTo(ref output, _repeated_positions_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += companies_.CalculateSize(_repeated_companies_codec);
+      size += positions_.CalculateSize(_repeated_positions_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(experience other) {
+      if (other == null) {
+        return;
+      }
+      companies_.Add(other.companies_);
+      positions_.Add(other.positions_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            companies_.AddEntriesFrom(input, _repeated_companies_codec);
+            break;
+          }
+          case 18: {
+            positions_.AddEntriesFrom(input, _repeated_positions_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            companies_.AddEntriesFrom(ref input, _repeated_companies_codec);
+            break;
+          }
+          case 18: {
+            positions_.AddEntriesFrom(ref input, _repeated_positions_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
   public sealed partial class GetResumeDataReply : pb::IMessage<GetResumeDataReply>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -4259,7 +4502,7 @@ namespace core {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::core.ConsultantReflection.Descriptor.MessageTypes[17]; }
+      get { return global::core.ConsultantReflection.Descriptor.MessageTypes[18]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4282,10 +4525,11 @@ namespace core {
       contact_ = other.contact_ != null ? other.contact_.Clone() : null;
       identification_ = other.identification_ != null ? other.identification_.Clone() : null;
       summary_ = other.summary_;
-      experience_ = other.experience_;
+      experience_ = other.experience_.Clone();
       education_ = other.education_.Clone();
       languages_ = other.languages_.Clone();
       ownerId_ = other.ownerId_;
+      structuredExperience_ = other.structuredExperience_ != null ? other.structuredExperience_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -4333,14 +4577,13 @@ namespace core {
 
     /// <summary>Field number for the "experience" field.</summary>
     public const int ExperienceFieldNumber = 4;
-    private string experience_ = "";
+    private static readonly pb::FieldCodec<string> _repeated_experience_codec
+        = pb::FieldCodec.ForString(34);
+    private readonly pbc::RepeatedField<string> experience_ = new pbc::RepeatedField<string>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string Experience {
+    public pbc::RepeatedField<string> Experience {
       get { return experience_; }
-      set {
-        experience_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
     }
 
     /// <summary>Field number for the "education" field.</summary>
@@ -4377,6 +4620,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "structuredExperience" field.</summary>
+    public const int StructuredExperienceFieldNumber = 8;
+    private global::core.experience structuredExperience_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::core.experience StructuredExperience {
+      get { return structuredExperience_; }
+      set {
+        structuredExperience_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -4395,10 +4650,11 @@ namespace core {
       if (!object.Equals(Contact, other.Contact)) return false;
       if (!object.Equals(Identification, other.Identification)) return false;
       if (Summary != other.Summary) return false;
-      if (Experience != other.Experience) return false;
+      if(!experience_.Equals(other.experience_)) return false;
       if(!education_.Equals(other.education_)) return false;
       if(!languages_.Equals(other.languages_)) return false;
       if (OwnerId != other.OwnerId) return false;
+      if (!object.Equals(StructuredExperience, other.StructuredExperience)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -4409,10 +4665,11 @@ namespace core {
       if (contact_ != null) hash ^= Contact.GetHashCode();
       if (identification_ != null) hash ^= Identification.GetHashCode();
       if (Summary.Length != 0) hash ^= Summary.GetHashCode();
-      if (Experience.Length != 0) hash ^= Experience.GetHashCode();
+      hash ^= experience_.GetHashCode();
       hash ^= education_.GetHashCode();
       hash ^= languages_.GetHashCode();
       if (OwnerId.Length != 0) hash ^= OwnerId.GetHashCode();
+      if (structuredExperience_ != null) hash ^= StructuredExperience.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -4443,15 +4700,16 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Summary);
       }
-      if (Experience.Length != 0) {
-        output.WriteRawTag(34);
-        output.WriteString(Experience);
-      }
+      experience_.WriteTo(output, _repeated_experience_codec);
       education_.WriteTo(output, _repeated_education_codec);
       languages_.WriteTo(output, _repeated_languages_codec);
       if (OwnerId.Length != 0) {
         output.WriteRawTag(58);
         output.WriteString(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(StructuredExperience);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -4475,15 +4733,16 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Summary);
       }
-      if (Experience.Length != 0) {
-        output.WriteRawTag(34);
-        output.WriteString(Experience);
-      }
+      experience_.WriteTo(ref output, _repeated_experience_codec);
       education_.WriteTo(ref output, _repeated_education_codec);
       languages_.WriteTo(ref output, _repeated_languages_codec);
       if (OwnerId.Length != 0) {
         output.WriteRawTag(58);
         output.WriteString(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(StructuredExperience);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -4504,13 +4763,14 @@ namespace core {
       if (Summary.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Summary);
       }
-      if (Experience.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Experience);
-      }
+      size += experience_.CalculateSize(_repeated_experience_codec);
       size += education_.CalculateSize(_repeated_education_codec);
       size += languages_.CalculateSize(_repeated_languages_codec);
       if (OwnerId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(OwnerId);
+      }
+      if (structuredExperience_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(StructuredExperience);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -4539,13 +4799,17 @@ namespace core {
       if (other.Summary.Length != 0) {
         Summary = other.Summary;
       }
-      if (other.Experience.Length != 0) {
-        Experience = other.Experience;
-      }
+      experience_.Add(other.experience_);
       education_.Add(other.education_);
       languages_.Add(other.languages_);
       if (other.OwnerId.Length != 0) {
         OwnerId = other.OwnerId;
+      }
+      if (other.structuredExperience_ != null) {
+        if (structuredExperience_ == null) {
+          StructuredExperience = new global::core.experience();
+        }
+        StructuredExperience.MergeFrom(other.StructuredExperience);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4581,7 +4845,7 @@ namespace core {
             break;
           }
           case 34: {
-            Experience = input.ReadString();
+            experience_.AddEntriesFrom(input, _repeated_experience_codec);
             break;
           }
           case 42: {
@@ -4594,6 +4858,13 @@ namespace core {
           }
           case 58: {
             OwnerId = input.ReadString();
+            break;
+          }
+          case 66: {
+            if (structuredExperience_ == null) {
+              StructuredExperience = new global::core.experience();
+            }
+            input.ReadMessage(StructuredExperience);
             break;
           }
         }
@@ -4630,7 +4901,7 @@ namespace core {
             break;
           }
           case 34: {
-            Experience = input.ReadString();
+            experience_.AddEntriesFrom(ref input, _repeated_experience_codec);
             break;
           }
           case 42: {
@@ -4643,6 +4914,13 @@ namespace core {
           }
           case 58: {
             OwnerId = input.ReadString();
+            break;
+          }
+          case 66: {
+            if (structuredExperience_ == null) {
+              StructuredExperience = new global::core.experience();
+            }
+            input.ReadMessage(StructuredExperience);
             break;
           }
         }

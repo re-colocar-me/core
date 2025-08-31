@@ -60,7 +60,7 @@ builder.Services.AddDbContext<ReColocarmeContext>((DbContextOptionsBuilder optio
 {
     options.UseSqlServer(connectionString: configuration.GetConnectionString("Default") ?? string.Empty, dboptions =>
     {
-        dboptions.EnableRetryOnFailure(10);
+        dboptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(1), null);
         dboptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         dboptions.MigrationsAssembly(typeof(ReColocarmeContext).Assembly.GetName().Name);
     });

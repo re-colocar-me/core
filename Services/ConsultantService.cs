@@ -270,7 +270,7 @@ namespace core.Services
                 var resume = new Resume
                 {
                     Summary = request.Summary,
-                    Experience = request.Experience,
+                    Experience = [.. request.Experience],
                     Identification = new Identification()
                     {
                         Name = request.Identification.Name,
@@ -294,6 +294,13 @@ namespace core.Services
                         Title = x.Title
                     }).ToList()
                 };
+
+                if (request.StructuredExperience != null)
+                    resume.StructuredExperience = new Experience()
+                    {
+                        Companies = [.. request.StructuredExperience.Companies],
+                        Positions = [.. request.StructuredExperience.Positions]
+                    };
 
                 await _consultantServices.SetResumeData(Guid.Parse(request.OwnerId), resume);
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -328,9 +335,17 @@ namespace core.Services
                         Title = response.Identification.Title,
                         Region = response.Identification.Region
                     },
-                    Summary = response.Summary,
-                    Experience = response.Experience
+                    Summary = response.Summary
                 };
+
+                if(response.StructuredExperience != null)
+                {
+                    data.StructuredExperience = new experience();
+                    data.StructuredExperience.Companies.AddRange(response.StructuredExperience.Companies.Select(x => x));
+                    data.StructuredExperience.Positions.AddRange(response.StructuredExperience.Positions.Select(x => x));
+                }
+
+                data.Experience.AddRange(response.Experience.Select(x => x));
 
                 data.Languages.AddRange(response.Languages.Select(x => new language()
                 {

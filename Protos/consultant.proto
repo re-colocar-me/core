@@ -89,10 +89,11 @@ message SetResumeDataRequest{
 	contacts contact = 1;
     identification identification = 2;
     string summary = 3;
-    string experience = 4;
+    repeated string experience = 4;
     repeated education education = 5;
     repeated language languages = 6;
 	string ownerId = 7;
+	experience structuredExperience=8;
 }
 
 message contacts{
@@ -117,12 +118,18 @@ message language{
 	string level =2;
 }
 
+message experience{
+	repeated string companies =1;
+	repeated string positions =2;
+}
+
 message GetResumeDataReply{
 	contacts contact = 1;
     identification identification = 2;
-    string summary = 3;
-    string experience = 4;
+    string summary = 3;	
+    repeated string experience = 4;
     repeated education education = 5;
     repeated language languages = 6;
 	string ownerId = 7;
+	experience structuredExperience = 8;
 }

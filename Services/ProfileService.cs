@@ -43,7 +43,7 @@ namespace core.Services
 
                 var data = new GetFullProfileReply()
                 {
-                    BioText = response.BioText,
+                    BioText = response.BioText ?? string.Empty,
                     BirthDate = response.BirthDate.HasValue ? Timestamp.FromDateTime(response.BirthDate.Value.ToUniversalTime()) : null,
                     Email = response.Email,
                     FirstName = response.Name?.FirstName,
@@ -55,7 +55,7 @@ namespace core.Services
                     TelephoneAreaCode = response.Telephone?.AreaCode ?? string.Empty,
                     TelephoneCountryCode = response.Telephone?.CountryCode ?? string.Empty,
                     TelephoneNumber = response.Telephone?.Number ?? string.Empty,
-                    GenderCode = response.GenderCode,
+                    GenderCode = response.GenderCode ?? string.Empty,
                     Role = response.Role.ToString()
                 };
 
