@@ -374,6 +374,79 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> SetSporadicAvailability(SetSporadicAvailabilityRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _scheduleService.SetSporadicAvailability(Guid.Parse(request.OwnerId),
+                                                                DateOnly.Parse(request.Date),
+                                                                TimeOnly.Parse(request.Start),
+                                                                TimeOnly.Parse(request.End),
+                                                                request.Reason);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetSporadicAvailabilityListByOwner(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var list = await _scheduleService.GetSporadicAvailabilityByOwner(Guid.Parse(request.OwnerId));
+                var data = new GetSporadicAvailabilityListByOwnerReply();
+
+                data.Items.AddRange(list.Select(x => new sporadicavailabilityitem()
+                {
+                    Id = x.Id.ToString(),
+                    Date = x.Date.ToString("yyyy-MM-dd"),
+                    Starttime = x.StartTime.ToString(),
+                    Endtime = x.EndTime.ToString(),
+                    Reason = x.Reason ?? string.Empty
+                }));
+
+                reply.Statuscode = Constants.SuccessStatusCode;
+                reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> DeleteSporadicAvailability(DeleteAvailabilityRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _scheduleService.RemoveSporadicAvailability(Guid.Parse(request.Availabilityid), Guid.Parse(request.Ownerid));
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
     }
 
 
