@@ -66,6 +66,7 @@ message schedule{
 	string notes = 4;
 	string status = 5;
 	string id = 6;
+	string date = 7;
 }
 
 message candidate{

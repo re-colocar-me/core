@@ -130,6 +130,7 @@ namespace core.Services
                     Id = x.Id.ToString(),
                     Candidate = new candidate() { Name = x.Recipient.Name?.FullName, PictureUrl = x.Recipient.PictureUrl },
                     DateTime = $"{x.StartTime.ToString("t")} - {x.EndTime.ToString("t")}",
+                    Date = x.StartTime.ToString("yyyy-MM-dd"),
                     Notes = x.Notes,
                     Status = x.Status.ToString(),
                     Subject = x.Subject,
