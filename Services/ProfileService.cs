@@ -9,10 +9,12 @@ namespace core.Services
     public class ProfileService : Profile.ProfileBase
     {
         private IProfileService _service;
+        private IResumeSuggestionService _resumeSuggestionService;
 
-        public ProfileService(IProfileService service)
+        public ProfileService(IProfileService service, IResumeSuggestionService resumeSuggestionService)
         {
             _service = service;
+            _resumeSuggestionService = resumeSuggestionService;
         }
 
         public override async Task<defaultReply> SetBio(SetBioRequest request, ServerCallContext context)
@@ -60,6 +62,26 @@ namespace core.Services
                 };
 
                 reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = ex.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SuggestBio(GetFullProfileRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var suggestedText = await _resumeSuggestionService.SuggestBioAsync(Guid.Parse(request.OwnerId));
+                reply.Data = Any.Pack(new SuggestBioReply { SuggestedText = suggestedText });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception ex)

@@ -12,6 +12,7 @@ service Profile{
 	rpc SetBio (SetBioRequest) returns (common.defaultReply);
 	rpc SetAdditionalData (SetAdditionalDataRequest) returns (common.defaultReply);
 	rpc GetFullProfile (GetFullProfileRequest) returns (common.defaultReply);
+	rpc SuggestBio (GetFullProfileRequest) returns (common.defaultReply);
 }
 
 message SetBioRequest{
@@ -50,4 +51,8 @@ message GetFullProfileReply{
 	string lastName =13;
 	string genderCode = 14;
 	string role = 15;
+}
+
+message SuggestBioReply{
+	string suggestedText = 1;
 }

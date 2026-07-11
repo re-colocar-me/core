@@ -23,6 +23,7 @@ service Consultant {
   rpc SetSporadicAvailability (SetSporadicAvailabilityRequest) returns (common.defaultReply);
   rpc GetSporadicAvailabilityListByOwner (OwnerIdRequest) returns (common.defaultReply);
   rpc DeleteSporadicAvailability (DeleteAvailabilityRequest) returns (common.defaultReply);
+  rpc SuggestSummary (OwnerIdRequest) returns (common.defaultReply);
 
 }
 
@@ -54,6 +55,10 @@ message SetServiceRequest{
 
 message OwnerIdRequest{
 	string ownerId =1;
+}
+
+message SuggestSummaryReply{
+	string suggestedText = 1;
 }
 
 message GetScheduleReply{

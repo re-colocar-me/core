@@ -6,6 +6,7 @@ using core.domain.Services;
 using core.infrastructure;
 using core.infrastructure.ExternalServices.Facebook;
 using core.infrastructure.ExternalServices.Linkedin;
+using core.infrastructure.ExternalServices.Claude;
 using core.infrastructure.Repositiories;
 using core.infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -48,11 +49,13 @@ builder.Services.Configure<LinkedinConfigurations>(configuration.GetSection(Link
 builder.Services.Configure<FacebookConfigurations>(configuration.GetSection(FacebookConfigurations.FacebookOptions));
 builder.Services.Configure<JwtConfiguration>(configuration.GetSection(JwtConfiguration.JwtOptions));
 builder.Services.Configure<ScheduleServiceConfiguration>(configuration.GetSection(ScheduleServiceConfiguration.ScheduleServiceOptions));
+builder.Services.Configure<AnthropicConfigurations>(configuration.GetSection(AnthropicConfigurations.AnthropicOptions));
 
 // Add services to the container.
 
 builder.Services.AddTransient<ILinkedinClient, LinkedinClient>();
 builder.Services.AddTransient<IFacebookClient, FacebookClient>();
+builder.Services.AddTransient<IAnthropicClient, ClaudeSuggestionClient>();
 
 builder.Services.AddTransient<IProfileRepository, ProfileRepository>();
 builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
@@ -64,6 +67,7 @@ builder.Services.AddTransient<IConsultantServices, ConsultantService>();
 builder.Services.AddTransient<IProfileService, ProfileServices>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
+builder.Services.AddTransient<IResumeSuggestionService, ResumeSuggestionService>();
 
 builder.Services.AddDbContext<ReColocarmeContext>((DbContextOptionsBuilder options) =>
 {

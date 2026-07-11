@@ -12,12 +12,15 @@ namespace core.Services
     {
         private IScheduleService _scheduleService;
         private IConsultantServices _consultantServices;
+        private IResumeSuggestionService _resumeSuggestionService;
 
         public ConsultantService(IScheduleService scheduleService,
-                                 IConsultantServices consultantServices)
+                                 IConsultantServices consultantServices,
+                                 IResumeSuggestionService resumeSuggestionService)
         {
             _scheduleService = scheduleService;
             _consultantServices = consultantServices;
+            _resumeSuggestionService = resumeSuggestionService;
         }
         public override async Task<defaultReply> SetAvailability(SetAvailabilityRequest request, ServerCallContext context)
         {
@@ -387,6 +390,26 @@ namespace core.Services
 
                 reply.Statuscode = Constants.SuccessStatusCode;
                 reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SuggestSummary(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var suggestedText = await _resumeSuggestionService.SuggestSummaryAsync(Guid.Parse(request.OwnerId));
+                reply.Data = Any.Pack(new SuggestSummaryReply { SuggestedText = suggestedText });
+                reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
             {
