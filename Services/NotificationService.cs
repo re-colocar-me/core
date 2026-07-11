@@ -54,7 +54,8 @@ namespace core.Services
                     Body = x.Body,
                     Title = x.Title,
                     Status = System.Enum.GetName(typeof(NotificationStatus), x.Status),
-                    Viewedat = x.ViewedAt?.ToString("dd/MM/yyyy hh:mm:ss") ?? string.Empty
+                    Viewedat = x.ViewedAt?.ToString("dd/MM/yyyy hh:mm:ss") ?? string.Empty,
+                    Createdat = x.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;

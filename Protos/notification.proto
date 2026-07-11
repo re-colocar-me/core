@@ -32,9 +32,10 @@ message GetNotificationListByOwnerReply {
 message notificationentity{
 	string title =1;
     string body =2;
-    string viewedat =3;    
+    string viewedat =3;
     string status =4;
     string id = 5;
+    string createdat = 6;
 }
 
 message SetNotificationReadRequest{
