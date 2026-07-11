@@ -311,6 +311,14 @@ namespace core.Services
                         Positions = [.. request.StructuredExperience.Positions]
                     };
 
+                resume.ExperienceEntries = request.ExperienceEntries.Select(x => new ExperienceEntry()
+                {
+                    Company = x.Company,
+                    Title = x.Title,
+                    Period = x.Period,
+                    Details = x.Details
+                }).ToList();
+
                 await _consultantServices.SetResumeData(Guid.Parse(request.OwnerId), resume);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
@@ -367,6 +375,14 @@ namespace core.Services
                     School = x.School,
                     Title = x.Title,
                     TtmeRange = x.TimeRange
+                }));
+
+                data.ExperienceEntries.AddRange(response.ExperienceEntries.Select(x => new experienceEntry()
+                {
+                    Company = x.Company,
+                    Title = x.Title,
+                    Period = x.Period,
+                    Details = x.Details
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;

@@ -99,6 +99,7 @@ message SetResumeDataRequest{
     repeated language languages = 6;
 	string ownerId = 7;
 	experience structuredExperience=8;
+	repeated experienceEntry experienceEntries=9;
 }
 
 message contacts{
@@ -128,6 +129,13 @@ message experience{
 	repeated string positions =2;
 }
 
+message experienceEntry{
+	string company =1;
+	string title =2;
+	string period =3;
+	string details =4;
+}
+
 message GetResumeDataReply{
 	contacts contact = 1;
     identification identification = 2;
@@ -137,6 +145,7 @@ message GetResumeDataReply{
     repeated language languages = 6;
 	string ownerId = 7;
 	experience structuredExperience = 8;
+	repeated experienceEntry experienceEntries = 9;
 }
 
 message SetSporadicAvailabilityRequest{

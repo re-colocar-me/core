@@ -11,17 +11,26 @@ using core.infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using coreServices = core.Services;
 using core.IoC.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
+builder.Host.UseSerilog((context, loggerConfiguration) => loggerConfiguration
             .MinimumLevel.Information()
             .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)            
-            .CreateLogger();
+            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.Elasticsearch(new[] { new Uri(context.Configuration["Elasticsearch:Uri"] ?? "http://localhost:9200") }, opts =>
+            {
+                opts.DataStream = new DataStreamName("logs", "core", context.HostingEnvironment.EnvironmentName.ToLowerInvariant());
+                opts.BootstrapMethod = BootstrapMethod.Failure;
+            }));
 
 // Add services to the container.
 builder.Services.AddGrpc();
