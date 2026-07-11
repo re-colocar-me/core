@@ -30,6 +30,8 @@ message availabilityitem{
 	string id = 1;
 	string starttime = 2;
 	string endtime = 3;
+	string serviceid = 4;
+	string servicename = 5;
 }
 
 message service{

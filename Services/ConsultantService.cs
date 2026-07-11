@@ -28,7 +28,8 @@ namespace core.Services
                 await _scheduleService.SetAvailability(Guid.Parse(request.OwnerId),
                                                         request.Wday,
                                                         TimeOnly.Parse(request.Start),
-                                                        TimeOnly.Parse(request.End));
+                                                        TimeOnly.Parse(request.End),
+                                                        Guid.Parse(request.ServiceId));
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception ex)
@@ -61,7 +62,14 @@ namespace core.Services
                     {
                         Weekday = item.Key
                     };
-                    newAvailability.Items.AddRange(item.Select(x => new availabilityitem() { Id = x.Id.ToString(), Endtime = x.EndTime.ToString(), Starttime = x.StartTime.ToString() }));
+                    newAvailability.Items.AddRange(item.Select(x => new availabilityitem()
+                    {
+                        Id = x.Id.ToString(),
+                        Endtime = x.EndTime.ToString(),
+                        Starttime = x.StartTime.ToString(),
+                        Serviceid = x.ServiceId.ToString(),
+                        Servicename = x.Service?.Name ?? string.Empty
+                    }));
                     data.Availabilies.Add(newAvailability);
                 }
 
@@ -384,7 +392,8 @@ namespace core.Services
                                                                 DateOnly.Parse(request.Date),
                                                                 TimeOnly.Parse(request.Start),
                                                                 TimeOnly.Parse(request.End),
-                                                                request.Reason);
+                                                                request.Reason,
+                                                                Guid.Parse(request.ServiceId));
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -412,7 +421,9 @@ namespace core.Services
                     Date = x.Date.ToString("yyyy-MM-dd"),
                     Starttime = x.StartTime.ToString(),
                     Endtime = x.EndTime.ToString(),
-                    Reason = x.Reason ?? string.Empty
+                    Reason = x.Reason ?? string.Empty,
+                    Serviceid = x.ServiceId.ToString(),
+                    Servicename = x.Service?.Name ?? string.Empty
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;

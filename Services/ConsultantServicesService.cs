@@ -60,6 +60,7 @@ namespace core.Services
                 {
                     var newCategory = new category()
                     {
+                        Id = item.Id.ToString(),
                         Name = item.Name,
                         Description = item.Description
                     };

@@ -31,6 +31,7 @@ message SetAvailabilityRequest {
   string wday = 2;
   string start = 3;
   string end = 4;
+  string serviceId = 5;
 }
 
 message GetAvailabiltyListByOwnerRequest{
@@ -144,6 +145,7 @@ message SetSporadicAvailabilityRequest{
 	string start = 3;
 	string end = 4;
 	string reason = 5;
+	string serviceId = 6;
 }
 
 message GetSporadicAvailabilityListByOwnerReply{
@@ -156,4 +158,6 @@ message sporadicavailabilityitem{
 	string starttime = 3;
 	string endtime = 4;
 	string reason = 5;
+	string serviceid = 6;
+	string servicename = 7;
 }
