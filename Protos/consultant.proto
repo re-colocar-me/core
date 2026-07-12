@@ -24,6 +24,9 @@ service Consultant {
   rpc GetSporadicAvailabilityListByOwner (OwnerIdRequest) returns (common.defaultReply);
   rpc DeleteSporadicAvailability (DeleteAvailabilityRequest) returns (common.defaultReply);
   rpc SuggestSummary (OwnerIdRequest) returns (common.defaultReply);
+  rpc SetServicePrice (SetServicePriceRequest) returns (common.defaultReply);
+  rpc GetServicePriceHistory (GetServicePriceHistoryRequest) returns (common.defaultReply);
+  rpc GetOfferingForPayment (OfferingIdRequest) returns (common.defaultReply);
 
 }
 
@@ -33,6 +36,7 @@ message SetAvailabilityRequest {
   string start = 3;
   string end = 4;
   string serviceId = 5;
+  optional int64 priceOverrideInLemonCoins = 6;
 }
 
 message GetAvailabiltyListByOwnerRequest{
@@ -55,6 +59,36 @@ message SetServiceRequest{
 
 message OwnerIdRequest{
 	string ownerId =1;
+}
+
+message SetServicePriceRequest{
+	string ownerId = 1;
+	string serviceId = 2;
+	int64 priceInLemonCoins = 3;
+}
+
+message GetServicePriceHistoryRequest{
+	string ownerId = 1;
+	string serviceId = 2;
+}
+
+message priceHistoryEntry{
+	int64 price = 1;
+	string effectiveFrom = 2;
+}
+
+message GetServicePriceHistoryReply{
+	repeated priceHistoryEntry entries = 1;
+}
+
+message OfferingIdRequest{
+	string offeringId = 1;
+}
+
+message GetOfferingForPaymentReply{
+	string consultantProfileId = 1;
+	int64 priceInLemonCoins = 2;
+	string serviceName = 3;
 }
 
 message SuggestSummaryReply{
@@ -160,6 +194,7 @@ message SetSporadicAvailabilityRequest{
 	string end = 4;
 	string reason = 5;
 	string serviceId = 6;
+	optional int64 priceOverrideInLemonCoins = 7;
 }
 
 message GetSporadicAvailabilityListByOwnerReply{
@@ -174,4 +209,5 @@ message sporadicavailabilityitem{
 	string reason = 5;
 	string serviceid = 6;
 	string servicename = 7;
+	optional int64 priceoverrideinlemoncoins = 8;
 }

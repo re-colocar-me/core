@@ -40,7 +40,7 @@ namespace core.Services
 
                     }
 
-                    newConsultant.Services.AddRange(item.ProvidedServices.Select(x => x.Name));
+                    newConsultant.Services.AddRange(item.ProvidedServices.Select(x => x.ServiceItem?.Name ?? string.Empty));
                     data.Consultants.Add(newConsultant);
                 }
 

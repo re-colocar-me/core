@@ -32,7 +32,8 @@ namespace core.Services
                                                         request.Wday,
                                                         TimeOnly.Parse(request.Start),
                                                         TimeOnly.Parse(request.End),
-                                                        Guid.Parse(request.ServiceId));
+                                                        Guid.Parse(request.ServiceId),
+                                                        request.HasPriceOverrideInLemonCoins ? request.PriceOverrideInLemonCoins : null);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception ex)
@@ -65,13 +66,19 @@ namespace core.Services
                     {
                         Weekday = item.Key
                     };
-                    newAvailability.Items.AddRange(item.Select(x => new availabilityitem()
+                    newAvailability.Items.AddRange(item.Select(x =>
                     {
-                        Id = x.Id.ToString(),
-                        Endtime = x.EndTime.ToString(),
-                        Starttime = x.StartTime.ToString(),
-                        Serviceid = x.ServiceId.ToString(),
-                        Servicename = x.Service?.Name ?? string.Empty
+                        var newItem = new availabilityitem()
+                        {
+                            Id = x.Id.ToString(),
+                            Endtime = x.EndTime.ToString(),
+                            Starttime = x.StartTime.ToString(),
+                            Serviceid = x.ServiceId.ToString(),
+                            Servicename = x.Service?.Name ?? string.Empty
+                        };
+                        if (x.PriceOverrideInLemonCoins.HasValue)
+                            newItem.Priceoverrideinlemoncoins = x.PriceOverrideInLemonCoins.Value;
+                        return newItem;
                     }));
                     data.Availabilies.Add(newAvailability);
                 }
@@ -232,13 +239,15 @@ namespace core.Services
                 var response = await _consultantServices.GetProvidedServices(Guid.Parse(request.OwnerId));
                 var data = new GetProvidedServicesReply();
 
-                data.Services.AddRange(response.OrderBy(x => x.Name)
+                data.Services.AddRange(response.OrderBy(x => x.ServiceItem!.Name)
                                                .Select(x => new service()
                                                {
-                                                   Id = x.Id.ToString(),
-                                                   Categoryname = x.Category.Name,
-                                                   Name = x.Name,
-                                                   Description = x.Description
+                                                   Id = x.ServiceItem!.Id.ToString(),
+                                                   Categoryname = x.ServiceItem.Category?.Name ?? string.Empty,
+                                                   Name = x.ServiceItem.Name,
+                                                   Description = x.ServiceItem.Description,
+                                                   Offeringid = x.Id.ToString(),
+                                                   Priceinlemoncoins = x.PriceInLemonCoins
                                                }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -422,6 +431,81 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> SetServicePrice(SetServicePriceRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _consultantServices.SetServicePrice(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId), request.PriceInLemonCoins);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetServicePriceHistory(GetServicePriceHistoryRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var history = await _consultantServices.GetServicePriceHistory(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId));
+                var data = new GetServicePriceHistoryReply();
+                data.Entries.AddRange(history.Select(x => new priceHistoryEntry
+                {
+                    Price = x.Price,
+                    EffectiveFrom = x.EffectiveFrom.ToString("O")
+                }));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetOfferingForPayment(OfferingIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var offering = await _consultantServices.GetOfferingForPayment(Guid.Parse(request.OfferingId))
+                    ?? throw new ArgumentException("Oferta de serviço não encontrada.");
+
+                if (offering.Consultant is null)
+                    throw new ArgumentException("Consultor da oferta não encontrado.");
+
+                reply.Data = Any.Pack(new GetOfferingForPaymentReply
+                {
+                    ConsultantProfileId = offering.Consultant.ProfileId.ToString(),
+                    PriceInLemonCoins = offering.PriceInLemonCoins,
+                    ServiceName = offering.ServiceItem?.Name ?? string.Empty
+                });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
         public override async Task<defaultReply> SetSporadicAvailability(SetSporadicAvailabilityRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();
@@ -432,7 +516,8 @@ namespace core.Services
                                                                 TimeOnly.Parse(request.Start),
                                                                 TimeOnly.Parse(request.End),
                                                                 request.Reason,
-                                                                Guid.Parse(request.ServiceId));
+                                                                Guid.Parse(request.ServiceId),
+                                                                request.HasPriceOverrideInLemonCoins ? request.PriceOverrideInLemonCoins : null);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -454,15 +539,21 @@ namespace core.Services
                 var list = await _scheduleService.GetSporadicAvailabilityByOwner(Guid.Parse(request.OwnerId));
                 var data = new GetSporadicAvailabilityListByOwnerReply();
 
-                data.Items.AddRange(list.Select(x => new sporadicavailabilityitem()
+                data.Items.AddRange(list.Select(x =>
                 {
-                    Id = x.Id.ToString(),
-                    Date = x.Date.ToString("yyyy-MM-dd"),
-                    Starttime = x.StartTime.ToString(),
-                    Endtime = x.EndTime.ToString(),
-                    Reason = x.Reason ?? string.Empty,
-                    Serviceid = x.ServiceId.ToString(),
-                    Servicename = x.Service?.Name ?? string.Empty
+                    var newItem = new sporadicavailabilityitem()
+                    {
+                        Id = x.Id.ToString(),
+                        Date = x.Date.ToString("yyyy-MM-dd"),
+                        Starttime = x.StartTime.ToString(),
+                        Endtime = x.EndTime.ToString(),
+                        Reason = x.Reason ?? string.Empty,
+                        Serviceid = x.ServiceId.ToString(),
+                        Servicename = x.Service?.Name ?? string.Empty
+                    };
+                    if (x.PriceOverrideInLemonCoins.HasValue)
+                        newItem.Priceoverrideinlemoncoins = x.PriceOverrideInLemonCoins.Value;
+                    return newItem;
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;
