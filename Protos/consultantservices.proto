@@ -43,44 +43,52 @@ message category{
 message CreateCategoryRequest {
 	string name = 1;
 	string description = 2;
+	string changedBy = 3;
 }
 
 message UpdateCategoryRequest {
 	string id = 1;
 	string name = 2;
 	string description = 3;
+	string changedBy = 4;
 }
 
 message SetCategoryActiveRequest {
 	string id = 1;
 	bool isActive = 2;
+	string changedBy = 3;
 }
 
 message CreateServiceRequest {
 	string categoryId = 1;
 	string name = 2;
 	string description = 3;
+	string changedBy = 4;
 }
 
 message UpdateServiceRequest {
 	string id = 1;
 	string name = 2;
 	string description = 3;
+	string changedBy = 4;
 }
 
 message SetServiceActiveRequest {
 	string id = 1;
 	bool isActive = 2;
+	string changedBy = 3;
 }
 
 message SetCategorySkillsRequest {
 	string categoryId = 1;
 	repeated string skillNames = 2;
+	string changedBy = 3;
 }
 
 message SetServiceSkillsRequest {
 	string serviceItemId = 1;
 	repeated string skillNames = 2;
+	string changedBy = 3;
 }
 
 message SearchSkillsRequest {

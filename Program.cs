@@ -1,9 +1,13 @@
+using core.Auditing;
+using core.domain.Auditing;
 using core.domain.Configurations;
+using core.domain.Entities;
 using core.domain.Interfaces.Infrastructure;
 using core.domain.Interfaces.Infrastructure.Repositories;
 using core.domain.Interfaces.Services;
 using core.domain.Services;
 using core.infrastructure;
+using core.infrastructure.Auditing;
 using core.infrastructure.ExternalServices.Facebook;
 using core.infrastructure.ExternalServices.Linkedin;
 using core.infrastructure.ExternalServices.Claude;
@@ -69,7 +73,28 @@ builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IResumeSuggestionService, ResumeSuggestionService>();
 
-builder.Services.AddDbContext<ReColocarmeContext>((DbContextOptionsBuilder options) =>
+// Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
+// purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
+var auditSerilogLogger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Elasticsearch(new[] { new Uri(configuration["Elasticsearch:Uri"] ?? "http://localhost:9200") }, opts =>
+    {
+        opts.DataStream = new DataStreamName("audit", "core", environmentName?.ToLowerInvariant() ?? "development");
+        opts.BootstrapMethod = BootstrapMethod.Failure;
+    })
+    .CreateLogger();
+
+builder.Services.AddSingleton(new AuditLogger(auditSerilogLogger));
+builder.Services.AddScoped<ICurrentActorAccessor, CurrentActorAccessor>();
+builder.Services.AddScoped<IAuditSink, SerilogAuditSink>();
+builder.Services.AddSingleton(new Dictionary<Type, string>
+{
+    [typeof(ServiceCategory)] = "Categorias e Serviços",
+    [typeof(ConsultantServiceItem)] = "Categorias e Serviços"
+});
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+builder.Services.AddDbContext<ReColocarmeContext>((IServiceProvider serviceProvider, DbContextOptionsBuilder options) =>
 {
     options.UseSqlServer(connectionString: configuration.GetConnectionString("Default") ?? string.Empty, dboptions =>
     {
@@ -77,6 +102,7 @@ builder.Services.AddDbContext<ReColocarmeContext>((DbContextOptionsBuilder optio
         dboptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         dboptions.MigrationsAssembly(typeof(ReColocarmeContext).Assembly.GetName().Name);
     });
+    options.AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>());
 });
 
 builder.Services.RegisterMasstransit(configuration);

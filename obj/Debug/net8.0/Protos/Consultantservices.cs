@@ -31,66 +31,69 @@ namespace core {
             "KAsyDS5jb21tb24uZXJyb3IiggEKCGNhdGVnb3J5EgwKBG5hbWUYASABKAkS",
             "EwoLZGVzY3JpcHRpb24YAiABKAkSIQoIc2VydmljZXMYAyADKAsyDy5jb21t",
             "b24uc2VydmljZRIKCgJpZBgEIAEoCRIQCghpc0FjdGl2ZRgFIAEoCBISCgpz",
-            "a2lsbE5hbWVzGAYgAygJIjoKFUNyZWF0ZUNhdGVnb3J5UmVxdWVzdBIMCgRu",
-            "YW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJIkYKFVVwZGF0ZUNhdGVn",
-            "b3J5UmVxdWVzdBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2Ny",
-            "aXB0aW9uGAMgASgJIjgKGFNldENhdGVnb3J5QWN0aXZlUmVxdWVzdBIKCgJp",
-            "ZBgBIAEoCRIQCghpc0FjdGl2ZRgCIAEoCCJNChRDcmVhdGVTZXJ2aWNlUmVx",
-            "dWVzdBISCgpjYXRlZ29yeUlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVz",
-            "Y3JpcHRpb24YAyABKAkiRQoUVXBkYXRlU2VydmljZVJlcXVlc3QSCgoCaWQY",
-            "ASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCSI3ChdT",
-            "ZXRTZXJ2aWNlQWN0aXZlUmVxdWVzdBIKCgJpZBgBIAEoCRIQCghpc0FjdGl2",
-            "ZRgCIAEoCCJCChhTZXRDYXRlZ29yeVNraWxsc1JlcXVlc3QSEgoKY2F0ZWdv",
-            "cnlJZBgBIAEoCRISCgpza2lsbE5hbWVzGAIgAygJIkQKF1NldFNlcnZpY2VT",
-            "a2lsbHNSZXF1ZXN0EhUKDXNlcnZpY2VJdGVtSWQYASABKAkSEgoKc2tpbGxO",
-            "YW1lcxgCIAMoCSIkChNTZWFyY2hTa2lsbHNSZXF1ZXN0Eg0KBXF1ZXJ5GAEg",
-            "ASgJIicKEVNlYXJjaFNraWxsc1JlcGx5EhIKCnNraWxsTmFtZXMYASADKAki",
-            "OQogR2V0RWZmZWN0aXZlU2VydmljZVNraWxsc1JlcXVlc3QSFQoNc2Vydmlj",
-            "ZUl0ZW1JZBgBIAEoCSI0Ch5HZXRFZmZlY3RpdmVTZXJ2aWNlU2tpbGxzUmVw",
-            "bHkSEgoKc2tpbGxOYW1lcxgBIAMoCSIzCh1MaXN0U2VydmljZXNCeUNhdGVn",
-            "b3J5UmVxdWVzdBISCgpjYXRlZ29yeUlkGAEgASgJIkAKG0xpc3RTZXJ2aWNl",
-            "c0J5Q2F0ZWdvcnlSZXBseRIhCghzZXJ2aWNlcxgBIAMoCzIPLmNvbW1vbi5z",
-            "ZXJ2aWNlImsKFExpc3RBbGxTZXJ2aWNlc1JlcGx5EiEKCHNlcnZpY2VzGAEg",
-            "AygLMg8uY29tbW9uLnNlcnZpY2USEgoKc3RhdHVzY29kZRgCIAEoBRIcCgVl",
-            "cnJvchgDIAEoCzINLmNvbW1vbi5lcnJvcjLGCAoSQ29uc3VsdGFudFNlcnZp",
-            "Y2VzEjUKDkxpc3RDYXRlZ29yaWVzEg0uY29tbW9uLkVtcHR5GhQuY29tbW9u",
-            "LmRlZmF1bHRSZXBseRJhChZMaXN0U2VydmljZXNCeUNhdGVnb3J5EjEuY29u",
-            "c3VsdGFudFNlcnZpY2VzLkxpc3RTZXJ2aWNlc0J5Q2F0ZWdvcnlSZXF1ZXN0",
-            "GhQuY29tbW9uLmRlZmF1bHRSZXBseRI2Cg9MaXN0QWxsU2VydmljZXMSDS5j",
-            "b21tb24uRW1wdHkaFC5jb21tb24uZGVmYXVsdFJlcGx5ElEKDkNyZWF0ZUNh",
-            "dGVnb3J5EikuY29uc3VsdGFudFNlcnZpY2VzLkNyZWF0ZUNhdGVnb3J5UmVx",
-            "dWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSUQoOVXBkYXRlQ2F0ZWdvcnkS",
-            "KS5jb25zdWx0YW50U2VydmljZXMuVXBkYXRlQ2F0ZWdvcnlSZXF1ZXN0GhQu",
-            "Y29tbW9uLmRlZmF1bHRSZXBseRJXChFTZXRDYXRlZ29yeUFjdGl2ZRIsLmNv",
-            "bnN1bHRhbnRTZXJ2aWNlcy5TZXRDYXRlZ29yeUFjdGl2ZVJlcXVlc3QaFC5j",
-            "b21tb24uZGVmYXVsdFJlcGx5Ek8KDUNyZWF0ZVNlcnZpY2USKC5jb25zdWx0",
-            "YW50U2VydmljZXMuQ3JlYXRlU2VydmljZVJlcXVlc3QaFC5jb21tb24uZGVm",
-            "YXVsdFJlcGx5Ek8KDVVwZGF0ZVNlcnZpY2USKC5jb25zdWx0YW50U2Vydmlj",
-            "ZXMuVXBkYXRlU2VydmljZVJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5",
-            "ElUKEFNldFNlcnZpY2VBY3RpdmUSKy5jb25zdWx0YW50U2VydmljZXMuU2V0",
-            "U2VydmljZUFjdGl2ZVJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5ElcK",
-            "EVNldENhdGVnb3J5U2tpbGxzEiwuY29uc3VsdGFudFNlcnZpY2VzLlNldENh",
-            "dGVnb3J5U2tpbGxzUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSVQoQ",
-            "U2V0U2VydmljZVNraWxscxIrLmNvbnN1bHRhbnRTZXJ2aWNlcy5TZXRTZXJ2",
-            "aWNlU2tpbGxzUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSTQoMU2Vh",
-            "cmNoU2tpbGxzEicuY29uc3VsdGFudFNlcnZpY2VzLlNlYXJjaFNraWxsc1Jl",
-            "cXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EmcKGUdldEVmZmVjdGl2ZVNl",
-            "cnZpY2VTa2lsbHMSNC5jb25zdWx0YW50U2VydmljZXMuR2V0RWZmZWN0aXZl",
-            "U2VydmljZVNraWxsc1JlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5Qgeq",
-            "AgRjb3JlYgZwcm90bzM="));
+            "a2lsbE5hbWVzGAYgAygJIk0KFUNyZWF0ZUNhdGVnb3J5UmVxdWVzdBIMCgRu",
+            "YW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWNoYW5nZWRCeRgD",
+            "IAEoCSJZChVVcGRhdGVDYXRlZ29yeVJlcXVlc3QSCgoCaWQYASABKAkSDAoE",
+            "bmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIRCgljaGFuZ2VkQnkY",
+            "BCABKAkiSwoYU2V0Q2F0ZWdvcnlBY3RpdmVSZXF1ZXN0EgoKAmlkGAEgASgJ",
+            "EhAKCGlzQWN0aXZlGAIgASgIEhEKCWNoYW5nZWRCeRgDIAEoCSJgChRDcmVh",
+            "dGVTZXJ2aWNlUmVxdWVzdBISCgpjYXRlZ29yeUlkGAEgASgJEgwKBG5hbWUY",
+            "AiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJY2hhbmdlZEJ5GAQgASgJ",
+            "IlgKFFVwZGF0ZVNlcnZpY2VSZXF1ZXN0EgoKAmlkGAEgASgJEgwKBG5hbWUY",
+            "AiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJY2hhbmdlZEJ5GAQgASgJ",
+            "IkoKF1NldFNlcnZpY2VBY3RpdmVSZXF1ZXN0EgoKAmlkGAEgASgJEhAKCGlz",
+            "QWN0aXZlGAIgASgIEhEKCWNoYW5nZWRCeRgDIAEoCSJVChhTZXRDYXRlZ29y",
+            "eVNraWxsc1JlcXVlc3QSEgoKY2F0ZWdvcnlJZBgBIAEoCRISCgpza2lsbE5h",
+            "bWVzGAIgAygJEhEKCWNoYW5nZWRCeRgDIAEoCSJXChdTZXRTZXJ2aWNlU2tp",
+            "bGxzUmVxdWVzdBIVCg1zZXJ2aWNlSXRlbUlkGAEgASgJEhIKCnNraWxsTmFt",
+            "ZXMYAiADKAkSEQoJY2hhbmdlZEJ5GAMgASgJIiQKE1NlYXJjaFNraWxsc1Jl",
+            "cXVlc3QSDQoFcXVlcnkYASABKAkiJwoRU2VhcmNoU2tpbGxzUmVwbHkSEgoK",
+            "c2tpbGxOYW1lcxgBIAMoCSI5CiBHZXRFZmZlY3RpdmVTZXJ2aWNlU2tpbGxz",
+            "UmVxdWVzdBIVCg1zZXJ2aWNlSXRlbUlkGAEgASgJIjQKHkdldEVmZmVjdGl2",
+            "ZVNlcnZpY2VTa2lsbHNSZXBseRISCgpza2lsbE5hbWVzGAEgAygJIjMKHUxp",
+            "c3RTZXJ2aWNlc0J5Q2F0ZWdvcnlSZXF1ZXN0EhIKCmNhdGVnb3J5SWQYASAB",
+            "KAkiQAobTGlzdFNlcnZpY2VzQnlDYXRlZ29yeVJlcGx5EiEKCHNlcnZpY2Vz",
+            "GAEgAygLMg8uY29tbW9uLnNlcnZpY2UiawoUTGlzdEFsbFNlcnZpY2VzUmVw",
+            "bHkSIQoIc2VydmljZXMYASADKAsyDy5jb21tb24uc2VydmljZRISCgpzdGF0",
+            "dXNjb2RlGAIgASgFEhwKBWVycm9yGAMgASgLMg0uY29tbW9uLmVycm9yMsYI",
+            "ChJDb25zdWx0YW50U2VydmljZXMSNQoOTGlzdENhdGVnb3JpZXMSDS5jb21t",
+            "b24uRW1wdHkaFC5jb21tb24uZGVmYXVsdFJlcGx5EmEKFkxpc3RTZXJ2aWNl",
+            "c0J5Q2F0ZWdvcnkSMS5jb25zdWx0YW50U2VydmljZXMuTGlzdFNlcnZpY2Vz",
+            "QnlDYXRlZ29yeVJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EjYKD0xp",
+            "c3RBbGxTZXJ2aWNlcxINLmNvbW1vbi5FbXB0eRoULmNvbW1vbi5kZWZhdWx0",
+            "UmVwbHkSUQoOQ3JlYXRlQ2F0ZWdvcnkSKS5jb25zdWx0YW50U2VydmljZXMu",
+            "Q3JlYXRlQ2F0ZWdvcnlSZXF1ZXN0GhQuY29tbW9uLmRlZmF1bHRSZXBseRJR",
+            "Cg5VcGRhdGVDYXRlZ29yeRIpLmNvbnN1bHRhbnRTZXJ2aWNlcy5VcGRhdGVD",
+            "YXRlZ29yeVJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5ElcKEVNldENh",
+            "dGVnb3J5QWN0aXZlEiwuY29uc3VsdGFudFNlcnZpY2VzLlNldENhdGVnb3J5",
+            "QWN0aXZlUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSTwoNQ3JlYXRl",
+            "U2VydmljZRIoLmNvbnN1bHRhbnRTZXJ2aWNlcy5DcmVhdGVTZXJ2aWNlUmVx",
+            "dWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkSTwoNVXBkYXRlU2VydmljZRIo",
+            "LmNvbnN1bHRhbnRTZXJ2aWNlcy5VcGRhdGVTZXJ2aWNlUmVxdWVzdBoULmNv",
+            "bW1vbi5kZWZhdWx0UmVwbHkSVQoQU2V0U2VydmljZUFjdGl2ZRIrLmNvbnN1",
+            "bHRhbnRTZXJ2aWNlcy5TZXRTZXJ2aWNlQWN0aXZlUmVxdWVzdBoULmNvbW1v",
+            "bi5kZWZhdWx0UmVwbHkSVwoRU2V0Q2F0ZWdvcnlTa2lsbHMSLC5jb25zdWx0",
+            "YW50U2VydmljZXMuU2V0Q2F0ZWdvcnlTa2lsbHNSZXF1ZXN0GhQuY29tbW9u",
+            "LmRlZmF1bHRSZXBseRJVChBTZXRTZXJ2aWNlU2tpbGxzEisuY29uc3VsdGFu",
+            "dFNlcnZpY2VzLlNldFNlcnZpY2VTa2lsbHNSZXF1ZXN0GhQuY29tbW9uLmRl",
+            "ZmF1bHRSZXBseRJNCgxTZWFyY2hTa2lsbHMSJy5jb25zdWx0YW50U2Vydmlj",
+            "ZXMuU2VhcmNoU2tpbGxzUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHkS",
+            "ZwoZR2V0RWZmZWN0aXZlU2VydmljZVNraWxscxI0LmNvbnN1bHRhbnRTZXJ2",
+            "aWNlcy5HZXRFZmZlY3RpdmVTZXJ2aWNlU2tpbGxzUmVxdWVzdBoULmNvbW1v",
+            "bi5kZWZhdWx0UmVwbHlCB6oCBGNvcmViBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::core.CommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::core.ListCategoriesReply), global::core.ListCategoriesReply.Parser, new[]{ "Categories", "Statuscode", "Error" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.category), global::core.category.Parser, new[]{ "Name", "Description", "Services", "Id", "IsActive", "SkillNames" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.CreateCategoryRequest), global::core.CreateCategoryRequest.Parser, new[]{ "Name", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.UpdateCategoryRequest), global::core.UpdateCategoryRequest.Parser, new[]{ "Id", "Name", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetCategoryActiveRequest), global::core.SetCategoryActiveRequest.Parser, new[]{ "Id", "IsActive" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.CreateServiceRequest), global::core.CreateServiceRequest.Parser, new[]{ "CategoryId", "Name", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.UpdateServiceRequest), global::core.UpdateServiceRequest.Parser, new[]{ "Id", "Name", "Description" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetServiceActiveRequest), global::core.SetServiceActiveRequest.Parser, new[]{ "Id", "IsActive" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetCategorySkillsRequest), global::core.SetCategorySkillsRequest.Parser, new[]{ "CategoryId", "SkillNames" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetServiceSkillsRequest), global::core.SetServiceSkillsRequest.Parser, new[]{ "ServiceItemId", "SkillNames" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.CreateCategoryRequest), global::core.CreateCategoryRequest.Parser, new[]{ "Name", "Description", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.UpdateCategoryRequest), global::core.UpdateCategoryRequest.Parser, new[]{ "Id", "Name", "Description", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetCategoryActiveRequest), global::core.SetCategoryActiveRequest.Parser, new[]{ "Id", "IsActive", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.CreateServiceRequest), global::core.CreateServiceRequest.Parser, new[]{ "CategoryId", "Name", "Description", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.UpdateServiceRequest), global::core.UpdateServiceRequest.Parser, new[]{ "Id", "Name", "Description", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetServiceActiveRequest), global::core.SetServiceActiveRequest.Parser, new[]{ "Id", "IsActive", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetCategorySkillsRequest), global::core.SetCategorySkillsRequest.Parser, new[]{ "CategoryId", "SkillNames", "ChangedBy" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SetServiceSkillsRequest), global::core.SetServiceSkillsRequest.Parser, new[]{ "ServiceItemId", "SkillNames", "ChangedBy" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SearchSkillsRequest), global::core.SearchSkillsRequest.Parser, new[]{ "Query" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SearchSkillsReply), global::core.SearchSkillsReply.Parser, new[]{ "SkillNames" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetEffectiveServiceSkillsRequest), global::core.GetEffectiveServiceSkillsRequest.Parser, new[]{ "ServiceItemId" }, null, null, null, null),
@@ -753,6 +756,7 @@ namespace core {
     public CreateCategoryRequest(CreateCategoryRequest other) : this() {
       name_ = other.name_;
       description_ = other.description_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -786,6 +790,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 3;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -803,6 +819,7 @@ namespace core {
       }
       if (Name != other.Name) return false;
       if (Description != other.Description) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -812,6 +829,7 @@ namespace core {
       int hash = 1;
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -838,6 +856,10 @@ namespace core {
         output.WriteRawTag(18);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -856,6 +878,10 @@ namespace core {
         output.WriteRawTag(18);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -871,6 +897,9 @@ namespace core {
       }
       if (Description.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -889,6 +918,9 @@ namespace core {
       }
       if (other.Description.Length != 0) {
         Description = other.Description;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -913,6 +945,10 @@ namespace core {
             Description = input.ReadString();
             break;
           }
+          case 26: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -934,6 +970,10 @@ namespace core {
           }
           case 18: {
             Description = input.ReadString();
+            break;
+          }
+          case 26: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -980,6 +1020,7 @@ namespace core {
       id_ = other.id_;
       name_ = other.name_;
       description_ = other.description_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1025,6 +1066,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 4;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1043,6 +1096,7 @@ namespace core {
       if (Id != other.Id) return false;
       if (Name != other.Name) return false;
       if (Description != other.Description) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1053,6 +1107,7 @@ namespace core {
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1083,6 +1138,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1105,6 +1164,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1123,6 +1186,9 @@ namespace core {
       }
       if (Description.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1144,6 +1210,9 @@ namespace core {
       }
       if (other.Description.Length != 0) {
         Description = other.Description;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1172,6 +1241,10 @@ namespace core {
             Description = input.ReadString();
             break;
           }
+          case 34: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1197,6 +1270,10 @@ namespace core {
           }
           case 26: {
             Description = input.ReadString();
+            break;
+          }
+          case 34: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -1242,6 +1319,7 @@ namespace core {
     public SetCategoryActiveRequest(SetCategoryActiveRequest other) : this() {
       id_ = other.id_;
       isActive_ = other.isActive_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1275,6 +1353,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 3;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1292,6 +1382,7 @@ namespace core {
       }
       if (Id != other.Id) return false;
       if (IsActive != other.IsActive) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1301,6 +1392,7 @@ namespace core {
       int hash = 1;
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (IsActive != false) hash ^= IsActive.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1327,6 +1419,10 @@ namespace core {
         output.WriteRawTag(16);
         output.WriteBool(IsActive);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1345,6 +1441,10 @@ namespace core {
         output.WriteRawTag(16);
         output.WriteBool(IsActive);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1360,6 +1460,9 @@ namespace core {
       }
       if (IsActive != false) {
         size += 1 + 1;
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1378,6 +1481,9 @@ namespace core {
       }
       if (other.IsActive != false) {
         IsActive = other.IsActive;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1402,6 +1508,10 @@ namespace core {
             IsActive = input.ReadBool();
             break;
           }
+          case 26: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1423,6 +1533,10 @@ namespace core {
           }
           case 16: {
             IsActive = input.ReadBool();
+            break;
+          }
+          case 26: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -1469,6 +1583,7 @@ namespace core {
       categoryId_ = other.categoryId_;
       name_ = other.name_;
       description_ = other.description_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1514,6 +1629,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 4;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1532,6 +1659,7 @@ namespace core {
       if (CategoryId != other.CategoryId) return false;
       if (Name != other.Name) return false;
       if (Description != other.Description) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1542,6 +1670,7 @@ namespace core {
       if (CategoryId.Length != 0) hash ^= CategoryId.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1572,6 +1701,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1594,6 +1727,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1612,6 +1749,9 @@ namespace core {
       }
       if (Description.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1633,6 +1773,9 @@ namespace core {
       }
       if (other.Description.Length != 0) {
         Description = other.Description;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1661,6 +1804,10 @@ namespace core {
             Description = input.ReadString();
             break;
           }
+          case 34: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1686,6 +1833,10 @@ namespace core {
           }
           case 26: {
             Description = input.ReadString();
+            break;
+          }
+          case 34: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -1732,6 +1883,7 @@ namespace core {
       id_ = other.id_;
       name_ = other.name_;
       description_ = other.description_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1777,6 +1929,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 4;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1795,6 +1959,7 @@ namespace core {
       if (Id != other.Id) return false;
       if (Name != other.Name) return false;
       if (Description != other.Description) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1805,6 +1970,7 @@ namespace core {
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Description.Length != 0) hash ^= Description.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1835,6 +2001,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1857,6 +2027,10 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Description);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1875,6 +2049,9 @@ namespace core {
       }
       if (Description.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1896,6 +2073,9 @@ namespace core {
       }
       if (other.Description.Length != 0) {
         Description = other.Description;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1924,6 +2104,10 @@ namespace core {
             Description = input.ReadString();
             break;
           }
+          case 34: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1949,6 +2133,10 @@ namespace core {
           }
           case 26: {
             Description = input.ReadString();
+            break;
+          }
+          case 34: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -1994,6 +2182,7 @@ namespace core {
     public SetServiceActiveRequest(SetServiceActiveRequest other) : this() {
       id_ = other.id_;
       isActive_ = other.isActive_;
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2027,6 +2216,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 3;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -2044,6 +2245,7 @@ namespace core {
       }
       if (Id != other.Id) return false;
       if (IsActive != other.IsActive) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2053,6 +2255,7 @@ namespace core {
       int hash = 1;
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (IsActive != false) hash ^= IsActive.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2079,6 +2282,10 @@ namespace core {
         output.WriteRawTag(16);
         output.WriteBool(IsActive);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2097,6 +2304,10 @@ namespace core {
         output.WriteRawTag(16);
         output.WriteBool(IsActive);
       }
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2112,6 +2323,9 @@ namespace core {
       }
       if (IsActive != false) {
         size += 1 + 1;
+      }
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2130,6 +2344,9 @@ namespace core {
       }
       if (other.IsActive != false) {
         IsActive = other.IsActive;
+      }
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2154,6 +2371,10 @@ namespace core {
             IsActive = input.ReadBool();
             break;
           }
+          case 26: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -2175,6 +2396,10 @@ namespace core {
           }
           case 16: {
             IsActive = input.ReadBool();
+            break;
+          }
+          case 26: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -2220,6 +2445,7 @@ namespace core {
     public SetCategorySkillsRequest(SetCategorySkillsRequest other) : this() {
       categoryId_ = other.categoryId_;
       skillNames_ = other.skillNames_.Clone();
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2252,6 +2478,18 @@ namespace core {
       get { return skillNames_; }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 3;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -2269,6 +2507,7 @@ namespace core {
       }
       if (CategoryId != other.CategoryId) return false;
       if(!skillNames_.Equals(other.skillNames_)) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2278,6 +2517,7 @@ namespace core {
       int hash = 1;
       if (CategoryId.Length != 0) hash ^= CategoryId.GetHashCode();
       hash ^= skillNames_.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2301,6 +2541,10 @@ namespace core {
         output.WriteString(CategoryId);
       }
       skillNames_.WriteTo(output, _repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2316,6 +2560,10 @@ namespace core {
         output.WriteString(CategoryId);
       }
       skillNames_.WriteTo(ref output, _repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2330,6 +2578,9 @@ namespace core {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(CategoryId);
       }
       size += skillNames_.CalculateSize(_repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -2346,6 +2597,9 @@ namespace core {
         CategoryId = other.CategoryId;
       }
       skillNames_.Add(other.skillNames_);
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -2369,6 +2623,10 @@ namespace core {
             skillNames_.AddEntriesFrom(input, _repeated_skillNames_codec);
             break;
           }
+          case 26: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -2390,6 +2648,10 @@ namespace core {
           }
           case 18: {
             skillNames_.AddEntriesFrom(ref input, _repeated_skillNames_codec);
+            break;
+          }
+          case 26: {
+            ChangedBy = input.ReadString();
             break;
           }
         }
@@ -2435,6 +2697,7 @@ namespace core {
     public SetServiceSkillsRequest(SetServiceSkillsRequest other) : this() {
       serviceItemId_ = other.serviceItemId_;
       skillNames_ = other.skillNames_.Clone();
+      changedBy_ = other.changedBy_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2467,6 +2730,18 @@ namespace core {
       get { return skillNames_; }
     }
 
+    /// <summary>Field number for the "changedBy" field.</summary>
+    public const int ChangedByFieldNumber = 3;
+    private string changedBy_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ChangedBy {
+      get { return changedBy_; }
+      set {
+        changedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -2484,6 +2759,7 @@ namespace core {
       }
       if (ServiceItemId != other.ServiceItemId) return false;
       if(!skillNames_.Equals(other.skillNames_)) return false;
+      if (ChangedBy != other.ChangedBy) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2493,6 +2769,7 @@ namespace core {
       int hash = 1;
       if (ServiceItemId.Length != 0) hash ^= ServiceItemId.GetHashCode();
       hash ^= skillNames_.GetHashCode();
+      if (ChangedBy.Length != 0) hash ^= ChangedBy.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2516,6 +2793,10 @@ namespace core {
         output.WriteString(ServiceItemId);
       }
       skillNames_.WriteTo(output, _repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2531,6 +2812,10 @@ namespace core {
         output.WriteString(ServiceItemId);
       }
       skillNames_.WriteTo(ref output, _repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(ChangedBy);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2545,6 +2830,9 @@ namespace core {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ServiceItemId);
       }
       size += skillNames_.CalculateSize(_repeated_skillNames_codec);
+      if (ChangedBy.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ChangedBy);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -2561,6 +2849,9 @@ namespace core {
         ServiceItemId = other.ServiceItemId;
       }
       skillNames_.Add(other.skillNames_);
+      if (other.ChangedBy.Length != 0) {
+        ChangedBy = other.ChangedBy;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -2584,6 +2875,10 @@ namespace core {
             skillNames_.AddEntriesFrom(input, _repeated_skillNames_codec);
             break;
           }
+          case 26: {
+            ChangedBy = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -2605,6 +2900,10 @@ namespace core {
           }
           case 18: {
             skillNames_.AddEntriesFrom(ref input, _repeated_skillNames_codec);
+            break;
+          }
+          case 26: {
+            ChangedBy = input.ReadString();
             break;
           }
         }

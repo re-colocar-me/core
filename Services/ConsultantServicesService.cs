@@ -1,4 +1,5 @@
 using core.domain;
+using core.domain.Auditing;
 using core.domain.Entities;
 using core.domain.Interfaces.Services;
 using Google.Protobuf.WellKnownTypes;
@@ -9,10 +10,12 @@ namespace core.Services
     public class ConsultantServicesService : ConsultantServices.ConsultantServicesBase
     {
         private IConsultantServiceServices _services;
+        private readonly ICurrentActorAccessor _actorAccessor;
 
-        public ConsultantServicesService(IConsultantServiceServices services)
+        public ConsultantServicesService(IConsultantServiceServices services, ICurrentActorAccessor actorAccessor)
         {
             _services = services;
+            _actorAccessor = actorAccessor;
         }
 
         private static service MapService(ConsultantServiceItem x, string? categoryName = null) => new()
@@ -112,6 +115,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 var category = await _services.CreateCategory(request.Name, request.Description);
                 reply.Data = Any.Pack(MapCategory(category));
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -129,6 +133,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 var category = await _services.UpdateCategory(Guid.Parse(request.Id), request.Name, request.Description);
                 reply.Data = Any.Pack(MapCategory(category));
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -146,6 +151,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 await _services.SetCategoryActive(Guid.Parse(request.Id), request.IsActive);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
@@ -162,6 +168,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 var item = await _services.CreateService(Guid.Parse(request.CategoryId), request.Name, request.Description);
                 reply.Data = Any.Pack(MapService(item));
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -179,6 +186,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 var item = await _services.UpdateService(Guid.Parse(request.Id), request.Name, request.Description);
                 reply.Data = Any.Pack(MapService(item));
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -196,6 +204,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 await _services.SetServiceActive(Guid.Parse(request.Id), request.IsActive);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
@@ -212,6 +221,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 await _services.SetCategorySkills(Guid.Parse(request.CategoryId), request.SkillNames);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
@@ -228,6 +238,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
+                _actorAccessor.Actor = request.ChangedBy;
                 await _services.SetServiceSkills(Guid.Parse(request.ServiceItemId), request.SkillNames);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
