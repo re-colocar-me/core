@@ -41,19 +41,23 @@ namespace core {
             "ASgJEhkKEXRlbGVwaG9uZUFyZWFDb2RlGAogASgJEhcKD3RlbGVwaG9uZU51",
             "bWJlchgLIAEoCRItCgliaXJ0aERhdGUYDCABKAsyGi5nb29nbGUucHJvdG9i",
             "dWYuVGltZXN0YW1wEhAKCGxhc3ROYW1lGA0gASgJEhIKCmdlbmRlckNvZGUY",
-            "DiABKAkSDAoEcm9sZRgPIAEoCTLXAQoHUHJvZmlsZRI2CgZTZXRCaW8SFi5w",
-            "cm9maWxlLlNldEJpb1JlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkwK",
-            "EVNldEFkZGl0aW9uYWxEYXRhEiEucHJvZmlsZS5TZXRBZGRpdGlvbmFsRGF0",
-            "YVJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkYKDkdldEZ1bGxQcm9m",
-            "aWxlEh4ucHJvZmlsZS5HZXRGdWxsUHJvZmlsZVJlcXVlc3QaFC5jb21tb24u",
-            "ZGVmYXVsdFJlcGx5QgeqAgRjb3JlYgZwcm90bzM="));
+            "DiABKAkSDAoEcm9sZRgPIAEoCSIoCg9TdWdnZXN0QmlvUmVwbHkSFQoNc3Vn",
+            "Z2VzdGVkVGV4dBgBIAEoCTKbAgoHUHJvZmlsZRI2CgZTZXRCaW8SFi5wcm9m",
+            "aWxlLlNldEJpb1JlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkwKEVNl",
+            "dEFkZGl0aW9uYWxEYXRhEiEucHJvZmlsZS5TZXRBZGRpdGlvbmFsRGF0YVJl",
+            "cXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5EkYKDkdldEZ1bGxQcm9maWxl",
+            "Eh4ucHJvZmlsZS5HZXRGdWxsUHJvZmlsZVJlcXVlc3QaFC5jb21tb24uZGVm",
+            "YXVsdFJlcGx5EkIKClN1Z2dlc3RCaW8SHi5wcm9maWxlLkdldEZ1bGxQcm9m",
+            "aWxlUmVxdWVzdBoULmNvbW1vbi5kZWZhdWx0UmVwbHlCB6oCBGNvcmViBnBy",
+            "b3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::core.CommonReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SetBioRequest), global::core.SetBioRequest.Parser, new[]{ "OwnerId", "Text" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SetAdditionalDataRequest), global::core.SetAdditionalDataRequest.Parser, new[]{ "OwnerId", "TelCountryCode", "TelLocalCode", "TelephoneCountryCode", "TelephoneAreaCode", "TelephoneNumber", "GenderCode", "BirthDate" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetFullProfileRequest), global::core.GetFullProfileRequest.Parser, new[]{ "OwnerId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.GetFullProfileReply), global::core.GetFullProfileReply.Parser, new[]{ "Id", "Email", "Source", "FirstName", "PictureUrl", "BioText", "Status", "LastAccess", "TelephoneCountryCode", "TelephoneAreaCode", "TelephoneNumber", "BirthDate", "LastName", "GenderCode", "Role" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.GetFullProfileReply), global::core.GetFullProfileReply.Parser, new[]{ "Id", "Email", "Source", "FirstName", "PictureUrl", "BioText", "Status", "LastAccess", "TelephoneCountryCode", "TelephoneAreaCode", "TelephoneNumber", "BirthDate", "LastName", "GenderCode", "Role" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.SuggestBioReply), global::core.SuggestBioReply.Parser, new[]{ "SuggestedText" }, null, null, null, null)
           }));
     }
     #endregion
@@ -1648,6 +1652,195 @@ namespace core {
           }
           case 122: {
             Role = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class SuggestBioReply : pb::IMessage<SuggestBioReply>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<SuggestBioReply> _parser = new pb::MessageParser<SuggestBioReply>(() => new SuggestBioReply());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<SuggestBioReply> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::core.ProfileReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SuggestBioReply() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SuggestBioReply(SuggestBioReply other) : this() {
+      suggestedText_ = other.suggestedText_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public SuggestBioReply Clone() {
+      return new SuggestBioReply(this);
+    }
+
+    /// <summary>Field number for the "suggestedText" field.</summary>
+    public const int SuggestedTextFieldNumber = 1;
+    private string suggestedText_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string SuggestedText {
+      get { return suggestedText_; }
+      set {
+        suggestedText_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as SuggestBioReply);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(SuggestBioReply other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (SuggestedText != other.SuggestedText) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (SuggestedText.Length != 0) hash ^= SuggestedText.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (SuggestedText.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(SuggestedText);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (SuggestedText.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(SuggestedText);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (SuggestedText.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(SuggestedText);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(SuggestBioReply other) {
+      if (other == null) {
+        return;
+      }
+      if (other.SuggestedText.Length != 0) {
+        SuggestedText = other.SuggestedText;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            SuggestedText = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            SuggestedText = input.ReadString();
             break;
           }
         }

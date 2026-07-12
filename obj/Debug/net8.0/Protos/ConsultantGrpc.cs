@@ -63,6 +63,14 @@ namespace core {
     static readonly grpc::Marshaller<global::core.PublishResumeUploadedEventRequest> __Marshaller_consultant_PublishResumeUploadedEventRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.PublishResumeUploadedEventRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::core.SetResumeDataRequest> __Marshaller_consultant_SetResumeDataRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.SetResumeDataRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::core.SetSporadicAvailabilityRequest> __Marshaller_consultant_SetSporadicAvailabilityRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.SetSporadicAvailabilityRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::core.SetServicePriceRequest> __Marshaller_consultant_SetServicePriceRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.SetServicePriceRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::core.GetServicePriceHistoryRequest> __Marshaller_consultant_GetServicePriceHistoryRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.GetServicePriceHistoryRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::core.OfferingIdRequest> __Marshaller_consultant_OfferingIdRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.OfferingIdRequest.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::core.SetAvailabilityRequest, global::core.defaultReply> __Method_SetAvailability = new grpc::Method<global::core.SetAvailabilityRequest, global::core.defaultReply>(
@@ -160,6 +168,62 @@ namespace core {
         __Marshaller_consultant_OwnerIdRequest,
         __Marshaller_common_defaultReply);
 
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.SetSporadicAvailabilityRequest, global::core.defaultReply> __Method_SetSporadicAvailability = new grpc::Method<global::core.SetSporadicAvailabilityRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SetSporadicAvailability",
+        __Marshaller_consultant_SetSporadicAvailabilityRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.OwnerIdRequest, global::core.defaultReply> __Method_GetSporadicAvailabilityListByOwner = new grpc::Method<global::core.OwnerIdRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetSporadicAvailabilityListByOwner",
+        __Marshaller_consultant_OwnerIdRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.DeleteAvailabilityRequest, global::core.defaultReply> __Method_DeleteSporadicAvailability = new grpc::Method<global::core.DeleteAvailabilityRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "DeleteSporadicAvailability",
+        __Marshaller_consultant_DeleteAvailabilityRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.OwnerIdRequest, global::core.defaultReply> __Method_SuggestSummary = new grpc::Method<global::core.OwnerIdRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SuggestSummary",
+        __Marshaller_consultant_OwnerIdRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.SetServicePriceRequest, global::core.defaultReply> __Method_SetServicePrice = new grpc::Method<global::core.SetServicePriceRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SetServicePrice",
+        __Marshaller_consultant_SetServicePriceRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.GetServicePriceHistoryRequest, global::core.defaultReply> __Method_GetServicePriceHistory = new grpc::Method<global::core.GetServicePriceHistoryRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetServicePriceHistory",
+        __Marshaller_consultant_GetServicePriceHistoryRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.OfferingIdRequest, global::core.defaultReply> __Method_GetOfferingForPayment = new grpc::Method<global::core.OfferingIdRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetOfferingForPayment",
+        __Marshaller_consultant_OfferingIdRequest,
+        __Marshaller_common_defaultReply);
+
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
@@ -242,6 +306,48 @@ namespace core {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> SetSporadicAvailability(global::core.SetSporadicAvailabilityRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> GetSporadicAvailabilityListByOwner(global::core.OwnerIdRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> DeleteSporadicAvailability(global::core.DeleteAvailabilityRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> SuggestSummary(global::core.OwnerIdRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> SetServicePrice(global::core.SetServicePriceRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> GetServicePriceHistory(global::core.GetServicePriceHistoryRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> GetOfferingForPayment(global::core.OfferingIdRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
     }
 
     /// <summary>Creates service definition that can be registered with a server</summary>
@@ -261,7 +367,14 @@ namespace core {
           .AddMethod(__Method_GetProvidedServices, serviceImpl.GetProvidedServices)
           .AddMethod(__Method_PublishResumeUploadedEvent, serviceImpl.PublishResumeUploadedEvent)
           .AddMethod(__Method_SetResumeData, serviceImpl.SetResumeData)
-          .AddMethod(__Method_GetResumeData, serviceImpl.GetResumeData).Build();
+          .AddMethod(__Method_GetResumeData, serviceImpl.GetResumeData)
+          .AddMethod(__Method_SetSporadicAvailability, serviceImpl.SetSporadicAvailability)
+          .AddMethod(__Method_GetSporadicAvailabilityListByOwner, serviceImpl.GetSporadicAvailabilityListByOwner)
+          .AddMethod(__Method_DeleteSporadicAvailability, serviceImpl.DeleteSporadicAvailability)
+          .AddMethod(__Method_SuggestSummary, serviceImpl.SuggestSummary)
+          .AddMethod(__Method_SetServicePrice, serviceImpl.SetServicePrice)
+          .AddMethod(__Method_GetServicePriceHistory, serviceImpl.GetServicePriceHistory)
+          .AddMethod(__Method_GetOfferingForPayment, serviceImpl.GetOfferingForPayment).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -283,6 +396,13 @@ namespace core {
       serviceBinder.AddMethod(__Method_PublishResumeUploadedEvent, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.PublishResumeUploadedEventRequest, global::core.defaultReply>(serviceImpl.PublishResumeUploadedEvent));
       serviceBinder.AddMethod(__Method_SetResumeData, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SetResumeDataRequest, global::core.defaultReply>(serviceImpl.SetResumeData));
       serviceBinder.AddMethod(__Method_GetResumeData, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.OwnerIdRequest, global::core.defaultReply>(serviceImpl.GetResumeData));
+      serviceBinder.AddMethod(__Method_SetSporadicAvailability, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SetSporadicAvailabilityRequest, global::core.defaultReply>(serviceImpl.SetSporadicAvailability));
+      serviceBinder.AddMethod(__Method_GetSporadicAvailabilityListByOwner, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.OwnerIdRequest, global::core.defaultReply>(serviceImpl.GetSporadicAvailabilityListByOwner));
+      serviceBinder.AddMethod(__Method_DeleteSporadicAvailability, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.DeleteAvailabilityRequest, global::core.defaultReply>(serviceImpl.DeleteSporadicAvailability));
+      serviceBinder.AddMethod(__Method_SuggestSummary, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.OwnerIdRequest, global::core.defaultReply>(serviceImpl.SuggestSummary));
+      serviceBinder.AddMethod(__Method_SetServicePrice, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SetServicePriceRequest, global::core.defaultReply>(serviceImpl.SetServicePrice));
+      serviceBinder.AddMethod(__Method_GetServicePriceHistory, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.GetServicePriceHistoryRequest, global::core.defaultReply>(serviceImpl.GetServicePriceHistory));
+      serviceBinder.AddMethod(__Method_GetOfferingForPayment, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.OfferingIdRequest, global::core.defaultReply>(serviceImpl.GetOfferingForPayment));
     }
 
   }

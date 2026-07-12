@@ -30,25 +30,25 @@ namespace core {
             "dW50GAEgASgFIjQKIUdldE5vdGlmaWNhdGlvbkxpc3RCeU93bmVyUmVxdWVz",
             "dBIPCgdvd25lcmlkGAEgASgJIloKH0dldE5vdGlmaWNhdGlvbkxpc3RCeU93",
             "bmVyUmVwbHkSNwoNbm90aWZpY2F0aW9ucxgBIAMoCzIgLm5vdGlmaWNhdGlv",
-            "bi5ub3RpZmljYXRpb25lbnRpdHkiXwoSbm90aWZpY2F0aW9uZW50aXR5Eg0K",
+            "bi5ub3RpZmljYXRpb25lbnRpdHkicgoSbm90aWZpY2F0aW9uZW50aXR5Eg0K",
             "BXRpdGxlGAEgASgJEgwKBGJvZHkYAiABKAkSEAoIdmlld2VkYXQYAyABKAkS",
-            "DgoGc3RhdHVzGAQgASgJEgoKAmlkGAUgASgJIkAKGlNldE5vdGlmaWNhdGlv",
-            "blJlYWRSZXF1ZXN0Eg8KB293bmVyaWQYASABKAkSEQoJbWVzc2FnZWlkGAIg",
-            "ASgJIi0KG1NldE5vdGlmaWNhdGlvblJlYWRSZXNwb25zZRIOCgZyZXN1bHQY",
-            "ASABKAgiTwoTTm90aWZpY2F0aW9uUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIN",
-            "CgV0aXRsZRgCIAEoCRIMCgRib2R5GAMgASgJEgwKBHJvbGUYBCABKAUiMgoY",
-            "UmVtb3ZlTm90aWZpY2F0aW9uUmVxdXN0EhYKDm5vdGlmaWNhdGlvbklkGAEg",
-            "ASgJMrwDCgxOb3RpZmljYXRpb24STQoPR2V0Q291bnRCeU93bmVyEiQubm90",
-            "aWZpY2F0aW9uLkdldENvdW50QnlPd25lclJlcXVlc3QaFC5jb21tb24uZGVm",
-            "YXVsdFJlcGx5EmMKGkdldE5vdGlmaWNhdGlvbkxpc3RCeU93bmVyEi8ubm90",
-            "aWZpY2F0aW9uLkdldE5vdGlmaWNhdGlvbkxpc3RCeU93bmVyUmVxdWVzdBoU",
-            "LmNvbW1vbi5kZWZhdWx0UmVwbHkSVQoTU2V0Tm90aWZpY2F0aW9uUmVhZBIo",
-            "Lm5vdGlmaWNhdGlvbi5TZXROb3RpZmljYXRpb25SZWFkUmVxdWVzdBoULmNv",
-            "bW1vbi5kZWZhdWx0UmVwbHkSTQoSQ3JlYXRlTm90aWZpY2F0aW9uEiEubm90",
-            "aWZpY2F0aW9uLk5vdGlmaWNhdGlvblJlcXVlc3QaFC5jb21tb24uZGVmYXVs",
-            "dFJlcGx5ElIKElJlbW92ZU5vdGlmaWNhdGlvbhImLm5vdGlmaWNhdGlvbi5S",
-            "ZW1vdmVOb3RpZmljYXRpb25SZXF1c3QaFC5jb21tb24uZGVmYXVsdFJlcGx5",
-            "QgeqAgRjb3JlYgZwcm90bzM="));
+            "DgoGc3RhdHVzGAQgASgJEgoKAmlkGAUgASgJEhEKCWNyZWF0ZWRhdBgGIAEo",
+            "CSJAChpTZXROb3RpZmljYXRpb25SZWFkUmVxdWVzdBIPCgdvd25lcmlkGAEg",
+            "ASgJEhEKCW1lc3NhZ2VpZBgCIAEoCSItChtTZXROb3RpZmljYXRpb25SZWFk",
+            "UmVzcG9uc2USDgoGcmVzdWx0GAEgASgIIk8KE05vdGlmaWNhdGlvblJlcXVl",
+            "c3QSDQoFZW1haWwYASABKAkSDQoFdGl0bGUYAiABKAkSDAoEYm9keRgDIAEo",
+            "CRIMCgRyb2xlGAQgASgFIjIKGFJlbW92ZU5vdGlmaWNhdGlvblJlcXVzdBIW",
+            "Cg5ub3RpZmljYXRpb25JZBgBIAEoCTK8AwoMTm90aWZpY2F0aW9uEk0KD0dl",
+            "dENvdW50QnlPd25lchIkLm5vdGlmaWNhdGlvbi5HZXRDb3VudEJ5T3duZXJS",
+            "ZXF1ZXN0GhQuY29tbW9uLmRlZmF1bHRSZXBseRJjChpHZXROb3RpZmljYXRp",
+            "b25MaXN0QnlPd25lchIvLm5vdGlmaWNhdGlvbi5HZXROb3RpZmljYXRpb25M",
+            "aXN0QnlPd25lclJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5ElUKE1Nl",
+            "dE5vdGlmaWNhdGlvblJlYWQSKC5ub3RpZmljYXRpb24uU2V0Tm90aWZpY2F0",
+            "aW9uUmVhZFJlcXVlc3QaFC5jb21tb24uZGVmYXVsdFJlcGx5Ek0KEkNyZWF0",
+            "ZU5vdGlmaWNhdGlvbhIhLm5vdGlmaWNhdGlvbi5Ob3RpZmljYXRpb25SZXF1",
+            "ZXN0GhQuY29tbW9uLmRlZmF1bHRSZXBseRJSChJSZW1vdmVOb3RpZmljYXRp",
+            "b24SJi5ub3RpZmljYXRpb24uUmVtb3ZlTm90aWZpY2F0aW9uUmVxdXN0GhQu",
+            "Y29tbW9uLmRlZmF1bHRSZXBseUIHqgIEY29yZWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::core.CommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -56,7 +56,7 @@ namespace core {
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetCountByOwnerReply), global::core.GetCountByOwnerReply.Parser, new[]{ "Count" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetNotificationListByOwnerRequest), global::core.GetNotificationListByOwnerRequest.Parser, new[]{ "Ownerid" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.GetNotificationListByOwnerReply), global::core.GetNotificationListByOwnerReply.Parser, new[]{ "Notifications" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.notificationentity), global::core.notificationentity.Parser, new[]{ "Title", "Body", "Viewedat", "Status", "Id" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.notificationentity), global::core.notificationentity.Parser, new[]{ "Title", "Body", "Viewedat", "Status", "Id", "Createdat" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SetNotificationReadRequest), global::core.SetNotificationReadRequest.Parser, new[]{ "Ownerid", "Messageid" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.SetNotificationReadResponse), global::core.SetNotificationReadResponse.Parser, new[]{ "Result" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.NotificationRequest), global::core.NotificationRequest.Parser, new[]{ "Email", "Title", "Body", "Role" }, null, null, null, null),
@@ -851,6 +851,7 @@ namespace core {
       viewedat_ = other.viewedat_;
       status_ = other.status_;
       id_ = other.id_;
+      createdat_ = other.createdat_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -920,6 +921,18 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "createdat" field.</summary>
+    public const int CreatedatFieldNumber = 6;
+    private string createdat_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Createdat {
+      get { return createdat_; }
+      set {
+        createdat_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -940,6 +953,7 @@ namespace core {
       if (Viewedat != other.Viewedat) return false;
       if (Status != other.Status) return false;
       if (Id != other.Id) return false;
+      if (Createdat != other.Createdat) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -952,6 +966,7 @@ namespace core {
       if (Viewedat.Length != 0) hash ^= Viewedat.GetHashCode();
       if (Status.Length != 0) hash ^= Status.GetHashCode();
       if (Id.Length != 0) hash ^= Id.GetHashCode();
+      if (Createdat.Length != 0) hash ^= Createdat.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -990,6 +1005,10 @@ namespace core {
         output.WriteRawTag(42);
         output.WriteString(Id);
       }
+      if (Createdat.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(Createdat);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1020,6 +1039,10 @@ namespace core {
         output.WriteRawTag(42);
         output.WriteString(Id);
       }
+      if (Createdat.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(Createdat);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1044,6 +1067,9 @@ namespace core {
       }
       if (Id.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Id);
+      }
+      if (Createdat.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Createdat);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1071,6 +1097,9 @@ namespace core {
       }
       if (other.Id.Length != 0) {
         Id = other.Id;
+      }
+      if (other.Createdat.Length != 0) {
+        Createdat = other.Createdat;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1107,6 +1136,10 @@ namespace core {
             Id = input.ReadString();
             break;
           }
+          case 50: {
+            Createdat = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1140,6 +1173,10 @@ namespace core {
           }
           case 42: {
             Id = input.ReadString();
+            break;
+          }
+          case 50: {
+            Createdat = input.ReadString();
             break;
           }
         }

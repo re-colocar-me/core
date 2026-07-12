@@ -78,6 +78,14 @@ namespace core {
         __Marshaller_profile_GetFullProfileRequest,
         __Marshaller_common_defaultReply);
 
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.GetFullProfileRequest, global::core.defaultReply> __Method_SuggestBio = new grpc::Method<global::core.GetFullProfileRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SuggestBio",
+        __Marshaller_profile_GetFullProfileRequest,
+        __Marshaller_common_defaultReply);
+
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
@@ -106,6 +114,12 @@ namespace core {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> SuggestBio(global::core.GetFullProfileRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
     }
 
     /// <summary>Creates service definition that can be registered with a server</summary>
@@ -116,7 +130,8 @@ namespace core {
       return grpc::ServerServiceDefinition.CreateBuilder()
           .AddMethod(__Method_SetBio, serviceImpl.SetBio)
           .AddMethod(__Method_SetAdditionalData, serviceImpl.SetAdditionalData)
-          .AddMethod(__Method_GetFullProfile, serviceImpl.GetFullProfile).Build();
+          .AddMethod(__Method_GetFullProfile, serviceImpl.GetFullProfile)
+          .AddMethod(__Method_SuggestBio, serviceImpl.SuggestBio).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -129,6 +144,7 @@ namespace core {
       serviceBinder.AddMethod(__Method_SetBio, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SetBioRequest, global::core.defaultReply>(serviceImpl.SetBio));
       serviceBinder.AddMethod(__Method_SetAdditionalData, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SetAdditionalDataRequest, global::core.defaultReply>(serviceImpl.SetAdditionalData));
       serviceBinder.AddMethod(__Method_GetFullProfile, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.GetFullProfileRequest, global::core.defaultReply>(serviceImpl.GetFullProfile));
+      serviceBinder.AddMethod(__Method_SuggestBio, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.GetFullProfileRequest, global::core.defaultReply>(serviceImpl.SuggestBio));
     }
 
   }

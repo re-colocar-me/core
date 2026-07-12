@@ -42,4 +42,6 @@ message service{
 	string id = 4;
 	string offeringid = 5;
 	int64 priceinlemoncoins = 6;
+	bool isActive = 7;
+	repeated string skillNames = 8;
 }

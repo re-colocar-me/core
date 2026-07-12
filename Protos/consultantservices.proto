@@ -10,6 +10,19 @@ service ConsultantServices{
 	rpc ListCategories (common.Empty) returns (common.defaultReply);
 	rpc ListServicesByCategory (ListServicesByCategoryRequest) returns (common.defaultReply);
 	rpc ListAllServices (common.Empty) returns (common.defaultReply);
+
+	rpc CreateCategory (CreateCategoryRequest) returns (common.defaultReply);
+	rpc UpdateCategory (UpdateCategoryRequest) returns (common.defaultReply);
+	rpc SetCategoryActive (SetCategoryActiveRequest) returns (common.defaultReply);
+
+	rpc CreateService (CreateServiceRequest) returns (common.defaultReply);
+	rpc UpdateService (UpdateServiceRequest) returns (common.defaultReply);
+	rpc SetServiceActive (SetServiceActiveRequest) returns (common.defaultReply);
+
+	rpc SetCategorySkills (SetCategorySkillsRequest) returns (common.defaultReply);
+	rpc SetServiceSkills (SetServiceSkillsRequest) returns (common.defaultReply);
+	rpc SearchSkills (SearchSkillsRequest) returns (common.defaultReply);
+	rpc GetEffectiveServiceSkills (GetEffectiveServiceSkillsRequest) returns (common.defaultReply);
 }
 
 message ListCategoriesReply{
@@ -23,6 +36,67 @@ message category{
 	string description = 2;
 	repeated common.service services = 3;
 	string id = 4;
+	bool isActive = 5;
+	repeated string skillNames = 6;
+}
+
+message CreateCategoryRequest {
+	string name = 1;
+	string description = 2;
+}
+
+message UpdateCategoryRequest {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+}
+
+message SetCategoryActiveRequest {
+	string id = 1;
+	bool isActive = 2;
+}
+
+message CreateServiceRequest {
+	string categoryId = 1;
+	string name = 2;
+	string description = 3;
+}
+
+message UpdateServiceRequest {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+}
+
+message SetServiceActiveRequest {
+	string id = 1;
+	bool isActive = 2;
+}
+
+message SetCategorySkillsRequest {
+	string categoryId = 1;
+	repeated string skillNames = 2;
+}
+
+message SetServiceSkillsRequest {
+	string serviceItemId = 1;
+	repeated string skillNames = 2;
+}
+
+message SearchSkillsRequest {
+	string query = 1;
+}
+
+message SearchSkillsReply {
+	repeated string skillNames = 1;
+}
+
+message GetEffectiveServiceSkillsRequest {
+	string serviceItemId = 1;
+}
+
+message GetEffectiveServiceSkillsReply {
+	repeated string skillNames = 1;
 }
 
 message ListServicesByCategoryRequest {

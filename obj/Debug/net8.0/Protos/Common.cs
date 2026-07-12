@@ -30,10 +30,15 @@ namespace core {
             "LnByb3RvYnVmLkFueRISCgpzdGF0dXNjb2RlGAIgASgFEhwKBWVycm9yGAMg",
             "ASgLMg0uY29tbW9uLmVycm9yIgcKBUVtcHR5IkgKDGF2YWlsYWJpbGl0eRIP",
             "Cgd3ZWVrZGF5GAEgASgJEicKBWl0ZW1zGAIgAygLMhguY29tbW9uLmF2YWls",
-            "YWJpbGl0eWl0ZW0iQgoQYXZhaWxhYmlsaXR5aXRlbRIKCgJpZBgBIAEoCRIR",
-            "CglzdGFydHRpbWUYAiABKAkSDwoHZW5kdGltZRgDIAEoCSJOCgdzZXJ2aWNl",
-            "EgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSFAoMY2F0ZWdv",
-            "cnluYW1lGAMgASgJEgoKAmlkGAQgASgJQgeqAgRjb3JlYgZwcm90bzM="));
+            "YWJpbGl0eWl0ZW0isAEKEGF2YWlsYWJpbGl0eWl0ZW0SCgoCaWQYASABKAkS",
+            "EQoJc3RhcnR0aW1lGAIgASgJEg8KB2VuZHRpbWUYAyABKAkSEQoJc2Vydmlj",
+            "ZWlkGAQgASgJEhMKC3NlcnZpY2VuYW1lGAUgASgJEiYKGXByaWNlb3ZlcnJp",
+            "ZGVpbmxlbW9uY29pbnMYBiABKANIAIgBAUIcChpfcHJpY2VvdmVycmlkZWlu",
+            "bGVtb25jb2lucyKjAQoHc2VydmljZRIMCgRuYW1lGAEgASgJEhMKC2Rlc2Ny",
+            "aXB0aW9uGAIgASgJEhQKDGNhdGVnb3J5bmFtZRgDIAEoCRIKCgJpZBgEIAEo",
+            "CRISCgpvZmZlcmluZ2lkGAUgASgJEhkKEXByaWNlaW5sZW1vbmNvaW5zGAYg",
+            "ASgDEhAKCGlzQWN0aXZlGAcgASgIEhIKCnNraWxsTmFtZXMYCCADKAlCB6oC",
+            "BGNvcmViBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -41,8 +46,8 @@ namespace core {
             new pbr::GeneratedClrTypeInfo(typeof(global::core.defaultReply), global::core.defaultReply.Parser, new[]{ "Data", "Statuscode", "Error" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.Empty), global::core.Empty.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::core.availability), global::core.availability.Parser, new[]{ "Weekday", "Items" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.availabilityitem), global::core.availabilityitem.Parser, new[]{ "Id", "Starttime", "Endtime" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::core.service), global::core.service.Parser, new[]{ "Name", "Description", "Categoryname", "Id" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.availabilityitem), global::core.availabilityitem.Parser, new[]{ "Id", "Starttime", "Endtime", "Serviceid", "Servicename", "Priceoverrideinlemoncoins" }, new[]{ "Priceoverrideinlemoncoins" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::core.service), global::core.service.Parser, new[]{ "Name", "Description", "Categoryname", "Id", "Offeringid", "Priceinlemoncoins", "IsActive", "SkillNames" }, null, null, null, null)
           }));
     }
     #endregion
@@ -930,6 +935,7 @@ namespace core {
   {
     private static readonly pb::MessageParser<availabilityitem> _parser = new pb::MessageParser<availabilityitem>(() => new availabilityitem());
     private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pb::MessageParser<availabilityitem> Parser { get { return _parser; } }
@@ -957,9 +963,13 @@ namespace core {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public availabilityitem(availabilityitem other) : this() {
+      _hasBits0 = other._hasBits0;
       id_ = other.id_;
       starttime_ = other.starttime_;
       endtime_ = other.endtime_;
+      serviceid_ = other.serviceid_;
+      servicename_ = other.servicename_;
+      priceoverrideinlemoncoins_ = other.priceoverrideinlemoncoins_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1005,6 +1015,57 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "serviceid" field.</summary>
+    public const int ServiceidFieldNumber = 4;
+    private string serviceid_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Serviceid {
+      get { return serviceid_; }
+      set {
+        serviceid_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "servicename" field.</summary>
+    public const int ServicenameFieldNumber = 5;
+    private string servicename_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Servicename {
+      get { return servicename_; }
+      set {
+        servicename_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "priceoverrideinlemoncoins" field.</summary>
+    public const int PriceoverrideinlemoncoinsFieldNumber = 6;
+    private readonly static long PriceoverrideinlemoncoinsDefaultValue = 0L;
+
+    private long priceoverrideinlemoncoins_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long Priceoverrideinlemoncoins {
+      get { if ((_hasBits0 & 1) != 0) { return priceoverrideinlemoncoins_; } else { return PriceoverrideinlemoncoinsDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        priceoverrideinlemoncoins_ = value;
+      }
+    }
+    /// <summary>Gets whether the "priceoverrideinlemoncoins" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasPriceoverrideinlemoncoins {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "priceoverrideinlemoncoins" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearPriceoverrideinlemoncoins() {
+      _hasBits0 &= ~1;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1023,6 +1084,9 @@ namespace core {
       if (Id != other.Id) return false;
       if (Starttime != other.Starttime) return false;
       if (Endtime != other.Endtime) return false;
+      if (Serviceid != other.Serviceid) return false;
+      if (Servicename != other.Servicename) return false;
+      if (Priceoverrideinlemoncoins != other.Priceoverrideinlemoncoins) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1033,6 +1097,9 @@ namespace core {
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (Starttime.Length != 0) hash ^= Starttime.GetHashCode();
       if (Endtime.Length != 0) hash ^= Endtime.GetHashCode();
+      if (Serviceid.Length != 0) hash ^= Serviceid.GetHashCode();
+      if (Servicename.Length != 0) hash ^= Servicename.GetHashCode();
+      if (HasPriceoverrideinlemoncoins) hash ^= Priceoverrideinlemoncoins.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1063,6 +1130,18 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Endtime);
       }
+      if (Serviceid.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Serviceid);
+      }
+      if (Servicename.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Servicename);
+      }
+      if (HasPriceoverrideinlemoncoins) {
+        output.WriteRawTag(48);
+        output.WriteInt64(Priceoverrideinlemoncoins);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1085,6 +1164,18 @@ namespace core {
         output.WriteRawTag(26);
         output.WriteString(Endtime);
       }
+      if (Serviceid.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Serviceid);
+      }
+      if (Servicename.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Servicename);
+      }
+      if (HasPriceoverrideinlemoncoins) {
+        output.WriteRawTag(48);
+        output.WriteInt64(Priceoverrideinlemoncoins);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1103,6 +1194,15 @@ namespace core {
       }
       if (Endtime.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Endtime);
+      }
+      if (Serviceid.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Serviceid);
+      }
+      if (Servicename.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Servicename);
+      }
+      if (HasPriceoverrideinlemoncoins) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Priceoverrideinlemoncoins);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1124,6 +1224,15 @@ namespace core {
       }
       if (other.Endtime.Length != 0) {
         Endtime = other.Endtime;
+      }
+      if (other.Serviceid.Length != 0) {
+        Serviceid = other.Serviceid;
+      }
+      if (other.Servicename.Length != 0) {
+        Servicename = other.Servicename;
+      }
+      if (other.HasPriceoverrideinlemoncoins) {
+        Priceoverrideinlemoncoins = other.Priceoverrideinlemoncoins;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1152,6 +1261,18 @@ namespace core {
             Endtime = input.ReadString();
             break;
           }
+          case 34: {
+            Serviceid = input.ReadString();
+            break;
+          }
+          case 42: {
+            Servicename = input.ReadString();
+            break;
+          }
+          case 48: {
+            Priceoverrideinlemoncoins = input.ReadInt64();
+            break;
+          }
         }
       }
     #endif
@@ -1177,6 +1298,18 @@ namespace core {
           }
           case 26: {
             Endtime = input.ReadString();
+            break;
+          }
+          case 34: {
+            Serviceid = input.ReadString();
+            break;
+          }
+          case 42: {
+            Servicename = input.ReadString();
+            break;
+          }
+          case 48: {
+            Priceoverrideinlemoncoins = input.ReadInt64();
             break;
           }
         }
@@ -1224,6 +1357,10 @@ namespace core {
       description_ = other.description_;
       categoryname_ = other.categoryname_;
       id_ = other.id_;
+      offeringid_ = other.offeringid_;
+      priceinlemoncoins_ = other.priceinlemoncoins_;
+      isActive_ = other.isActive_;
+      skillNames_ = other.skillNames_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1281,6 +1418,53 @@ namespace core {
       }
     }
 
+    /// <summary>Field number for the "offeringid" field.</summary>
+    public const int OfferingidFieldNumber = 5;
+    private string offeringid_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Offeringid {
+      get { return offeringid_; }
+      set {
+        offeringid_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "priceinlemoncoins" field.</summary>
+    public const int PriceinlemoncoinsFieldNumber = 6;
+    private long priceinlemoncoins_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long Priceinlemoncoins {
+      get { return priceinlemoncoins_; }
+      set {
+        priceinlemoncoins_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "isActive" field.</summary>
+    public const int IsActiveFieldNumber = 7;
+    private bool isActive_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool IsActive {
+      get { return isActive_; }
+      set {
+        isActive_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "skillNames" field.</summary>
+    public const int SkillNamesFieldNumber = 8;
+    private static readonly pb::FieldCodec<string> _repeated_skillNames_codec
+        = pb::FieldCodec.ForString(66);
+    private readonly pbc::RepeatedField<string> skillNames_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<string> SkillNames {
+      get { return skillNames_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1300,6 +1484,10 @@ namespace core {
       if (Description != other.Description) return false;
       if (Categoryname != other.Categoryname) return false;
       if (Id != other.Id) return false;
+      if (Offeringid != other.Offeringid) return false;
+      if (Priceinlemoncoins != other.Priceinlemoncoins) return false;
+      if (IsActive != other.IsActive) return false;
+      if(!skillNames_.Equals(other.skillNames_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1311,6 +1499,10 @@ namespace core {
       if (Description.Length != 0) hash ^= Description.GetHashCode();
       if (Categoryname.Length != 0) hash ^= Categoryname.GetHashCode();
       if (Id.Length != 0) hash ^= Id.GetHashCode();
+      if (Offeringid.Length != 0) hash ^= Offeringid.GetHashCode();
+      if (Priceinlemoncoins != 0L) hash ^= Priceinlemoncoins.GetHashCode();
+      if (IsActive != false) hash ^= IsActive.GetHashCode();
+      hash ^= skillNames_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1345,6 +1537,19 @@ namespace core {
         output.WriteRawTag(34);
         output.WriteString(Id);
       }
+      if (Offeringid.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Offeringid);
+      }
+      if (Priceinlemoncoins != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(Priceinlemoncoins);
+      }
+      if (IsActive != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(IsActive);
+      }
+      skillNames_.WriteTo(output, _repeated_skillNames_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1371,6 +1576,19 @@ namespace core {
         output.WriteRawTag(34);
         output.WriteString(Id);
       }
+      if (Offeringid.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Offeringid);
+      }
+      if (Priceinlemoncoins != 0L) {
+        output.WriteRawTag(48);
+        output.WriteInt64(Priceinlemoncoins);
+      }
+      if (IsActive != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(IsActive);
+      }
+      skillNames_.WriteTo(ref output, _repeated_skillNames_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1393,6 +1611,16 @@ namespace core {
       if (Id.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Id);
       }
+      if (Offeringid.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Offeringid);
+      }
+      if (Priceinlemoncoins != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Priceinlemoncoins);
+      }
+      if (IsActive != false) {
+        size += 1 + 1;
+      }
+      size += skillNames_.CalculateSize(_repeated_skillNames_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -1417,6 +1645,16 @@ namespace core {
       if (other.Id.Length != 0) {
         Id = other.Id;
       }
+      if (other.Offeringid.Length != 0) {
+        Offeringid = other.Offeringid;
+      }
+      if (other.Priceinlemoncoins != 0L) {
+        Priceinlemoncoins = other.Priceinlemoncoins;
+      }
+      if (other.IsActive != false) {
+        IsActive = other.IsActive;
+      }
+      skillNames_.Add(other.skillNames_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1448,6 +1686,22 @@ namespace core {
             Id = input.ReadString();
             break;
           }
+          case 42: {
+            Offeringid = input.ReadString();
+            break;
+          }
+          case 48: {
+            Priceinlemoncoins = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            IsActive = input.ReadBool();
+            break;
+          }
+          case 66: {
+            skillNames_.AddEntriesFrom(input, _repeated_skillNames_codec);
+            break;
+          }
         }
       }
     #endif
@@ -1477,6 +1731,22 @@ namespace core {
           }
           case 34: {
             Id = input.ReadString();
+            break;
+          }
+          case 42: {
+            Offeringid = input.ReadString();
+            break;
+          }
+          case 48: {
+            Priceinlemoncoins = input.ReadInt64();
+            break;
+          }
+          case 56: {
+            IsActive = input.ReadBool();
+            break;
+          }
+          case 66: {
+            skillNames_.AddEntriesFrom(ref input, _repeated_skillNames_codec);
             break;
           }
         }
