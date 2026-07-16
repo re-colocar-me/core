@@ -287,5 +287,75 @@ namespace core.Services
             }
             return reply;
         }
+
+        public override async Task<defaultReply> SetConsultantSkills(SetConsultantSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _services.SetConsultantSkills(Guid.Parse(request.ConsultantProfileId), request.SkillNames);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetConsultantSkills(GetConsultantSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var skills = await _services.GetConsultantSkills(Guid.Parse(request.ConsultantProfileId));
+                var data = new GetConsultantSkillsReply();
+                data.SkillNames.AddRange(skills.Select(x => x.Name));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetCurationConfig(Empty request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var minimumPercentage = await _services.GetMinimumSkillMatchPercentage();
+                var data = new GetCurationConfigReply { MinimumSkillMatchPercentage = (double)minimumPercentage };
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SetCurationConfig(SetCurationConfigRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                _actorAccessor.Actor = request.ChangedBy;
+                await _services.SetMinimumSkillMatchPercentage((decimal)request.MinimumSkillMatchPercentage);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
     }
 }

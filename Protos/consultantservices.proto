@@ -23,6 +23,11 @@ service ConsultantServices{
 	rpc SetServiceSkills (SetServiceSkillsRequest) returns (common.defaultReply);
 	rpc SearchSkills (SearchSkillsRequest) returns (common.defaultReply);
 	rpc GetEffectiveServiceSkills (GetEffectiveServiceSkillsRequest) returns (common.defaultReply);
+
+	rpc SetConsultantSkills (SetConsultantSkillsRequest) returns (common.defaultReply);
+	rpc GetConsultantSkills (GetConsultantSkillsRequest) returns (common.defaultReply);
+	rpc GetCurationConfig (common.Empty) returns (common.defaultReply);
+	rpc SetCurationConfig (SetCurationConfigRequest) returns (common.defaultReply);
 }
 
 message ListCategoriesReply{
@@ -120,4 +125,26 @@ message ListAllServicesReply{
 	repeated common.service services =1;
 	int32 statuscode = 2;
 	common.error error = 3;
+}
+
+message SetConsultantSkillsRequest {
+	string consultantProfileId = 1;
+	repeated string skillNames = 2;
+}
+
+message GetConsultantSkillsRequest {
+	string consultantProfileId = 1;
+}
+
+message GetConsultantSkillsReply {
+	repeated string skillNames = 1;
+}
+
+message SetCurationConfigRequest {
+	double minimumSkillMatchPercentage = 1;
+	string changedBy = 2;
+}
+
+message GetCurationConfigReply {
+	double minimumSkillMatchPercentage = 1;
 }

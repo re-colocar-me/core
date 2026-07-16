@@ -331,6 +331,8 @@ namespace core.Services
                     Details = x.Details
                 }).ToList();
 
+                resume.Skills = [.. request.Skills];
+
                 await _consultantServices.SetResumeData(Guid.Parse(request.OwnerId), resume);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
@@ -396,6 +398,8 @@ namespace core.Services
                     Period = x.Period,
                     Details = x.Details
                 }));
+
+                data.Skills.AddRange(response.Skills);
 
                 reply.Statuscode = Constants.SuccessStatusCode;
                 reply.Data = Any.Pack(data);

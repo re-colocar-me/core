@@ -139,6 +139,7 @@ message SetResumeDataRequest{
 	string ownerId = 7;
 	experience structuredExperience=8;
 	repeated experienceEntry experienceEntries=9;
+	repeated string skills = 10;
 }
 
 message contacts{
@@ -185,6 +186,7 @@ message GetResumeDataReply{
 	string ownerId = 7;
 	experience structuredExperience = 8;
 	repeated experienceEntry experienceEntries = 9;
+	repeated string skills = 10;
 }
 
 message SetSporadicAvailabilityRequest{
