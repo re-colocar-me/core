@@ -51,6 +51,8 @@ namespace core {
     static readonly grpc::Marshaller<global::core.defaultReply> __Marshaller_common_defaultReply = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.defaultReply.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::core.ConnectRequest> __Marshaller_talent_ConnectRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.ConnectRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::core.SearchProfilesRequest> __Marshaller_talent_SearchProfilesRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::core.SearchProfilesRequest.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::core.FilterRequest, global::core.defaultReply> __Method_ListConsultants = new grpc::Method<global::core.FilterRequest, global::core.defaultReply>(
@@ -66,6 +68,14 @@ namespace core {
         __ServiceName,
         "Connect",
         __Marshaller_talent_ConnectRequest,
+        __Marshaller_common_defaultReply);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::core.SearchProfilesRequest, global::core.defaultReply> __Method_SearchProfiles = new grpc::Method<global::core.SearchProfilesRequest, global::core.defaultReply>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SearchProfiles",
+        __Marshaller_talent_SearchProfilesRequest,
         __Marshaller_common_defaultReply);
 
     /// <summary>Service descriptor</summary>
@@ -90,6 +100,12 @@ namespace core {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::core.defaultReply> SearchProfiles(global::core.SearchProfilesRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
     }
 
     /// <summary>Creates service definition that can be registered with a server</summary>
@@ -99,7 +115,8 @@ namespace core {
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
           .AddMethod(__Method_ListConsultants, serviceImpl.ListConsultants)
-          .AddMethod(__Method_Connect, serviceImpl.Connect).Build();
+          .AddMethod(__Method_Connect, serviceImpl.Connect)
+          .AddMethod(__Method_SearchProfiles, serviceImpl.SearchProfiles).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -111,6 +128,7 @@ namespace core {
     {
       serviceBinder.AddMethod(__Method_ListConsultants, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.FilterRequest, global::core.defaultReply>(serviceImpl.ListConsultants));
       serviceBinder.AddMethod(__Method_Connect, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.ConnectRequest, global::core.defaultReply>(serviceImpl.Connect));
+      serviceBinder.AddMethod(__Method_SearchProfiles, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::core.SearchProfilesRequest, global::core.defaultReply>(serviceImpl.SearchProfiles));
     }
 
   }

@@ -10,6 +10,7 @@ package talent;
 service Talent {
   rpc ListConsultants (FilterRequest) returns (common.defaultReply);
   rpc Connect (ConnectRequest) returns (common.defaultReply);
+  rpc SearchProfiles (SearchProfilesRequest) returns (common.defaultReply);
 }
 
 message FilterRequest{
@@ -32,4 +33,19 @@ message consultant {
 message ConnectRequest{
 	string candidateId = 1;
 	string consultantId = 2;
+}
+
+message SearchProfilesRequest {
+	string name = 1;
+	string role = 2;
+}
+
+message profileSearchResult {
+	string id = 1;
+	string name = 2;
+	string role = 3;
+}
+
+message SearchProfilesReply {
+	repeated profileSearchResult items = 1;
 }
