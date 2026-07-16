@@ -27,6 +27,7 @@ service Consultant {
   rpc SetServicePrice (SetServicePriceRequest) returns (common.defaultReply);
   rpc GetServicePriceHistory (GetServicePriceHistoryRequest) returns (common.defaultReply);
   rpc GetOfferingForPayment (OfferingIdRequest) returns (common.defaultReply);
+  rpc GetConnections (OwnerIdRequest) returns (common.defaultReply);
 
 }
 
@@ -212,4 +213,15 @@ message sporadicavailabilityitem{
 	string serviceid = 6;
 	string servicename = 7;
 	optional int64 priceoverrideinlemoncoins = 8;
+}
+
+message GetConnectionsReply{
+	repeated connection connections = 1;
+}
+
+message connection{
+	string id = 1;
+	string name = 2;
+	string pictureUrl = 3;
+	string connectedat = 4;
 }

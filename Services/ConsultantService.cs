@@ -168,6 +168,36 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> GetConnections(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var response = await _consultantServices.GetConnections(Guid.Parse(request.OwnerId));
+                var data = new GetConnectionsReply();
+
+                data.Connections.AddRange(response.Select(x => new connection()
+                {
+                    Id = x.Id.ToString(),
+                    Name = x.Candidate.Name.FullName,
+                    PictureUrl = x.Candidate.PictureUrl ?? string.Empty,
+                    Connectedat = x.ConnectedAt.ToString("dd/MM/yyyy HH:mm:ss")
+                }));
+
+                reply.Statuscode = Constants.SuccessStatusCode;
+                reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
         public override async Task<defaultReply> CancelSchedule(ChangeScheduleStatusRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();
