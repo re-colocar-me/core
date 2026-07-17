@@ -33,6 +33,7 @@ namespace core.IoC.Messaging
             });
 
             services.AddScoped<IConsultantEventPublisher, ConsultantEventPublisher>();
+            services.AddScoped<IRealtimeNotificationPublisher, RealtimeNotificationPublisher>();
         }
     }
 }
