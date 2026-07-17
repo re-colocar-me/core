@@ -46,12 +46,12 @@ namespace core.Services
                 var data = new GetFullProfileReply()
                 {
                     BioText = response.BioText ?? string.Empty,
-                    BirthDate = response.BirthDate.HasValue ? Timestamp.FromDateTime(response.BirthDate.Value.ToUniversalTime()) : null,
+                    BirthDate = response.BirthDate.HasValue ? Timestamp.FromDateTime(DateTime.SpecifyKind(response.BirthDate.Value, DateTimeKind.Utc)) : null,
                     Email = response.Email,
                     FirstName = response.Name?.FirstName,
                     LastName = response.Name?.LastName,
                     Id = response.Id.ToString(),
-                    LastAccess = Timestamp.FromDateTime(response.LastAccess.ToUniversalTime()),
+                    LastAccess = Timestamp.FromDateTime(DateTime.SpecifyKind(response.LastAccess, DateTimeKind.Utc)),
                     PictureUrl = response.PictureUrl,
                     Status = response.Status.ToString(),
                     TelephoneAreaCode = response.Telephone?.AreaCode ?? string.Empty,

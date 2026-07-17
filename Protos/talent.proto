@@ -3,6 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "core";
 
 import "Protos/common.proto";
+import "Protos/consultant.proto";
 
 package talent;
 
@@ -11,6 +12,19 @@ service Talent {
   rpc ListConsultants (FilterRequest) returns (common.defaultReply);
   rpc Connect (ConnectRequest) returns (common.defaultReply);
   rpc SearchProfiles (SearchProfilesRequest) returns (common.defaultReply);
+  rpc PublishResumeUploadedEvent (.consultant.PublishResumeUploadedEventRequest) returns (common.defaultReply);
+  rpc SetResumeData (.consultant.SetResumeDataRequest) returns (common.defaultReply);
+  rpc GetResumeData (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc EnsureProfile (EnsureProfileRequest) returns (common.defaultReply);
+  rpc SuggestSummary (.consultant.OwnerIdRequest) returns (common.defaultReply);
+}
+
+message EnsureProfileRequest{
+	string id = 1;
+	string firstName = 2;
+	string lastName = 3;
+	string email = 4;
+	string pictureUrl = 5;
 }
 
 message FilterRequest{
@@ -28,11 +42,19 @@ message consultant {
 	string name = 1;
 	repeated string services = 2;
 	repeated common.availability availabilities = 3;
+	string id = 4;
+	repeated string skills = 5;
+	string pictureUrl = 6;
+	optional string bio = 7;
 }
 
 message ConnectRequest{
 	string candidateId = 1;
 	string consultantId = 2;
+	string candidateFirstName = 3;
+	string candidateLastName = 4;
+	optional string candidateEmail = 5;
+	optional string candidatePictureUrl = 6;
 }
 
 message SearchProfilesRequest {
@@ -49,3 +71,8 @@ message profileSearchResult {
 message SearchProfilesReply {
 	repeated profileSearchResult items = 1;
 }
+
+// PublishResumeUploadedEventRequest, OwnerIdRequest, SetResumeDataRequest, GetResumeDataReply
+// (e as mensagens contacts/identification/education/language/experience/experienceEntry que elas
+// usam) já são definidas em core/Protos/consultant.proto, compilado no mesmo csharp_namespace
+// "core" que este arquivo — reaproveitadas as mesmas classes geradas, não redefinidas aqui.

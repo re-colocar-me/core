@@ -65,9 +65,11 @@ builder.Services.AddTransient<IProfileRepository, ProfileRepository>();
 builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
 builder.Services.AddTransient<IConsultantServicesRepository, ConsultantServicesRepository>();
 builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
+builder.Services.AddTransient<ITalentRepository, TalentRepository>();
 
 builder.Services.AddTransient<IConsultantServiceServices, ConsultantServiceServices>();
 builder.Services.AddTransient<IConsultantServices, ConsultantService>();
+builder.Services.AddTransient<ITalentServices, TalentServices>();
 builder.Services.AddTransient<IProfileService, ProfileServices>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
