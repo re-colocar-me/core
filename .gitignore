@@ -2,7 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/bin/Debug/net8.0
+bin/
+obj/
 /.vs
 
 appsettings.Development.json

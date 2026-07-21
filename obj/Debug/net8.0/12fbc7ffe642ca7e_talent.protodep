@@ -1,4 +1,0 @@
-obj\Debug\net8.0\Protos/Talent.cs \
-obj\Debug\net8.0\Protos/TalentGrpc.cs: C:/Users/adolf/.nuget/packages/grpc.tools/2.57.0/build/native/include/google/protobuf/any.proto\
- Protos/common.proto\
- Protos/talent.proto

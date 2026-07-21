@@ -1,4 +1,0 @@
-obj\Release\net8.0\Protos/Consultant.cs \
-obj\Release\net8.0\Protos/ConsultantGrpc.cs: C:/Users/adolf/.nuget/packages/grpc.tools/2.57.0/build/native/include/google/protobuf/any.proto\
- Protos/common.proto\
- Protos/consultant.proto
