@@ -55,6 +55,9 @@ message ConnectRequest{
 	string candidateLastName = 4;
 	optional string candidateEmail = 5;
 	optional string candidatePictureUrl = 6;
+	optional string candidateTelephoneCountryCode = 7;
+	optional string candidateTelephoneAreaCode = 8;
+	optional string candidateTelephoneNumber = 9;
 }
 
 message SearchProfilesRequest {

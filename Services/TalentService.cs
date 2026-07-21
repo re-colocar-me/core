@@ -118,7 +118,10 @@ namespace core.Services
                     request.CandidateFirstName,
                     request.CandidateLastName,
                     request.HasCandidateEmail ? request.CandidateEmail : null,
-                    request.HasCandidatePictureUrl ? request.CandidatePictureUrl : null);
+                    request.HasCandidatePictureUrl ? request.CandidatePictureUrl : null,
+                    request.HasCandidateTelephoneCountryCode ? request.CandidateTelephoneCountryCode : null,
+                    request.HasCandidateTelephoneAreaCode ? request.CandidateTelephoneAreaCode : null,
+                    request.HasCandidateTelephoneNumber ? request.CandidateTelephoneNumber : null);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception ex)

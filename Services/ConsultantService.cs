@@ -1,6 +1,7 @@
 ﻿using core.domain;
 using core.domain.Entities;
 using core.domain.Enums;
+using core.domain.Interfaces.Infrastructure.Repositories;
 using core.domain.Interfaces.Services;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -13,14 +14,17 @@ namespace core.Services
         private IScheduleService _scheduleService;
         private IConsultantServices _consultantServices;
         private IResumeSuggestionService _resumeSuggestionService;
+        private IConsultantServicesRepository _repository;
 
         public ConsultantService(IScheduleService scheduleService,
                                  IConsultantServices consultantServices,
-                                 IResumeSuggestionService resumeSuggestionService)
+                                 IResumeSuggestionService resumeSuggestionService,
+                                 IConsultantServicesRepository repository)
         {
             _scheduleService = scheduleService;
             _consultantServices = consultantServices;
             _resumeSuggestionService = resumeSuggestionService;
+            _repository = repository;
         }
         public override async Task<defaultReply> SetAvailability(SetAvailabilityRequest request, ServerCallContext context)
         {
@@ -186,6 +190,146 @@ namespace core.Services
 
                 reply.Statuscode = Constants.SuccessStatusCode;
                 reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetTratativas(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var response = await _consultantServices.ListTratativas(Guid.Parse(request.OwnerId));
+                var data = new GetTratativasReply();
+
+                var serviceNames = (await _repository.ListAllServicesAsync()).ToDictionary(x => x.Id, x => x.Name);
+
+                data.Tratativas.AddRange(response.Select(x =>
+                {
+                    var newTratativa = new tratativa()
+                    {
+                        Id = x.Id.ToString(),
+                        ConnectionId = x.ConnectionId.ToString(),
+                        CandidateName = x.Connection?.Candidate.Name.FullName ?? string.Empty,
+                        CandidatePictureUrl = x.Connection?.Candidate.PictureUrl ?? string.Empty,
+                        CandidateEmail = x.Connection?.Candidate.Email ?? string.Empty,
+                        CandidateTelephoneCountryCode = x.Connection?.Candidate.Telephone?.CountryCode ?? string.Empty,
+                        CandidateTelephoneAreaCode = x.Connection?.Candidate.Telephone?.AreaCode ?? string.Empty,
+                        CandidateTelephoneNumber = x.Connection?.Candidate.Telephone?.Number ?? string.Empty,
+                        ServiceId = x.ServiceId?.ToString() ?? string.Empty,
+                        ServiceName = x.ServiceId.HasValue && serviceNames.TryGetValue(x.ServiceId.Value, out var name) ? name : string.Empty,
+                        Stage = x.Stage.ToString(),
+                        Observacao = x.Observacao ?? string.Empty,
+                        CreatedAt = x.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"),
+                        ConnectedAt = x.Connection?.ConnectedAt.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty
+                    };
+
+                    newTratativa.StageHistory.AddRange(x.StageHistory.Select(h =>
+                    {
+                        var change = new tratativaStageChange()
+                        {
+                            ToStage = h.ToStage.ToString(),
+                            ChangedAt = h.ChangedAt.ToString("dd/MM/yyyy HH:mm:ss")
+                        };
+                        if (h.FromStage.HasValue)
+                            change.FromStage = h.FromStage.Value.ToString();
+                        return change;
+                    }));
+
+                    return newTratativa;
+                }));
+
+                reply.Statuscode = Constants.SuccessStatusCode;
+                reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> CreateTratativa(CreateTratativaRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _consultantServices.CriarTratativaManual(
+                    Guid.Parse(request.OwnerId),
+                    Guid.Parse(request.ConnectionId),
+                    Guid.Parse(request.ServiceId),
+                    request.HasObservacao ? request.Observacao : null);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> MoveTratativa(MoveTratativaRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var stage = System.Enum.Parse<TratativaStage>(request.Stage);
+                await _consultantServices.MoverTratativa(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), stage);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SetTratativaService(SetTratativaServiceRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _consultantServices.DefinirServico(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), Guid.Parse(request.ServiceId));
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SetTratativaObservacao(SetTratativaObservacaoRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _consultantServices.AtualizarObservacao(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), request.Observacao);
+                reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
             {

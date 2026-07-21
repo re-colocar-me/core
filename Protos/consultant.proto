@@ -28,6 +28,11 @@ service Consultant {
   rpc GetServicePriceHistory (GetServicePriceHistoryRequest) returns (common.defaultReply);
   rpc GetOfferingForPayment (OfferingIdRequest) returns (common.defaultReply);
   rpc GetConnections (OwnerIdRequest) returns (common.defaultReply);
+  rpc GetTratativas (OwnerIdRequest) returns (common.defaultReply);
+  rpc CreateTratativa (CreateTratativaRequest) returns (common.defaultReply);
+  rpc MoveTratativa (MoveTratativaRequest) returns (common.defaultReply);
+  rpc SetTratativaService (SetTratativaServiceRequest) returns (common.defaultReply);
+  rpc SetTratativaObservacao (SetTratativaObservacaoRequest) returns (common.defaultReply);
 
 }
 
@@ -224,4 +229,57 @@ message connection{
 	string name = 2;
 	string pictureUrl = 3;
 	string connectedat = 4;
+}
+
+message GetTratativasReply{
+	repeated tratativa tratativas = 1;
+}
+
+message tratativa{
+	string id = 1;
+	string connectionId = 2;
+	string candidateName = 3;
+	string candidatePictureUrl = 4;
+	string candidateEmail = 5;
+	string candidateTelephoneCountryCode = 6;
+	string candidateTelephoneAreaCode = 7;
+	string candidateTelephoneNumber = 8;
+	string serviceId = 9;
+	string serviceName = 10;
+	string stage = 11;
+	string observacao = 12;
+	string createdAt = 13;
+	string connectedAt = 14;
+	repeated tratativaStageChange stageHistory = 15;
+}
+
+message tratativaStageChange{
+	optional string fromStage = 1;
+	string toStage = 2;
+	string changedAt = 3;
+}
+
+message CreateTratativaRequest{
+	string ownerId = 1;
+	string connectionId = 2;
+	string serviceId = 3;
+	optional string observacao = 4;
+}
+
+message MoveTratativaRequest{
+	string ownerId = 1;
+	string tratativaId = 2;
+	string stage = 3;
+}
+
+message SetTratativaServiceRequest{
+	string ownerId = 1;
+	string tratativaId = 2;
+	string serviceId = 3;
+}
+
+message SetTratativaObservacaoRequest{
+	string ownerId = 1;
+	string tratativaId = 2;
+	string observacao = 3;
 }
