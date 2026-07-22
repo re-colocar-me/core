@@ -100,7 +100,9 @@ builder.Services.AddDbContext<ReColocarmeContext>((IServiceProvider serviceProvi
 {
     options.UseSqlServer(connectionString: configuration.GetConnectionString("Default") ?? string.Empty, dboptions =>
     {
-        dboptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(1), null);
+        // maxRetryDelay capped at 30s, not 1s — the shared free-tier Azure SQL database auto-pauses
+        // when idle and takes up to ~30s to resume; a 1s cap meant EF gave up long before that.
+        dboptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(30), null);
         dboptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         dboptions.MigrationsAssembly(typeof(ReColocarmeContext).Assembly.GetName().Name);
     });
