@@ -34,7 +34,10 @@ builder.Host.UseSerilog((context, loggerConfiguration) => loggerConfiguration
             .WriteTo.Elasticsearch(new[] { new Uri(context.Configuration["Elasticsearch:Uri"] ?? "http://localhost:9200") }, opts =>
             {
                 opts.DataStream = new DataStreamName("logs", "core", context.HostingEnvironment.EnvironmentName.ToLowerInvariant());
-                opts.BootstrapMethod = BootstrapMethod.Failure;
+                // Failure derrubava o processo inteiro (SIGABRT) se o Elasticsearch não estivesse
+                // acessível no boot — visto de verdade no core-vocacional em produção. Silent deixa
+                // o app subir normalmente e só perde log se o ES estiver fora.
+                opts.BootstrapMethod = BootstrapMethod.Silent;
             }));
 
 // Add services to the container.
@@ -54,6 +57,7 @@ builder.Services.Configure<FacebookConfigurations>(configuration.GetSection(Face
 builder.Services.Configure<JwtConfiguration>(configuration.GetSection(JwtConfiguration.JwtOptions));
 builder.Services.Configure<ScheduleServiceConfiguration>(configuration.GetSection(ScheduleServiceConfiguration.ScheduleServiceOptions));
 builder.Services.Configure<AnthropicConfigurations>(configuration.GetSection(AnthropicConfigurations.AnthropicOptions));
+builder.Services.Configure<TutorialConfiguration>(configuration.GetSection(TutorialConfiguration.TutorialOptions));
 
 // Add services to the container.
 
@@ -66,6 +70,7 @@ builder.Services.AddTransient<INotificationRepository, NotificationRepository>()
 builder.Services.AddTransient<IConsultantServicesRepository, ConsultantServicesRepository>();
 builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddTransient<ITalentRepository, TalentRepository>();
+builder.Services.AddTransient<ITutorialRepository, TutorialRepository>();
 
 builder.Services.AddTransient<IConsultantServiceServices, ConsultantServiceServices>();
 builder.Services.AddTransient<IConsultantServices, ConsultantService>();
@@ -74,6 +79,7 @@ builder.Services.AddTransient<IProfileService, ProfileServices>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IResumeSuggestionService, ResumeSuggestionService>();
+builder.Services.AddTransient<ITutorialService, TutorialService>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
@@ -82,7 +88,7 @@ var auditSerilogLogger = new LoggerConfiguration()
     .WriteTo.Elasticsearch(new[] { new Uri(configuration["Elasticsearch:Uri"] ?? "http://localhost:9200") }, opts =>
     {
         opts.DataStream = new DataStreamName("audit", "core", environmentName?.ToLowerInvariant() ?? "development");
-        opts.BootstrapMethod = BootstrapMethod.Failure;
+        opts.BootstrapMethod = BootstrapMethod.Silent;
     })
     .CreateLogger();
 
@@ -120,6 +126,7 @@ app.MapGrpcService<coreServices.ConsultantService>();
 app.MapGrpcService<coreServices.TalentService>();
 app.MapGrpcService<coreServices.ConsultantServicesService>();
 app.MapGrpcService<coreServices.ProfileService>();
+app.MapGrpcService<coreServices.TutorialService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

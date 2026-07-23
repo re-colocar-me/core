@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package tutorial;
+
+service Tutorial {
+  rpc GetPendingTutorial (GetPendingTutorialRequest) returns (common.defaultReply);
+  rpc ListTutorials (ListTutorialsRequest) returns (common.defaultReply);
+  rpc GetTutorialFlow (GetTutorialFlowRequest) returns (common.defaultReply);
+  rpc RecordTutorialProgress (RecordTutorialProgressRequest) returns (common.defaultReply);
+}
+
+message tutorialDisplayCondition {
+  string type = 1;
+  string value = 2;
+}
+
+message tutorialStep {
+  string stepId = 1;
+  int32 order = 2;
+  string type = 3;
+  string title = 4;
+  string body = 5;
+  optional string mediaUrl = 6;
+  optional string target = 7;
+  string placement = 8;
+  string route = 9;
+  repeated tutorialDisplayCondition displayConditions = 10;
+  optional string ctaLabel = 11;
+  optional string ctaAction = 12;
+  optional string ctaValue = 13;
+}
+
+message tutorialFlow {
+  string flowId = 1;
+  string label = 2;
+  int32 version = 3;
+  string trigger = 4;
+  repeated tutorialStep steps = 5;
+}
+
+message GetPendingTutorialRequest {
+  string ownerId = 1;
+  string audience = 2;
+}
+
+message GetPendingTutorialReply {
+  bool hasPending = 1;
+  tutorialFlow flow = 2;
+  optional string resumeStepId = 3;
+}
+
+message ListTutorialsRequest {
+  string audience = 1;
+}
+
+message ListTutorialsReply {
+  repeated tutorialFlow flows = 1;
+}
+
+message GetTutorialFlowRequest {
+  string flowId = 1;
+}
+
+message GetTutorialFlowReply {
+  tutorialFlow flow = 1;
+}
+
+message RecordTutorialProgressRequest {
+  string ownerId = 1;
+  string flowId = 2;
+  int32 flowVersion = 3;
+  optional string stepId = 4;
+  string event = 5;
+  optional string metadata = 6;
+}

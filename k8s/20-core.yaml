@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: consultor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+        - name: core
+          image: ghcr.io/re-colocar-me/core:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ConnectionStrings__Default
+              valueFrom:
+                secretKeyRef:
+                  name: core-secrets
+                  key: connection-string
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: core-secrets
+                  key: jwt-secret
+            - name: Jwt__Issuer
+              value: re.colocarme.core
+            - name: Jwt__Audience
+              value: re.colocarme
+            - name: Jwt__ExpirationMinutes
+              value: "60"
+            - name: LinkedinOptions__ClientId
+              value: "77dcc8zl3nnoku"
+            - name: LinkedinOptions__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: core-secrets
+                  key: linkedin-secret
+            # TROCAR quando o consultant-client tiver URL de produção definida (Azure Static Web
+            # Apps) — ver docs/specs. Sem isso o login via LinkedIn não completa em produção.
+            - name: LinkedinOptions__RedirectUri
+              value: "https://TROCAR-apos-deploy-consultant-client/linkedin"
+            - name: AnthropicOptions__Model
+              value: claude-haiku-4-5-20251001
+            - name: AnthropicOptions__BaseAddress
+              value: "https://api.anthropic.com/"
+            - name: AnthropicOptions__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: core-secrets
+                  key: anthropic-api-key
+            # RabbitMQ não está disponível neste cluster ainda — MassTransit tenta conectar e
+            # falha em background sem derrubar o app (retry, não é fatal), mas publicação de
+            # evento de currículo/notificação em tempo real fica degradada até isso ser resolvido.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core
+  namespace: consultor
+spec:
+  selector:
+    app: core
+  ports:
+    - port: 8080
+      targetPort: 8080

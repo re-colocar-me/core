@@ -1,0 +1,58 @@
+name: Deploy to AKS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout core
+        uses: actions/checkout@v4
+        with:
+          path: core
+
+      # core.csproj referencia core.domain/core.infrastructure via ProjectReference relativo —
+      # precisam ser checados lado a lado como repos irmãos pro build funcionar.
+      - name: Checkout core.domain
+        uses: actions/checkout@v4
+        with:
+          repository: re-colocar-me/core.domain
+          path: core.domain
+          token: ${{ secrets.ORG_REPO_ACCESS_TOKEN }}
+
+      - name: Checkout core.infrastructure
+        uses: actions/checkout@v4
+        with:
+          repository: re-colocar-me/core.infrastructure
+          path: core.infrastructure
+          token: ${{ secrets.ORG_REPO_ACCESS_TOKEN }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          docker build -f core/Dockerfile -t ghcr.io/re-colocar-me/core:${{ github.sha }} -t ghcr.io/re-colocar-me/core:latest .
+          docker push ghcr.io/re-colocar-me/core:${{ github.sha }}
+          docker push ghcr.io/re-colocar-me/core:latest
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        run: az aks get-credentials --resource-group rg-vistoria --name aks-vistoria --overwrite-existing
+
+      - name: Apply manifests and roll out new image
+        run: |
+          kubectl apply -f core/k8s/20-core.yaml
+          kubectl set image deployment/core core=ghcr.io/re-colocar-me/core:${{ github.sha }} -n consultor
+          kubectl rollout status deployment/core -n consultor --timeout=180s
