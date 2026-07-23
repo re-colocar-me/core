@@ -52,7 +52,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set AKS context
-        run: az aks get-credentials --resource-group rg-vistoria --name aks-vistoria --overwrite-existing
+        run: az aks get-credentials --resource-group rg-vistoria --name aks-vistoria --admin --overwrite-existing
 
       - name: Apply manifests and roll out new image
         run: |
