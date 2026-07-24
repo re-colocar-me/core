@@ -13,6 +13,8 @@ spec:
       labels:
         app: core
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
         - name: core
           image: ghcr.io/re-colocar-me/core:latest
@@ -57,9 +59,18 @@ spec:
                 secretKeyRef:
                   name: core-secrets
                   key: anthropic-api-key
-            # RabbitMQ não está disponível neste cluster ainda — MassTransit tenta conectar e
-            # falha em background sem derrubar o app (retry, não é fatal), mas publicação de
-            # evento de currículo/notificação em tempo real fica degradada até isso ser resolvido.
+            # RabbitMQ não está disponível neste cluster ainda. Host precisa ser uma string não
+            # nula (MassTransit lança ArgumentNullException na CONFIGURAÇÃO do bus, derrubando o
+            # app inteiro, se Host vier null) — "localhost" aqui é só placeholder: resolve DNS mas
+            # recusa conexão (ECONNREFUSED), que aí sim o MassTransit tolera e tenta de novo em
+            # background sem derrubar o processo. Publicação de evento de currículo/notificação em
+            # tempo real fica degradada até um RabbitMQ real ser configurado.
+            - name: RabbitMQ__Host
+              value: "localhost"
+            - name: RabbitMQ__UserName
+              value: "guest"
+            - name: RabbitMQ__Password
+              value: "guest"
           resources:
             requests:
               cpu: 100m
