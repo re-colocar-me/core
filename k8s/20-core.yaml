@@ -49,7 +49,7 @@ spec:
                   name: core-secrets
                   key: linkedin-secret
             - name: LinkedinOptions__RedirectUri
-              value: "https://white-pebble-0ce49a10f.7.azurestaticapps.net/linkedin"
+              value: "https://consultor-re.colocar-me.com.br/linkedin"
             - name: AnthropicOptions__Model
               value: claude-haiku-4-5-20251001
             - name: AnthropicOptions__BaseAddress
