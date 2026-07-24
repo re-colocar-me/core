@@ -23,7 +23,7 @@ namespace core.Services
             Id = x.Id.ToString(),
             Categoryname = categoryName ?? x.Category?.Name ?? string.Empty,
             Name = x.Name,
-            Description = x.Description,
+            Description = x.Description ?? string.Empty,
             IsActive = x.IsActive,
             SkillNames = { x.Skills.Select(s => s.Name) }
         };
@@ -32,7 +32,7 @@ namespace core.Services
         {
             Id = x.Id.ToString(),
             Name = x.Name,
-            Description = x.Description,
+            Description = x.Description ?? string.Empty,
             IsActive = x.IsActive,
             SkillNames = { x.Skills.Select(s => s.Name) },
             Services = { x.Services.Select(s => MapService(s, x.Name)) }

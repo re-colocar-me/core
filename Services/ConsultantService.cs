@@ -419,7 +419,7 @@ namespace core.Services
                                                    Id = x.ServiceItem!.Id.ToString(),
                                                    Categoryname = x.ServiceItem.Category?.Name ?? string.Empty,
                                                    Name = x.ServiceItem.Name,
-                                                   Description = x.ServiceItem.Description,
+                                                   Description = x.ServiceItem.Description ?? string.Empty,
                                                    Offeringid = x.Id.ToString(),
                                                    Priceinlemoncoins = x.PriceInLemonCoins
                                                }));
