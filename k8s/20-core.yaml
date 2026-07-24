@@ -23,6 +23,8 @@ spec:
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: Production
+            - name: Elasticsearch__Uri
+              value: "http://elasticsearch:9200"
             - name: ConnectionStrings__Default
               valueFrom:
                 secretKeyRef:
@@ -59,18 +61,19 @@ spec:
                 secretKeyRef:
                   name: core-secrets
                   key: anthropic-api-key
-            # RabbitMQ não está disponível neste cluster ainda. Host precisa ser uma string não
-            # nula (MassTransit lança ArgumentNullException na CONFIGURAÇÃO do bus, derrubando o
-            # app inteiro, se Host vier null) — "localhost" aqui é só placeholder: resolve DNS mas
-            # recusa conexão (ECONNREFUSED), que aí sim o MassTransit tolera e tenta de novo em
-            # background sem derrubar o processo. Publicação de evento de currículo/notificação em
-            # tempo real fica degradada até um RabbitMQ real ser configurado.
+            # RabbitMQ real no mesmo namespace (ver k8s/10-rabbitmq.yaml) — DNS interno do cluster.
             - name: RabbitMQ__Host
-              value: "localhost"
+              value: "rabbitmq"
             - name: RabbitMQ__UserName
-              value: "guest"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secrets
+                  key: username
             - name: RabbitMQ__Password
-              value: "guest"
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secrets
+                  key: password
           resources:
             requests:
               cpu: 100m
