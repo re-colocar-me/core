@@ -50,6 +50,17 @@ spec:
                   key: linkedin-secret
             - name: LinkedinOptions__RedirectUri
               value: "https://consultor-re.colocar-me.com.br/linkedin"
+            # appsettings.json de produção não tem LinkedinOptions nenhum (só
+            # appsettings.Development.json, que nunca é publicado) — sem estes 3, GetAuthTokenPath
+            # ficava null e o POST caía na raiz do linkedin.com em vez do endpoint de token.
+            - name: LinkedinOptions__BaseAddress
+              value: "https://www.linkedin.com/"
+            - name: LinkedinOptions__ApiBaseAddress
+              value: "https://api.linkedin.com/"
+            - name: LinkedinOptions__GetAuthTokenPath
+              value: "/oauth/v2/accessToken"
+            - name: LinkedinOptions__GetProfilePath
+              value: "/v2/userinfo"
             - name: AnthropicOptions__Model
               value: claude-haiku-4-5-20251001
             - name: AnthropicOptions__BaseAddress
