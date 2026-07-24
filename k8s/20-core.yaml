@@ -48,10 +48,8 @@ spec:
                 secretKeyRef:
                   name: core-secrets
                   key: linkedin-secret
-            # TROCAR quando o consultant-client tiver URL de produção definida (Azure Static Web
-            # Apps) — ver docs/specs. Sem isso o login via LinkedIn não completa em produção.
             - name: LinkedinOptions__RedirectUri
-              value: "https://TROCAR-apos-deploy-consultant-client/linkedin"
+              value: "https://white-pebble-0ce49a10f.7.azurestaticapps.net/linkedin"
             - name: AnthropicOptions__Model
               value: claude-haiku-4-5-20251001
             - name: AnthropicOptions__BaseAddress
