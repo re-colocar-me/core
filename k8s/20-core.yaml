@@ -61,15 +61,18 @@ spec:
               value: "/oauth/v2/accessToken"
             - name: LinkedinOptions__GetProfilePath
               value: "/v2/userinfo"
-            - name: AnthropicOptions__Model
-              value: claude-haiku-4-5-20251001
-            - name: AnthropicOptions__BaseAddress
-              value: "https://api.anthropic.com/"
-            - name: AnthropicOptions__ApiKey
+            # Sugestões de IA (bio/apresentação/skills) passaram a rotear pelo Hermes Agent
+            # (gateway próprio, k3s na Hetzner) em vez de bater direto na API da Anthropic —
+            # ver core.infrastructure/ExternalServices/Hermes/HermesAgentClient.cs.
+            - name: HermesAgentOptions__Model
+              value: hermes-agent
+            - name: HermesAgentOptions__BaseAddress
+              value: "https://bot.colocar-me.com.br/agent-api/"
+            - name: HermesAgentOptions__ApiKey
               valueFrom:
                 secretKeyRef:
                   name: core-secrets
-                  key: anthropic-api-key
+                  key: hermes-agent-api-key
             # RabbitMQ real no mesmo namespace (ver k8s/10-rabbitmq.yaml) — DNS interno do cluster.
             - name: RabbitMQ__Host
               value: "rabbitmq"

@@ -17,6 +17,26 @@ service Talent {
   rpc GetResumeData (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc EnsureProfile (EnsureProfileRequest) returns (common.defaultReply);
   rpc SuggestSummary (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc GetTalentSkills (GetTalentSkillsRequest) returns (common.defaultReply);
+  rpc SetTalentSkills (SetTalentSkillsRequest) returns (common.defaultReply);
+  rpc SuggestSkills (GetTalentSkillsRequest) returns (common.defaultReply);
+}
+
+message GetTalentSkillsRequest {
+	string talentProfileId = 1;
+}
+
+message GetTalentSkillsReply {
+	repeated string skillNames = 1;
+}
+
+message SetTalentSkillsRequest {
+	string talentProfileId = 1;
+	repeated string skillNames = 2;
+}
+
+message SuggestTalentSkillsReply {
+	repeated string suggestedSkills = 1;
 }
 
 message EnsureProfileRequest{

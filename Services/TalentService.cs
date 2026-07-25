@@ -330,5 +330,68 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> GetTalentSkills(GetTalentSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var skills = await _talentServices.GetTalentSkills(Guid.Parse(request.TalentProfileId));
+                var data = new GetTalentSkillsReply();
+                data.SkillNames.AddRange(skills.Select(x => x.Name));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SetTalentSkills(SetTalentSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _talentServices.SetTalentSkills(Guid.Parse(request.TalentProfileId), request.SkillNames);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SuggestSkills(GetTalentSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var suggestedSkills = await _resumeSuggestionService.SuggestSkillsAsync(Guid.Parse(request.TalentProfileId));
+                var data = new SuggestTalentSkillsReply();
+                data.SuggestedSkills.AddRange(suggestedSkills);
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
     }
 }

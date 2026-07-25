@@ -10,7 +10,7 @@ using core.infrastructure;
 using core.infrastructure.Auditing;
 using core.infrastructure.ExternalServices.Facebook;
 using core.infrastructure.ExternalServices.Linkedin;
-using core.infrastructure.ExternalServices.Claude;
+using core.infrastructure.ExternalServices.Hermes;
 using core.infrastructure.Repositiories;
 using core.infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -56,14 +56,14 @@ builder.Services.Configure<LinkedinConfigurations>(configuration.GetSection(Link
 builder.Services.Configure<FacebookConfigurations>(configuration.GetSection(FacebookConfigurations.FacebookOptions));
 builder.Services.Configure<JwtConfiguration>(configuration.GetSection(JwtConfiguration.JwtOptions));
 builder.Services.Configure<ScheduleServiceConfiguration>(configuration.GetSection(ScheduleServiceConfiguration.ScheduleServiceOptions));
-builder.Services.Configure<AnthropicConfigurations>(configuration.GetSection(AnthropicConfigurations.AnthropicOptions));
+builder.Services.Configure<HermesAgentConfigurations>(configuration.GetSection(HermesAgentConfigurations.HermesAgentOptions));
 builder.Services.Configure<TutorialConfiguration>(configuration.GetSection(TutorialConfiguration.TutorialOptions));
 
 // Add services to the container.
 
 builder.Services.AddTransient<ILinkedinClient, LinkedinClient>();
 builder.Services.AddTransient<IFacebookClient, FacebookClient>();
-builder.Services.AddTransient<IAnthropicClient, ClaudeSuggestionClient>();
+builder.Services.AddTransient<IAiTextClient, HermesAgentClient>();
 
 builder.Services.AddTransient<IProfileRepository, ProfileRepository>();
 builder.Services.AddTransient<INotificationRepository, NotificationRepository>();

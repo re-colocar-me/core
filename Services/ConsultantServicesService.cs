@@ -11,11 +11,13 @@ namespace core.Services
     {
         private IConsultantServiceServices _services;
         private readonly ICurrentActorAccessor _actorAccessor;
+        private readonly IResumeSuggestionService _resumeSuggestionService;
 
-        public ConsultantServicesService(IConsultantServiceServices services, ICurrentActorAccessor actorAccessor)
+        public ConsultantServicesService(IConsultantServiceServices services, ICurrentActorAccessor actorAccessor, IResumeSuggestionService resumeSuggestionService)
         {
             _services = services;
             _actorAccessor = actorAccessor;
+            _resumeSuggestionService = resumeSuggestionService;
         }
 
         private static service MapService(ConsultantServiceItem x, string? categoryName = null) => new()
@@ -312,6 +314,25 @@ namespace core.Services
                 var skills = await _services.GetConsultantSkills(Guid.Parse(request.ConsultantProfileId));
                 var data = new GetConsultantSkillsReply();
                 data.SkillNames.AddRange(skills.Select(x => x.Name));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SuggestSkills(GetConsultantSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var suggestedSkills = await _resumeSuggestionService.SuggestSkillsAsync(Guid.Parse(request.ConsultantProfileId));
+                var data = new SuggestSkillsReply();
+                data.SuggestedSkills.AddRange(suggestedSkills);
                 reply.Data = Any.Pack(data);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }

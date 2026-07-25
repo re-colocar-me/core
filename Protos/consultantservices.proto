@@ -26,6 +26,7 @@ service ConsultantServices{
 
 	rpc SetConsultantSkills (SetConsultantSkillsRequest) returns (common.defaultReply);
 	rpc GetConsultantSkills (GetConsultantSkillsRequest) returns (common.defaultReply);
+	rpc SuggestSkills (GetConsultantSkillsRequest) returns (common.defaultReply);
 	rpc GetCurationConfig (common.Empty) returns (common.defaultReply);
 	rpc SetCurationConfig (SetCurationConfigRequest) returns (common.defaultReply);
 }
@@ -138,6 +139,10 @@ message GetConsultantSkillsRequest {
 
 message GetConsultantSkillsReply {
 	repeated string skillNames = 1;
+}
+
+message SuggestSkillsReply {
+	repeated string suggestedSkills = 1;
 }
 
 message SetCurationConfigRequest {
