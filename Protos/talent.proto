@@ -20,6 +20,41 @@ service Talent {
   rpc GetTalentSkills (GetTalentSkillsRequest) returns (common.defaultReply);
   rpc SetTalentSkills (SetTalentSkillsRequest) returns (common.defaultReply);
   rpc SuggestSkills (GetTalentSkillsRequest) returns (common.defaultReply);
+  rpc GetMyConnections (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc GetConsultantDetails (ConsultantIdRequest) returns (common.defaultReply);
+  rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
+}
+
+message ConsultantIdRequest {
+	string consultantId = 1;
+}
+
+message RemoveConnectionRequest {
+	string candidateId = 1;
+	string consultantId = 2;
+}
+
+message connectionSummary {
+	string id = 1;
+	string consultantId = 2;
+	string consultantName = 3;
+	string pictureUrl = 4;
+	string connectedAt = 5;
+}
+
+message GetMyConnectionsReply {
+	repeated connectionSummary connections = 1;
+}
+
+message GetConsultantDetailsReply {
+	string id = 1;
+	string name = 2;
+	string pictureUrl = 3;
+	optional string bio = 4;
+	repeated string skills = 5;
+	repeated common.service providedServices = 6;
+	repeated common.availability weeklyAvailability = 7;
+	repeated .consultant.sporadicavailabilityitem sporadicAvailability = 8;
 }
 
 message GetTalentSkillsRequest {

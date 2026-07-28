@@ -13,13 +13,171 @@ namespace core.Services
         private readonly IProfileService _profileService;
         private readonly ITalentServices _talentServices;
         private readonly IResumeSuggestionService _resumeSuggestionService;
+        private readonly IScheduleService _scheduleService;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService)
         {
             _services = services;
             _profileService = profileService;
             _talentServices = talentServices;
             _resumeSuggestionService = resumeSuggestionService;
+            _scheduleService = scheduleService;
+        }
+
+        public override async Task<defaultReply> GetMyConnections(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                // Candidatos podem ter se conectado mais de uma vez com o mesmo consultor (histórico
+                // real de dados de teste) - a lista de conexões é conceitualmente 1 por consultor,
+                // então mantém só a mais recente de cada.
+                var connections = (await _services.GetConnectionsForCandidate(Guid.Parse(request.OwnerId)))
+                    .GroupBy(x => x.ConsultantId)
+                    .Select(g => g.OrderByDescending(x => x.ConnectedAt).First())
+                    .OrderByDescending(x => x.ConnectedAt)
+                    .ToList();
+                var consultantIds = connections.Select(x => x.ConsultantId).Distinct().ToList();
+                var consultants = new Dictionary<Guid, core.domain.Entities.Consultant>();
+                foreach (var consultantId in consultantIds)
+                {
+                    var consultant = await _services.GetConsultantById(consultantId);
+                    if (consultant is not null)
+                        consultants[consultantId] = consultant;
+                }
+
+                var profiles = (await _profileService.GetByIdsAsync(consultants.Values.Select(x => x.ProfileId)))
+                    .ToDictionary(x => x.Id);
+
+                var data = new GetMyConnectionsReply();
+                data.Connections.AddRange(connections
+                    .Where(x => consultants.ContainsKey(x.ConsultantId))
+                    .Select(x =>
+                    {
+                        var consultant = consultants[x.ConsultantId];
+                        var newItem = new connectionSummary()
+                        {
+                            Id = x.Id.ToString(),
+                            ConsultantId = x.ConsultantId.ToString(),
+                            ConsultantName = consultant.Name.FullName,
+                            ConnectedAt = x.ConnectedAt.ToString("O")
+                        };
+                        if (profiles.TryGetValue(consultant.ProfileId, out var profile))
+                            newItem.PictureUrl = profile.PictureUrl;
+                        return newItem;
+                    }));
+
+                reply.Statuscode = Constants.SuccessStatusCode;
+                reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetConsultantDetails(ConsultantIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var consultant = await _services.GetConsultantById(Guid.Parse(request.ConsultantId))
+                    ?? throw new ArgumentException("Consultor não encontrado.");
+
+                var profiles = await _profileService.GetByIdsAsync([consultant.ProfileId]);
+                var profile = profiles.FirstOrDefault();
+
+                var providedServices = await _services.GetProvidedServices(consultant.ProfileId);
+                var weeklyAvailability = await _scheduleService.GetAvailabiltyListByOwner(consultant.ProfileId);
+                var sporadicAvailability = await _scheduleService.GetSporadicAvailabilityByOwner(consultant.ProfileId);
+
+                var data = new GetConsultantDetailsReply()
+                {
+                    Id = consultant.Id.ToString(),
+                    Name = consultant.Name.FullName,
+                    PictureUrl = profile?.PictureUrl ?? string.Empty
+                };
+                if (!string.IsNullOrWhiteSpace(profile?.BioText))
+                    data.Bio = profile!.BioText;
+
+                data.Skills.AddRange(consultant.Skills.Select(x => x.Name));
+
+                data.ProvidedServices.AddRange(providedServices.Select(x => new service()
+                {
+                    Id = x.ServiceItem!.Id.ToString(),
+                    Categoryname = x.ServiceItem.Category?.Name ?? string.Empty,
+                    Name = x.ServiceItem.Name,
+                    Description = x.ServiceItem.Description ?? string.Empty,
+                    Offeringid = x.Id.ToString(),
+                    Priceinlemoncoins = x.PriceInLemonCoins,
+                    Format = x.Format.ToString(),
+                    Sessioncount = x.SessionCount ?? 0
+                }));
+
+                foreach (var grouped in weeklyAvailability.GroupBy(x => x.WeekDay))
+                {
+                    var newAvailability = new availability() { Weekday = grouped.Key };
+                    newAvailability.Items.AddRange(grouped.Select(x =>
+                    {
+                        var newItem = new availabilityitem()
+                        {
+                            Id = x.Id.ToString(),
+                            Endtime = x.EndTime.ToString(),
+                            Starttime = x.StartTime.ToString(),
+                            Serviceid = x.ServiceId.ToString(),
+                            Servicename = x.Service?.Name ?? string.Empty
+                        };
+                        if (x.PriceOverrideInLemonCoins.HasValue)
+                            newItem.Priceoverrideinlemoncoins = x.PriceOverrideInLemonCoins.Value;
+                        return newItem;
+                    }));
+                    data.WeeklyAvailability.Add(newAvailability);
+                }
+
+                data.SporadicAvailability.AddRange(sporadicAvailability.Select(x =>
+                {
+                    var newItem = new sporadicavailabilityitem()
+                    {
+                        Id = x.Id.ToString(),
+                        Date = x.Date.ToString("yyyy-MM-dd"),
+                        Starttime = x.StartTime.ToString(),
+                        Endtime = x.EndTime.ToString(),
+                        Reason = x.Reason ?? string.Empty,
+                        Serviceid = x.ServiceId.ToString(),
+                        Servicename = x.Service?.Name ?? string.Empty
+                    };
+                    if (x.PriceOverrideInLemonCoins.HasValue)
+                        newItem.Priceoverrideinlemoncoins = x.PriceOverrideInLemonCoins.Value;
+                    return newItem;
+                }));
+
+                reply.Statuscode = Constants.SuccessStatusCode;
+                reply.Data = Any.Pack(data);
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> RemoveConnection(RemoveConnectionRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _services.RemoveConnection(Guid.Parse(request.CandidateId), Guid.Parse(request.ConsultantId));
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
         }
 
         public override async Task<defaultReply> ListConsultants(FilterRequest request, ServerCallContext context)
