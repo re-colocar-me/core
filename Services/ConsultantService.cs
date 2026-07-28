@@ -125,7 +125,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                await _consultantServices.SetService(Guid.Parse(request.ServiceId), Guid.Parse(request.OwnerId));
+                await _consultantServices.SetService(Guid.Parse(request.ServiceId), Guid.Parse(request.OwnerId), System.Enum.Parse<ServiceFormat>(request.Format), request.HasSessionCount ? request.SessionCount : null);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -391,7 +391,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                await _consultantServices.RemoveService(Guid.Parse(request.ServiceId), Guid.Parse(request.OwnerId));
+                await _consultantServices.RemoveService(Guid.Parse(request.ServiceId), Guid.Parse(request.OwnerId), System.Enum.Parse<ServiceFormat>(request.Format));
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -421,7 +421,9 @@ namespace core.Services
                                                    Name = x.ServiceItem.Name,
                                                    Description = x.ServiceItem.Description ?? string.Empty,
                                                    Offeringid = x.Id.ToString(),
-                                                   Priceinlemoncoins = x.PriceInLemonCoins
+                                                   Priceinlemoncoins = x.PriceInLemonCoins,
+                                                   Format = x.Format.ToString(),
+                                                   Sessioncount = x.SessionCount ?? 0
                                                }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -614,7 +616,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                await _consultantServices.SetServicePrice(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId), request.PriceInLemonCoins);
+                await _consultantServices.SetServicePrice(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId), System.Enum.Parse<ServiceFormat>(request.Format), request.PriceInLemonCoins, request.HasSessionCount ? request.SessionCount : null);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -633,7 +635,7 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                var history = await _consultantServices.GetServicePriceHistory(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId));
+                var history = await _consultantServices.GetServicePriceHistory(Guid.Parse(request.OwnerId), Guid.Parse(request.ServiceId), System.Enum.Parse<ServiceFormat>(request.Format));
                 var data = new GetServicePriceHistoryReply();
                 data.Entries.AddRange(history.Select(x => new priceHistoryEntry
                 {
