@@ -229,7 +229,8 @@ namespace core.Services
                         Stage = x.Stage.ToString(),
                         Observacao = x.Observacao ?? string.Empty,
                         CreatedAt = x.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"),
-                        ConnectedAt = x.Connection?.ConnectedAt.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty
+                        ConnectedAt = x.Connection?.ConnectedAt.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        HasSwotAnalysis = x.Connection?.ShareSwotAnalysis ?? false
                     };
 
                     newTratativa.StageHistory.AddRange(x.StageHistory.Select(h =>
@@ -329,6 +330,26 @@ namespace core.Services
             try
             {
                 await _consultantServices.AtualizarObservacao(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), request.Observacao);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetTratativaSwotAnalysis(GetTratativaSwotAnalysisRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var analysisText = await _consultantServices.GetTratativaSwotAnalysis(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId));
+                reply.Data = Any.Pack(new TratativaSwotAnalysisReply { Found = analysisText != null, AnalysisText = analysisText ?? string.Empty });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)

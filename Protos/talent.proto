@@ -23,6 +23,8 @@ service Talent {
   rpc GetMyConnections (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GetConsultantDetails (ConsultantIdRequest) returns (common.defaultReply);
   rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
+  rpc GenerateSwotAnalysis (GenerateSwotAnalysisRequest) returns (common.defaultReply);
+  rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
 }
 
 message ConsultantIdRequest {
@@ -113,6 +115,17 @@ message ConnectRequest{
 	optional string candidateTelephoneCountryCode = 7;
 	optional string candidateTelephoneAreaCode = 8;
 	optional string candidateTelephoneNumber = 9;
+	bool shareSwotAnalysis = 10;
+}
+
+message GenerateSwotAnalysisRequest {
+	string ownerId = 1;
+	string vocationalSummary = 2;
+}
+
+message SwotAnalysisReply {
+	bool found = 1;
+	string analysisText = 2;
 }
 
 message SearchProfilesRequest {

@@ -1,6 +1,7 @@
 ﻿using core.domain;
 using core.domain.Entities;
 using core.domain.Enums;
+using core.domain.Interfaces.Infrastructure;
 using core.domain.Interfaces.Services;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -14,14 +15,16 @@ namespace core.Services
         private readonly ITalentServices _talentServices;
         private readonly IResumeSuggestionService _resumeSuggestionService;
         private readonly IScheduleService _scheduleService;
+        private readonly ISwotAnalysisRepository _swotAnalysisRepository;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository)
         {
             _services = services;
             _profileService = profileService;
             _talentServices = talentServices;
             _resumeSuggestionService = resumeSuggestionService;
             _scheduleService = scheduleService;
+            _swotAnalysisRepository = swotAnalysisRepository;
         }
 
         public override async Task<defaultReply> GetMyConnections(OwnerIdRequest request, ServerCallContext context)
@@ -279,7 +282,8 @@ namespace core.Services
                     request.HasCandidatePictureUrl ? request.CandidatePictureUrl : null,
                     request.HasCandidateTelephoneCountryCode ? request.CandidateTelephoneCountryCode : null,
                     request.HasCandidateTelephoneAreaCode ? request.CandidateTelephoneAreaCode : null,
-                    request.HasCandidateTelephoneNumber ? request.CandidateTelephoneNumber : null);
+                    request.HasCandidateTelephoneNumber ? request.CandidateTelephoneNumber : null,
+                    request.ShareSwotAnalysis);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception ex)
@@ -538,6 +542,49 @@ namespace core.Services
                 var data = new SuggestTalentSkillsReply();
                 data.SuggestedSkills.AddRange(suggestedSkills);
                 reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GenerateSwotAnalysis(GenerateSwotAnalysisRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var ownerId = Guid.Parse(request.OwnerId);
+                var analysisText = await _resumeSuggestionService.SuggestSwotAnalysisAsync(ownerId, request.VocationalSummary);
+                await _swotAnalysisRepository.SaveAsync(ownerId, analysisText);
+
+                reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetSwotAnalysis(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var analysisText = await _swotAnalysisRepository.GetAsync(Guid.Parse(request.OwnerId));
+                reply.Data = Any.Pack(new SwotAnalysisReply { Found = analysisText != null, AnalysisText = analysisText ?? string.Empty });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)

@@ -11,8 +11,10 @@ using core.infrastructure.Auditing;
 using core.infrastructure.ExternalServices.Facebook;
 using core.infrastructure.ExternalServices.Linkedin;
 using core.infrastructure.ExternalServices.Hermes;
+using core.infrastructure.ExternalServices.Elasticsearch;
 using core.infrastructure.Repositiories;
 using core.infrastructure.Repositories;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -71,6 +73,7 @@ builder.Services.AddTransient<IConsultantServicesRepository, ConsultantServicesR
 builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddTransient<ITalentRepository, TalentRepository>();
 builder.Services.AddTransient<ITutorialRepository, TutorialRepository>();
+builder.Services.AddTransient<ISwotAnalysisRepository, SwotAnalysisRepository>();
 
 builder.Services.AddTransient<IConsultantServiceServices, ConsultantServiceServices>();
 builder.Services.AddTransient<IConsultantServices, ConsultantService>();
@@ -102,9 +105,19 @@ builder.Services.AddSingleton(new Dictionary<Type, string>
 });
 builder.Services.AddScoped<AuditSaveChangesInterceptor>();
 
+// EnableRetryOnFailure abaixo só controla o intervalo ENTRE tentativas — cada tentativa
+// individual de abrir a conexão ainda respeita o "Connection Timeout" da própria connection
+// string, um valor que mora no segredo do Kubernetes (fora do git, fora de code review). Uma
+// rotação de credenciais do SQL pode recriar esse segredo sem esse parâmetro, derrubando a
+// política de retry inteira sem nenhuma mudança de código ("SqlException: Connection Timeout
+// Expired" mesmo com EnableRetryOnFailure configurado) — já aconteceu uma vez. Forçado aqui via
+// SqlConnectionStringBuilder pra não depender de ninguém preservar isso manualmente no segredo.
+var connectionStringBuilder = new SqlConnectionStringBuilder(configuration.GetConnectionString("Default") ?? string.Empty);
+connectionStringBuilder.ConnectTimeout = Math.Max(30, connectionStringBuilder.ConnectTimeout);
+
 builder.Services.AddDbContext<ReColocarmeContext>((IServiceProvider serviceProvider, DbContextOptionsBuilder options) =>
 {
-    options.UseSqlServer(connectionString: configuration.GetConnectionString("Default") ?? string.Empty, dboptions =>
+    options.UseSqlServer(connectionString: connectionStringBuilder.ConnectionString, dboptions =>
     {
         // maxRetryDelay capped at 30s, not 1s — the shared free-tier Azure SQL database auto-pauses
         // when idle and takes up to ~30s to resume; a 1s cap meant EF gave up long before that.
