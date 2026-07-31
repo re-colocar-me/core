@@ -301,7 +301,17 @@ namespace core.Services
             try
             {
                 var stage = System.Enum.Parse<TratativaStage>(request.Stage);
-                await _consultantServices.MoverTratativa(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), stage);
+                var preview = await _consultantServices.MoverTratativa(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId), stage);
+
+                if (preview is not null && preview.GrossAmountToRefundLemonCoins > 0)
+                {
+                    reply.Data = Any.Pack(new MoveTratativaReply
+                    {
+                        GrossAmountToRefundLemonCoins = preview.GrossAmountToRefundLemonCoins,
+                        WalletDebitTransactionId = preview.WalletDebitTransactionId.ToString()
+                    });
+                }
+
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)

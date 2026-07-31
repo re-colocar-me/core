@@ -30,6 +30,8 @@ service Consultant {
   rpc GetConnections (OwnerIdRequest) returns (common.defaultReply);
   rpc GetTratativas (OwnerIdRequest) returns (common.defaultReply);
   rpc CreateTratativa (CreateTratativaRequest) returns (common.defaultReply);
+  // Data da reply, quando presente, é MoveTratativaReply — indica que a compra vinculada ao card
+  // (se houver) foi cancelada e precisa de estorno parcial na wallet (docs/specs/pipeline-tratativas-conexoes.md).
   rpc MoveTratativa (MoveTratativaRequest) returns (common.defaultReply);
   rpc SetTratativaService (SetTratativaServiceRequest) returns (common.defaultReply);
   rpc SetTratativaObservacao (SetTratativaObservacaoRequest) returns (common.defaultReply);
@@ -280,6 +282,11 @@ message MoveTratativaRequest{
 	string ownerId = 1;
 	string tratativaId = 2;
 	string stage = 3;
+}
+
+message MoveTratativaReply{
+	int64 grossAmountToRefundLemonCoins = 1;
+	string walletDebitTransactionId = 2;
 }
 
 message SetTratativaServiceRequest{

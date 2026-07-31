@@ -816,19 +816,18 @@ namespace core.Services
             try
             {
                 var id = Guid.Parse(request.Id);
-                var purchase = await _scheduleService.GetServicePurchaseById(id)
-                    ?? throw new ArgumentException("Compra não encontrada.");
-
-                var usedSessions = await _scheduleService.CountUsedSessions(id);
-                var unusedSessions = Math.Max(purchase.TotalSessions - usedSessions, 0);
-                var grossAmountToRefund = purchase.UnitPriceInLemonCoins * unusedSessions;
+                // Levanta ArgumentException ("já cancelada") se a compra já foi estornada — barra
+                // reestorno por retry/duplo clique (a RPC de estorno parcial não marca o grupo de
+                // transações como Reversed, então essa checagem em GetServicePurchaseCancellationPreview
+                // é o único guard contra chamar /cancel duas vezes).
+                var preview = await _scheduleService.GetServicePurchaseCancellationPreview(id);
 
                 reply.Data = Any.Pack(new GetServicePurchaseCancellationPreviewReply
                 {
-                    UnusedSessions = unusedSessions,
-                    UnitPriceInLemonCoins = purchase.UnitPriceInLemonCoins,
-                    GrossAmountToRefundLemonCoins = grossAmountToRefund,
-                    WalletDebitTransactionId = purchase.WalletDebitTransactionId.ToString()
+                    UnusedSessions = preview.UnusedSessions,
+                    UnitPriceInLemonCoins = preview.UnitPriceInLemonCoins,
+                    GrossAmountToRefundLemonCoins = preview.GrossAmountToRefundLemonCoins,
+                    WalletDebitTransactionId = preview.WalletDebitTransactionId.ToString()
                 });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
