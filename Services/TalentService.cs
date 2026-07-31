@@ -764,66 +764,6 @@ namespace core.Services
             return reply;
         }
 
-        public override async Task<defaultReply> GetScheduleIcs(GetScheduleIcsRequest request, ServerCallContext context)
-        {
-            var reply = new defaultReply();
-            try
-            {
-                var scheduleId = Guid.Parse(request.ScheduleId);
-                var candidateId = Guid.Parse(request.CandidateId);
-
-                var schedule = await _scheduleService.GetScheduleById(scheduleId)
-                    ?? throw new ArgumentException("Agendamento não encontrado.");
-
-                if (schedule.ServicePurchaseId is null)
-                    throw new ArgumentException("Agendamento sem compra vinculada.");
-
-                var purchase = await _scheduleService.GetServicePurchaseById(schedule.ServicePurchaseId.Value)
-                    ?? throw new ArgumentException("Compra não encontrada.");
-
-                if (purchase.CandidateId != candidateId)
-                    throw new ArgumentException("Este agendamento não pertence a este candidato.");
-
-                reply.Data = Any.Pack(new GetScheduleIcsReply
-                {
-                    FileName = $"agendamento-{scheduleId}.ics",
-                    Content = BuildIcs(schedule, purchase)
-                });
-                reply.Statuscode = Constants.SuccessStatusCode;
-            }
-            catch (Exception e)
-            {
-                reply.Statuscode = Constants.FailStatusCode;
-                reply.Error = new error() { Message = e.Message };
-            }
-            return reply;
-        }
-
-        // Formato mínimo iCalendar (RFC 5545) — StartTime/EndTime são gravados em UTC por
-        // convenção neste projeto (mesmo padrão assumido em ProfileService.GetFullProfile pra
-        // BirthDate/LastAccess).
-        private static string BuildIcs(Schedule schedule, ServicePurchase purchase)
-        {
-            static string Fmt(DateTime dt) => DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToString("yyyyMMdd'T'HHmmss'Z'");
-            var summary = (schedule.Subject ?? purchase.ServiceName).Replace("\r", " ").Replace("\n", " ");
-
-            return string.Join("\r\n",
-            [
-                "BEGIN:VCALENDAR",
-                "VERSION:2.0",
-                "PRODID:-//re.colocar.me//Agendamento//PT-BR",
-                "BEGIN:VEVENT",
-                $"UID:{schedule.Id}@re.colocar-me.com.br",
-                $"DTSTAMP:{Fmt(DateTime.UtcNow)}",
-                $"DTSTART:{Fmt(schedule.StartTime)}",
-                $"DTEND:{Fmt(schedule.EndTime)}",
-                $"SUMMARY:{summary}",
-                "END:VEVENT",
-                "END:VCALENDAR",
-                ""
-            ]);
-        }
-
         public override async Task<defaultReply> GetBookedDatesForAvailability(AvailabilityIdRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();

@@ -35,7 +35,6 @@ service Talent {
   rpc MarkServicePurchaseCanceled (ServicePurchaseIdRequest) returns (common.defaultReply);
   rpc ListMySchedules (CandidateIdRequest) returns (common.defaultReply);
   rpc GetBookedDatesForAvailability (AvailabilityIdRequest) returns (common.defaultReply);
-  rpc GetScheduleIcs (GetScheduleIcsRequest) returns (common.defaultReply);
 }
 
 message ConsultantIdRequest {
@@ -252,14 +251,4 @@ message AvailabilityIdRequest {
 // o backend vai rejeitar por conflito.
 message GetBookedDatesForAvailabilityReply {
 	repeated string dates = 1;
-}
-
-message GetScheduleIcsRequest {
-	string scheduleId = 1;
-	string candidateId = 2;
-}
-
-message GetScheduleIcsReply {
-	string fileName = 1;
-	string content = 2;
 }
