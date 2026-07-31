@@ -25,6 +25,14 @@ service Talent {
   rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
   rpc GenerateSwotAnalysis (GenerateSwotAnalysisRequest) returns (common.defaultReply);
   rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
+
+  // docs/specs/compra-agendamento-servico-consultor.md
+  rpc CreateServicePurchase (CreateServicePurchaseRequest) returns (common.defaultReply);
+  rpc ListMyServicePurchases (CandidateIdRequest) returns (common.defaultReply);
+  rpc ListServicePurchasesForConsultant (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc ScheduleServiceSession (ScheduleServiceSessionRequest) returns (common.defaultReply);
+  rpc GetServicePurchaseCancellationPreview (ServicePurchaseIdRequest) returns (common.defaultReply);
+  rpc MarkServicePurchaseCanceled (ServicePurchaseIdRequest) returns (common.defaultReply);
 }
 
 message ConsultantIdRequest {
@@ -147,3 +155,72 @@ message SearchProfilesReply {
 // (e as mensagens contacts/identification/education/language/experience/experienceEntry que elas
 // usam) já são definidas em core/Protos/consultant.proto, compilado no mesmo csharp_namespace
 // "core" que este arquivo — reaproveitadas as mesmas classes geradas, não redefinidas aqui.
+
+// docs/specs/compra-agendamento-servico-consultor.md
+
+message CandidateIdRequest {
+	string candidateId = 1;
+}
+
+message ServicePurchaseIdRequest {
+	string id = 1;
+}
+
+message CreateServicePurchaseRequest {
+	string consultantId = 1;
+	string offeringId = 2;
+	string candidateId = 3;
+	string candidateFirstName = 4;
+	string candidateLastName = 5;
+	optional string candidateEmail = 6;
+	optional string candidatePictureUrl = 7;
+	string walletDebitTransactionId = 8;
+}
+
+message CreateServicePurchaseReply {
+	string id = 1;
+	int32 totalSessions = 2;
+}
+
+message servicePurchaseEntry {
+	string id = 1;
+	string consultantId = 2;
+	string consultantName = 3;
+	string candidateName = 4;
+	string offeringId = 5;
+	string serviceName = 6;
+	string format = 7;
+	int32 totalSessions = 8;
+	int32 usedSessions = 9;
+	int64 unitPriceInLemonCoins = 10;
+	int64 totalPriceInLemonCoins = 11;
+	string purchasedAt = 12;
+	string status = 13;
+}
+
+message ListMyServicePurchasesReply {
+	repeated servicePurchaseEntry items = 1;
+}
+
+message ListServicePurchasesForConsultantReply {
+	repeated servicePurchaseEntry items = 1;
+}
+
+message ScheduleServiceSessionRequest {
+	string servicePurchaseId = 1;
+	string candidateId = 2;
+	optional string sourceAvailabilityId = 3;
+	optional string weeklyDate = 4;
+	optional string sourceSporadicAvailabilityId = 5;
+}
+
+message ScheduleServiceSessionReply {
+	string scheduleId = 1;
+}
+
+message GetServicePurchaseCancellationPreviewReply {
+	int32 unusedSessions = 1;
+	int64 unitPriceInLemonCoins = 2;
+	int64 grossAmountToRefundLemonCoins = 3;
+	string walletDebitTransactionId = 4;
+}

@@ -150,12 +150,22 @@ namespace core.Services
                 data.Schedules.AddRange(response.Select(x => new schedule()
                 {
                     Id = x.Id.ToString(),
-                    Candidate = new candidate() { Name = x.Recipient.Name?.FullName, PictureUrl = x.Recipient.PictureUrl },
+                    // proto3 string não aceita null — Recipient.PictureUrl é opcional (nem toda
+                    // ServicePurchase.Candidate tem foto), achado real ao testar o fluxo de
+                    // compra/agendamento ponta-a-ponta (docs/specs/compra-agendamento-servico-consultor.md).
+                    Candidate = new candidate()
+                    {
+                        Name = x.Recipient.Name?.FullName ?? string.Empty,
+                        PictureUrl = x.Recipient.PictureUrl ?? string.Empty,
+                        TelephoneCountryCode = x.Recipient.Telephone?.CountryCode ?? string.Empty,
+                        TelephoneAreaCode = x.Recipient.Telephone?.AreaCode ?? string.Empty,
+                        TelephoneNumber = x.Recipient.Telephone?.Number ?? string.Empty
+                    },
                     DateTime = $"{x.StartTime.ToString("t")} - {x.EndTime.ToString("t")}",
                     Date = x.StartTime.ToString("yyyy-MM-dd"),
-                    Notes = x.Notes,
+                    Notes = x.Notes ?? string.Empty,
                     Status = x.Status.ToString(),
-                    Subject = x.Subject,
+                    Subject = x.Subject ?? string.Empty,
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;

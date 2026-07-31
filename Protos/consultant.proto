@@ -124,6 +124,9 @@ message schedule{
 message candidate{
 	string Name = 1;
 	string pictureUrl = 2;
+	string telephoneCountryCode = 3;
+	string telephoneAreaCode = 4;
+	string telephoneNumber = 5;
 }
 
 message ChangeScheduleStatusRequest{

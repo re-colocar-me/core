@@ -94,7 +94,7 @@ namespace core.Services
 
                 var providedServices = await _services.GetProvidedServices(consultant.ProfileId);
                 var weeklyAvailability = await _scheduleService.GetAvailabiltyListByOwner(consultant.ProfileId);
-                var sporadicAvailability = await _scheduleService.GetSporadicAvailabilityByOwner(consultant.ProfileId);
+                var sporadicAvailability = await _scheduleService.GetBookableSporadicAvailabilityByOwner(consultant.ProfileId);
 
                 var data = new GetConsultantDetailsReply()
                 {
@@ -598,5 +598,190 @@ namespace core.Services
             return reply;
         }
 
+        // docs/specs/compra-agendamento-servico-consultor.md
+        public override async Task<defaultReply> CreateServicePurchase(CreateServicePurchaseRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var offeringId = Guid.Parse(request.OfferingId);
+                var offering = await _services.GetOfferingForPayment(offeringId)
+                    ?? throw new ArgumentException("Oferta de serviço não encontrada.");
+
+                if (offering.ConsultantId != Guid.Parse(request.ConsultantId))
+                    throw new ArgumentException("Esta oferta não pertence ao consultor informado.");
+
+                var totalSessions = offering.Format == ServiceFormat.Package ? (offering.SessionCount ?? 1) : 1;
+                var unitPrice = totalSessions > 0 ? offering.PriceInLemonCoins / totalSessions : offering.PriceInLemonCoins;
+
+                var purchase = await _scheduleService.CreateServicePurchase(
+                    Guid.Parse(request.CandidateId),
+                    request.CandidateFirstName,
+                    request.CandidateLastName,
+                    request.HasCandidateEmail ? request.CandidateEmail : null,
+                    request.HasCandidatePictureUrl ? request.CandidatePictureUrl : null,
+                    offering.ConsultantId,
+                    offeringId,
+                    offering.ServiceItem?.Name ?? string.Empty,
+                    offering.Format,
+                    totalSessions,
+                    unitPrice,
+                    offering.PriceInLemonCoins,
+                    Guid.Parse(request.WalletDebitTransactionId));
+
+                reply.Data = Any.Pack(new CreateServicePurchaseReply { Id = purchase.Id.ToString(), TotalSessions = purchase.TotalSessions });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> ListMyServicePurchases(CandidateIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var purchases = await _scheduleService.GetServicePurchasesForCandidate(Guid.Parse(request.CandidateId));
+                var data = new ListMyServicePurchasesReply();
+                data.Items.AddRange(await BuildServicePurchaseEntries(purchases));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> ListServicePurchasesForConsultant(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var purchases = await _scheduleService.GetServicePurchasesForConsultant(Guid.Parse(request.OwnerId));
+                var data = new ListServicePurchasesForConsultantReply();
+                data.Items.AddRange(await BuildServicePurchaseEntries(purchases));
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        private async Task<List<servicePurchaseEntry>> BuildServicePurchaseEntries(List<ServicePurchase> purchases)
+        {
+            var consultantIds = purchases.Select(x => x.ConsultantId).Distinct().ToList();
+            var consultants = new Dictionary<Guid, core.domain.Entities.Consultant>();
+            foreach (var id in consultantIds)
+            {
+                var consultant = await _services.GetConsultantById(id);
+                if (consultant is not null)
+                    consultants[id] = consultant;
+            }
+
+            var entries = new List<servicePurchaseEntry>();
+            foreach (var purchase in purchases)
+            {
+                var usedSessions = await _scheduleService.CountUsedSessions(purchase.Id);
+                entries.Add(new servicePurchaseEntry
+                {
+                    Id = purchase.Id.ToString(),
+                    ConsultantId = purchase.ConsultantId.ToString(),
+                    ConsultantName = consultants.TryGetValue(purchase.ConsultantId, out var consultant) ? consultant.Name.FullName : string.Empty,
+                    CandidateName = purchase.Candidate.Name.FullName,
+                    OfferingId = purchase.OfferingId.ToString(),
+                    ServiceName = purchase.ServiceName,
+                    Format = purchase.Format.ToString(),
+                    TotalSessions = purchase.TotalSessions,
+                    UsedSessions = usedSessions,
+                    UnitPriceInLemonCoins = purchase.UnitPriceInLemonCoins,
+                    TotalPriceInLemonCoins = purchase.TotalPriceInLemonCoins,
+                    PurchasedAt = purchase.PurchasedAt.ToString("O"),
+                    Status = purchase.Status.ToString()
+                });
+            }
+            return entries;
+        }
+
+        public override async Task<defaultReply> ScheduleServiceSession(ScheduleServiceSessionRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                DateOnly? weeklyDate = request.HasWeeklyDate ? DateOnly.Parse(request.WeeklyDate) : null;
+
+                var schedule = await _scheduleService.ScheduleServiceSession(
+                    Guid.Parse(request.ServicePurchaseId),
+                    Guid.Parse(request.CandidateId),
+                    request.HasSourceAvailabilityId ? Guid.Parse(request.SourceAvailabilityId) : null,
+                    weeklyDate,
+                    request.HasSourceSporadicAvailabilityId ? Guid.Parse(request.SourceSporadicAvailabilityId) : null);
+
+                reply.Data = Any.Pack(new ScheduleServiceSessionReply { ScheduleId = schedule.Id.ToString() });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetServicePurchaseCancellationPreview(ServicePurchaseIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var id = Guid.Parse(request.Id);
+                var purchase = await _scheduleService.GetServicePurchaseById(id)
+                    ?? throw new ArgumentException("Compra não encontrada.");
+
+                var usedSessions = await _scheduleService.CountUsedSessions(id);
+                var unusedSessions = Math.Max(purchase.TotalSessions - usedSessions, 0);
+                var grossAmountToRefund = purchase.UnitPriceInLemonCoins * unusedSessions;
+
+                reply.Data = Any.Pack(new GetServicePurchaseCancellationPreviewReply
+                {
+                    UnusedSessions = unusedSessions,
+                    UnitPriceInLemonCoins = purchase.UnitPriceInLemonCoins,
+                    GrossAmountToRefundLemonCoins = grossAmountToRefund,
+                    WalletDebitTransactionId = purchase.WalletDebitTransactionId.ToString()
+                });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> MarkServicePurchaseCanceled(ServicePurchaseIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _scheduleService.MarkServicePurchaseCanceled(Guid.Parse(request.Id));
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
     }
 }
