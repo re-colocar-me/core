@@ -713,6 +713,78 @@ namespace core.Services
             return entries;
         }
 
+        // Box de agendamentos do candidato no Feed (ajuste pedido pelo usuário) — Schedule não
+        // guarda ConsultantId direto, resolvido via ServicePurchase.ConsultantId de cada agendamento.
+        public override async Task<defaultReply> ListMySchedules(CandidateIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var candidateId = Guid.Parse(request.CandidateId);
+                var schedules = await _scheduleService.GetSchedulesForCandidate(candidateId);
+                var purchases = await _scheduleService.GetServicePurchasesForCandidate(candidateId);
+                var consultantIdByPurchaseId = purchases.ToDictionary(x => x.Id, x => x.ConsultantId);
+
+                var consultants = new Dictionary<Guid, core.domain.Entities.Consultant>();
+                foreach (var consultantId in purchases.Select(x => x.ConsultantId).Distinct())
+                {
+                    var consultant = await _services.GetConsultantById(consultantId);
+                    if (consultant is not null)
+                        consultants[consultantId] = consultant;
+                }
+
+                var data = new ListMySchedulesReply();
+                data.Schedules.AddRange(schedules.Select(x =>
+                {
+                    var consultantName = string.Empty;
+                    if (x.ServicePurchaseId.HasValue
+                        && consultantIdByPurchaseId.TryGetValue(x.ServicePurchaseId.Value, out var consultantId)
+                        && consultants.TryGetValue(consultantId, out var consultant))
+                        consultantName = consultant.Name.FullName;
+
+                    return new myScheduleEntry
+                    {
+                        Id = x.Id.ToString(),
+                        ConsultantName = consultantName,
+                        DateTime = $"{x.StartTime:t} - {x.EndTime:t}",
+                        Date = x.StartTime.ToString("yyyy-MM-dd"),
+                        Subject = x.Subject ?? string.Empty,
+                        Status = x.Status.ToString()
+                    };
+                }));
+
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetBookedDatesForAvailability(AvailabilityIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var dates = await _scheduleService.GetBookedDatesForAvailability(Guid.Parse(request.AvailabilityId));
+
+                var data = new GetBookedDatesForAvailabilityReply();
+                data.Dates.AddRange(dates.Select(x => x.ToString("yyyy-MM-dd")));
+
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = e.Message };
+            }
+            return reply;
+        }
+
         public override async Task<defaultReply> ScheduleServiceSession(ScheduleServiceSessionRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();
