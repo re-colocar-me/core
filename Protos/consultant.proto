@@ -204,6 +204,7 @@ message GetResumeDataReply{
 	experience structuredExperience = 8;
 	repeated experienceEntry experienceEntries = 9;
 	repeated string skills = 10;
+	optional string resumeUpdatedAt = 11;
 }
 
 message SetSporadicAvailabilityRequest{

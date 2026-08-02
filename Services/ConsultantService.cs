@@ -618,6 +618,9 @@ namespace core.Services
 
                 data.Skills.AddRange(response.Skills);
 
+                if (response.UpdatedAt.HasValue)
+                    data.ResumeUpdatedAt = response.UpdatedAt.Value.ToString("O");
+
                 reply.Statuscode = Constants.SuccessStatusCode;
                 reply.Data = Any.Pack(data);
             }

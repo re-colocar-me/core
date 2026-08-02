@@ -434,6 +434,9 @@ namespace core.Services
 
                 data.Skills.AddRange(response.Skills);
 
+                if (response.UpdatedAt.HasValue)
+                    data.ResumeUpdatedAt = response.UpdatedAt.Value.ToString("O");
+
                 reply.Statuscode = Constants.SuccessStatusCode;
                 reply.Data = Any.Pack(data);
             }
@@ -564,7 +567,7 @@ namespace core.Services
                 var analysisText = await _resumeSuggestionService.SuggestSwotAnalysisAsync(ownerId, request.VocationalSummary);
                 await _swotAnalysisRepository.SaveAsync(ownerId, analysisText);
 
-                reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText });
+                reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText, UpdatedAt = DateTime.UtcNow.ToString("O") });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
@@ -583,8 +586,12 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                var analysisText = await _swotAnalysisRepository.GetAsync(Guid.Parse(request.OwnerId));
-                reply.Data = Any.Pack(new SwotAnalysisReply { Found = analysisText != null, AnalysisText = analysisText ?? string.Empty });
+                var record = await _swotAnalysisRepository.GetAsync(Guid.Parse(request.OwnerId));
+                var swotReply = new SwotAnalysisReply { Found = record != null, AnalysisText = record?.AnalysisText ?? string.Empty };
+                if (record?.UpdatedAt is not null)
+                    swotReply.UpdatedAt = record.UpdatedAt.Value.ToString("O");
+
+                reply.Data = Any.Pack(swotReply);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
