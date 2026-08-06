@@ -1,4 +1,4 @@
-name: Deploy to AKS
+name: Deploy to k3s
 
 on:
   push:
@@ -46,13 +46,10 @@ jobs:
           docker push ghcr.io/re-colocar-me/core:${{ github.sha }}
           docker push ghcr.io/re-colocar-me/core:latest
 
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set AKS context
-        run: az aks get-credentials --resource-group rg-vistoria --name aks-vistoria --admin --overwrite-existing
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
 
       - name: Apply manifests and roll out new image
         run: |
