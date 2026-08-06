@@ -14,8 +14,8 @@ using core.infrastructure.ExternalServices.Hermes;
 using core.infrastructure.ExternalServices.Elasticsearch;
 using core.infrastructure.Repositiories;
 using core.infrastructure.Repositories;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Serilog;
 using Serilog.Events;
 using Elastic.Ingest.Elasticsearch;
@@ -106,21 +106,20 @@ builder.Services.AddSingleton(new Dictionary<Type, string>
 builder.Services.AddScoped<AuditSaveChangesInterceptor>();
 
 // EnableRetryOnFailure abaixo só controla o intervalo ENTRE tentativas — cada tentativa
-// individual de abrir a conexão ainda respeita o "Connection Timeout" da própria connection
-// string, um valor que mora no segredo do Kubernetes (fora do git, fora de code review). Uma
-// rotação de credenciais do SQL pode recriar esse segredo sem esse parâmetro, derrubando a
-// política de retry inteira sem nenhuma mudança de código ("SqlException: Connection Timeout
-// Expired" mesmo com EnableRetryOnFailure configurado) — já aconteceu uma vez. Forçado aqui via
-// SqlConnectionStringBuilder pra não depender de ninguém preservar isso manualmente no segredo.
-var connectionStringBuilder = new SqlConnectionStringBuilder(configuration.GetConnectionString("Default") ?? string.Empty);
-connectionStringBuilder.ConnectTimeout = Math.Max(30, connectionStringBuilder.ConnectTimeout);
+// individual de abrir a conexão ainda respeita o "Timeout" da própria connection string, um
+// valor que mora no segredo do Kubernetes (fora do git, fora de code review). Uma rotação de
+// credenciais pode recriar esse segredo sem esse parâmetro, derrubando a política de retry
+// inteira sem nenhuma mudança de código — já aconteceu uma vez. Forçado aqui via
+// NpgsqlConnectionStringBuilder pra não depender de ninguém preservar isso manualmente no segredo.
+var connectionStringBuilder = new NpgsqlConnectionStringBuilder(configuration.GetConnectionString("Default") ?? string.Empty);
+connectionStringBuilder.Timeout = Math.Max(30, connectionStringBuilder.Timeout);
 
 builder.Services.AddDbContext<ReColocarmeContext>((IServiceProvider serviceProvider, DbContextOptionsBuilder options) =>
 {
-    options.UseSqlServer(connectionString: connectionStringBuilder.ConnectionString, dboptions =>
+    options.UseNpgsql(connectionString: connectionStringBuilder.ConnectionString, dboptions =>
     {
-        // maxRetryDelay capped at 30s, not 1s — the shared free-tier Azure SQL database auto-pauses
-        // when idle and takes up to ~30s to resume; a 1s cap meant EF gave up long before that.
+        // Resiliência a restart de pod/blip de rede no Postgres em cluster (não mais o
+        // auto-pause do Azure SQL free-tier, que motivou o valor original de 30s).
         dboptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(30), null);
         dboptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         dboptions.MigrationsAssembly(typeof(ReColocarmeContext).Assembly.GetName().Name);
