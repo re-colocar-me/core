@@ -219,7 +219,12 @@ namespace core.Services
 
                     }
 
-                    newConsultant.Services.AddRange(item.ProvidedServices.Select(x => x.ServiceItem?.Name ?? string.Empty));
+                    // Um consultor pode ter várias ofertas (preço/formato/sessões diferentes) do mesmo
+                    // ConsultantServiceItem — aqui só listamos o nome do serviço uma vez, não uma vez por oferta.
+                    newConsultant.Services.AddRange(item.ProvidedServices
+                        .Where(x => x.ServiceItem != null)
+                        .GroupBy(x => x.ServiceItemId)
+                        .Select(g => g.First().ServiceItem!.Name));
                     newConsultant.Skills.AddRange(item.Skills.Select(x => x.Name));
                     data.Consultants.Add(newConsultant);
                 }
