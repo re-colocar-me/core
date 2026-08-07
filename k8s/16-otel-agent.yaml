@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-agent-config
+  namespace: consultor
+data:
+  config.yaml: |
+    receivers:
+      hostmetrics:
+        collection_interval: 30s
+        root_path: /hostfs
+        scrapers:
+          cpu: {}
+          memory: {}
+          disk: {}
+          filesystem: {}
+          network: {}
+      kubeletstats:
+        collection_interval: 30s
+        auth_type: serviceAccount
+        endpoint: "https://${env:K8S_NODE_NAME}:10250"
+        insecure_skip_verify: true
+        metric_groups: [container, pod, node]
+
+    processors:
+      batch: {}
+      k8sattributes:
+        auth_type: "serviceAccount"
+      # hostmetrics não anexa nenhum resource attribute por conta própria (sem isso,
+      # os dados de CPU/memória/disco do host ficam sem host.name — impossível saber
+      # de qual nó/cluster vieram uma vez que os dois clusters escrevem no mesmo ES).
+      resourcedetection:
+        detectors: [system]
+        system:
+          hostname_sources: ["os"]
+      resource:
+        attributes:
+          - key: k8s.cluster.name
+            value: "re-colocar-me"
+            action: upsert
+
+    exporters:
+      otlp:
+        endpoint: "otel-gateway.consultor.svc.cluster.local:4317"
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [hostmetrics, kubeletstats]
+          processors: [resourcedetection, resource, k8sattributes, batch]
+          exporters: [otlp]
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-agent
+  namespace: consultor
+spec:
+  selector:
+    matchLabels:
+      app: otel-agent
+  template:
+    metadata:
+      labels:
+        app: otel-agent
+    spec:
+      serviceAccountName: otel-agent
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: otel-agent
+          image: otel/opentelemetry-collector-contrib:0.114.0
+          args: ["--config=/etc/otel/config.yaml"]
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+            - name: hostfs
+              mountPath: /hostfs
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: otel-agent-config
+        - name: hostfs
+          hostPath:
+            path: /

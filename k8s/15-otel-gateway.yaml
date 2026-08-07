@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-agent
+  namespace: consultor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-agent
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces", "nodes", "nodes/stats", "nodes/proxy"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-agent
+subjects:
+  - kind: ServiceAccount
+    name: otel-agent
+    namespace: consultor
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-gateway-config
+  namespace: consultor
+data:
+  config.yaml: |
+    extensions:
+      bearertokenauth:
+        scheme: "Bearer"
+        token: "${env:OTEL_BEARER_TOKEN}"
+
+    receivers:
+      # gRPC (4317) só é alcançável via ClusterIP interno (não passa pelo Ingress) — mesmo
+      # nível de confiança implícita que o Elasticsearch já tem hoje, sem exigir token.
+      # HTTP (4318) é o único exposto publicamente (via Ingress, para o Hermes) — exige token.
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+            auth:
+              authenticator: bearertokenauth
+
+    processors:
+      batch: {}
+      k8sattributes:
+        auth_type: "serviceAccount"
+
+    exporters:
+      elasticsearch:
+        endpoints: ["http://elasticsearch.consultor.svc.cluster.local:9200"]
+        mapping:
+          mode: otel
+
+    service:
+      extensions: [bearertokenauth]
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [batch, k8sattributes]
+          exporters: [elasticsearch]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-gateway
+  namespace: consultor
+spec:
+  selector:
+    app: otel-gateway
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-gateway
+  namespace: consultor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-gateway
+  template:
+    metadata:
+      labels:
+        app: otel-gateway
+    spec:
+      serviceAccountName: otel-agent
+      containers:
+        - name: otel-gateway
+          image: otel/opentelemetry-collector-contrib:0.114.0
+          args: ["--config=/etc/otel/config.yaml"]
+          env:
+            - name: OTEL_BEARER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: otel-gateway-secrets
+                  key: bearer-token
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+      volumes:
+        - name: config
+          configMap:
+            name: otel-gateway-config
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: otel-gateway
+  namespace: consultor
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - otel-consultor-re.colocar-me.com.br
+      secretName: otel-gateway-tls-cert
+  rules:
+    - host: otel-consultor-re.colocar-me.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: otel-gateway
+                port:
+                  number: 4318

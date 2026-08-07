@@ -1,0 +1,44 @@
+# Expõe o Kibana publicamente. O Elasticsearch roda com xpack.security.enabled=false
+# (decisão deliberada — ver core/k8s/15-otel-gateway.yaml — pra não exigir credencial
+# dos 10 serviços que já conectam nele via Serilog), então o Kibana em si também não
+# pede login nenhum. Sem proteção na borda, isso deixaria todo o log/métrica de
+# produção acessível por qualquer um que descobrisse a URL — daí o Basic Auth aqui.
+#
+# O Secret "kibana-basicauth" (chave "users", formato htpasswd) NÃO é versionado —
+# criar direto no cluster:
+#   kubectl create secret generic kibana-basicauth -n consultor \
+#     --from-literal=users='<usuario>:<hash-apr1>'
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: kibana-basicauth
+  namespace: consultor
+spec:
+  basicAuth:
+    secret: kibana-basicauth
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana
+  namespace: consultor
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: consultor-kibana-basicauth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - kibana-re.colocar-me.com.br
+      secretName: kibana-tls-cert
+  rules:
+    - host: kibana-re.colocar-me.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
