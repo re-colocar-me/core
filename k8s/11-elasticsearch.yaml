@@ -49,17 +49,17 @@ spec:
             - name: xpack.security.enabled
               value: "false"
             - name: ES_JAVA_OPTS
-              value: "-Xms512m -Xmx512m"
+              value: "-Xms2g -Xmx2g"
           volumeMounts:
             - name: es-data
               mountPath: /usr/share/elasticsearch/data
           resources:
             requests:
               cpu: 250m
-              memory: 768Mi
+              memory: 2Gi
             limits:
-              cpu: 1000m
-              memory: 1536Mi
+              cpu: 1500m
+              memory: 4Gi
   volumeClaimTemplates:
     - metadata:
         name: es-data
