@@ -16,9 +16,10 @@ namespace core.Services
         private readonly IResumeSuggestionService _resumeSuggestionService;
         private readonly IScheduleService _scheduleService;
         private readonly ISwotAnalysisRepository _swotAnalysisRepository;
+        private readonly ISkillGapAnalysisRepository _skillGapAnalysisRepository;
         private readonly ILinkedinSuggestionRepository _linkedinSuggestionRepository;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository)
         {
             _services = services;
             _profileService = profileService;
@@ -26,6 +27,7 @@ namespace core.Services
             _resumeSuggestionService = resumeSuggestionService;
             _scheduleService = scheduleService;
             _swotAnalysisRepository = swotAnalysisRepository;
+            _skillGapAnalysisRepository = skillGapAnalysisRepository;
             _linkedinSuggestionRepository = linkedinSuggestionRepository;
         }
 
@@ -612,6 +614,53 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> GenerateSkillGapAnalysis(GenerateSkillGapAnalysisRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var ownerId = Guid.Parse(request.OwnerId);
+                var analysisText = await _resumeSuggestionService.SuggestSkillGapAsync(ownerId, request.VocationalSummary);
+                await _skillGapAnalysisRepository.SaveAsync(ownerId, analysisText);
+
+                reply.Data = Any.Pack(new SkillGapAnalysisReply { Found = true, AnalysisText = analysisText, UpdatedAt = DateTime.UtcNow.ToString("O") });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetSkillGapAnalysis(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var record = await _skillGapAnalysisRepository.GetAsync(Guid.Parse(request.OwnerId));
+                var skillGapReply = new SkillGapAnalysisReply { Found = record != null, AnalysisText = record?.AnalysisText ?? string.Empty };
+                if (record?.UpdatedAt is not null)
+                    skillGapReply.UpdatedAt = record.UpdatedAt.Value.ToString("O");
+
+                reply.Data = Any.Pack(skillGapReply);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
         // docs/specs/sugestao-melhoria-perfil-linkedin-talent.md
         public override async Task<defaultReply> GenerateLinkedinSuggestion(OwnerIdRequest request, ServerCallContext context)
         {
@@ -669,6 +718,53 @@ namespace core.Services
                 var coverLetterText = await _resumeSuggestionService.SuggestCoverLetterAsync(Guid.Parse(request.OwnerId), request.JobDescription);
 
                 reply.Data = Any.Pack(new SuggestCoverLetterReply { CoverLetterText = coverLetterText });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        // docs/specs/simulacao-entrevista-ia-talent.md
+        public override async Task<defaultReply> SuggestInterviewQuestions(SuggestInterviewQuestionsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var questions = await _resumeSuggestionService.SuggestInterviewQuestionsAsync(Guid.Parse(request.OwnerId), request.TargetRole);
+
+                var data = new SuggestInterviewQuestionsReply();
+                data.Questions.AddRange(questions);
+
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SuggestInterviewFeedback(SuggestInterviewFeedbackRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var answers = request.Answers.Select(a => (a.Question, a.Answer)).ToList();
+                var feedbackText = await _resumeSuggestionService.SuggestInterviewFeedbackAsync(Guid.Parse(request.OwnerId), request.TargetRole, answers);
+
+                reply.Data = Any.Pack(new SuggestInterviewFeedbackReply { FeedbackText = feedbackText });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)

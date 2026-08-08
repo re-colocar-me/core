@@ -25,9 +25,13 @@ service Talent {
   rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
   rpc GenerateSwotAnalysis (GenerateSwotAnalysisRequest) returns (common.defaultReply);
   rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc GenerateSkillGapAnalysis (GenerateSkillGapAnalysisRequest) returns (common.defaultReply);
+  rpc GetSkillGapAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GenerateLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GetLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc SuggestCoverLetter (SuggestCoverLetterRequest) returns (common.defaultReply);
+  rpc SuggestInterviewQuestions (SuggestInterviewQuestionsRequest) returns (common.defaultReply);
+  rpc SuggestInterviewFeedback (SuggestInterviewFeedbackRequest) returns (common.defaultReply);
 
   // docs/specs/compra-agendamento-servico-consultor.md
   rpc CreateServicePurchase (CreateServicePurchaseRequest) returns (common.defaultReply);
@@ -142,6 +146,17 @@ message SwotAnalysisReply {
 	optional string updatedAt = 3;
 }
 
+message GenerateSkillGapAnalysisRequest {
+	string ownerId = 1;
+	string vocationalSummary = 2;
+}
+
+message SkillGapAnalysisReply {
+	bool found = 1;
+	string analysisText = 2;
+	optional string updatedAt = 3;
+}
+
 message LinkedinSuggestionReply {
 	bool found = 1;
 	string suggestionText = 2;
@@ -155,6 +170,30 @@ message SuggestCoverLetterRequest {
 
 message SuggestCoverLetterReply {
 	string coverLetterText = 1;
+}
+
+message SuggestInterviewQuestionsRequest {
+	string ownerId = 1;
+	string targetRole = 2;
+}
+
+message SuggestInterviewQuestionsReply {
+	repeated string questions = 1;
+}
+
+message interviewAnswer {
+	string question = 1;
+	string answer = 2;
+}
+
+message SuggestInterviewFeedbackRequest {
+	string ownerId = 1;
+	string targetRole = 2;
+	repeated interviewAnswer answers = 3;
+}
+
+message SuggestInterviewFeedbackReply {
+	string feedbackText = 1;
 }
 
 message SearchProfilesRequest {
