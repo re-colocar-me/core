@@ -25,6 +25,8 @@ service Talent {
   rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
   rpc GenerateSwotAnalysis (GenerateSwotAnalysisRequest) returns (common.defaultReply);
   rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc GenerateLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc GetLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
 
   // docs/specs/compra-agendamento-servico-consultor.md
   rpc CreateServicePurchase (CreateServicePurchaseRequest) returns (common.defaultReply);
@@ -136,6 +138,12 @@ message GenerateSwotAnalysisRequest {
 message SwotAnalysisReply {
 	bool found = 1;
 	string analysisText = 2;
+	optional string updatedAt = 3;
+}
+
+message LinkedinSuggestionReply {
+	bool found = 1;
+	string suggestionText = 2;
 	optional string updatedAt = 3;
 }
 

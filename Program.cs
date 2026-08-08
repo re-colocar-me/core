@@ -74,6 +74,7 @@ builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddTransient<ITalentRepository, TalentRepository>();
 builder.Services.AddTransient<ITutorialRepository, TutorialRepository>();
 builder.Services.AddTransient<ISwotAnalysisRepository, SwotAnalysisRepository>();
+builder.Services.AddTransient<ILinkedinSuggestionRepository, LinkedinSuggestionRepository>();
 
 builder.Services.AddTransient<IConsultantServiceServices, ConsultantServiceServices>();
 builder.Services.AddTransient<IConsultantServices, ConsultantService>();

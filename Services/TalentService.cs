@@ -16,8 +16,9 @@ namespace core.Services
         private readonly IResumeSuggestionService _resumeSuggestionService;
         private readonly IScheduleService _scheduleService;
         private readonly ISwotAnalysisRepository _swotAnalysisRepository;
+        private readonly ILinkedinSuggestionRepository _linkedinSuggestionRepository;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository)
         {
             _services = services;
             _profileService = profileService;
@@ -25,6 +26,7 @@ namespace core.Services
             _resumeSuggestionService = resumeSuggestionService;
             _scheduleService = scheduleService;
             _swotAnalysisRepository = swotAnalysisRepository;
+            _linkedinSuggestionRepository = linkedinSuggestionRepository;
         }
 
         public override async Task<defaultReply> GetMyConnections(OwnerIdRequest request, ServerCallContext context)
@@ -597,6 +599,54 @@ namespace core.Services
                     swotReply.UpdatedAt = record.UpdatedAt.Value.ToString("O");
 
                 reply.Data = Any.Pack(swotReply);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        // docs/specs/sugestao-melhoria-perfil-linkedin-talent.md
+        public override async Task<defaultReply> GenerateLinkedinSuggestion(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var ownerId = Guid.Parse(request.OwnerId);
+                var suggestionText = await _resumeSuggestionService.SuggestLinkedinProfileAsync(ownerId);
+                await _linkedinSuggestionRepository.SaveAsync(ownerId, suggestionText);
+
+                reply.Data = Any.Pack(new LinkedinSuggestionReply { Found = true, SuggestionText = suggestionText, UpdatedAt = DateTime.UtcNow.ToString("O") });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> GetLinkedinSuggestion(OwnerIdRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var record = await _linkedinSuggestionRepository.GetAsync(Guid.Parse(request.OwnerId));
+                var linkedinReply = new LinkedinSuggestionReply { Found = record != null, SuggestionText = record?.SuggestionText ?? string.Empty };
+                if (record?.UpdatedAt is not null)
+                    linkedinReply.UpdatedAt = record.UpdatedAt.Value.ToString("O");
+
+                reply.Data = Any.Pack(linkedinReply);
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)
