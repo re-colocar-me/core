@@ -660,6 +660,28 @@ namespace core.Services
             return reply;
         }
 
+        // docs/specs/carta-apresentacao-sob-demanda-talent.md
+        public override async Task<defaultReply> SuggestCoverLetter(SuggestCoverLetterRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var coverLetterText = await _resumeSuggestionService.SuggestCoverLetterAsync(Guid.Parse(request.OwnerId), request.JobDescription);
+
+                reply.Data = Any.Pack(new SuggestCoverLetterReply { CoverLetterText = coverLetterText });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
         // docs/specs/compra-agendamento-servico-consultor.md
         public override async Task<defaultReply> CreateServicePurchase(CreateServicePurchaseRequest request, ServerCallContext context)
         {

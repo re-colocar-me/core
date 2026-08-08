@@ -27,6 +27,7 @@ service Talent {
   rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GenerateLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GetLinkedinSuggestion (.consultant.OwnerIdRequest) returns (common.defaultReply);
+  rpc SuggestCoverLetter (SuggestCoverLetterRequest) returns (common.defaultReply);
 
   // docs/specs/compra-agendamento-servico-consultor.md
   rpc CreateServicePurchase (CreateServicePurchaseRequest) returns (common.defaultReply);
@@ -145,6 +146,15 @@ message LinkedinSuggestionReply {
 	bool found = 1;
 	string suggestionText = 2;
 	optional string updatedAt = 3;
+}
+
+message SuggestCoverLetterRequest {
+	string ownerId = 1;
+	string jobDescription = 2;
+}
+
+message SuggestCoverLetterReply {
+	string coverLetterText = 1;
 }
 
 message SearchProfilesRequest {
