@@ -14,6 +14,7 @@ using core.infrastructure.ExternalServices.Hermes;
 using core.infrastructure.ExternalServices.Elasticsearch;
 using core.infrastructure.Repositiories;
 using core.infrastructure.Repositories;
+using core.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Serilog;
@@ -43,7 +44,7 @@ builder.Host.UseSerilog((context, loggerConfiguration) => loggerConfiguration
             }));
 
 // Add services to the container.
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(options => options.Interceptors.Add<LoggingInterceptor>());
 
 var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
