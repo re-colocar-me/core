@@ -13,6 +13,12 @@ service Profile{
 	rpc SetAdditionalData (SetAdditionalDataRequest) returns (common.defaultReply);
 	rpc GetFullProfile (GetFullProfileRequest) returns (common.defaultReply);
 	rpc SuggestBio (GetFullProfileRequest) returns (common.defaultReply);
+	rpc AcceptTerms (AcceptTermsRequest) returns (common.defaultReply);
+}
+
+message AcceptTermsRequest{
+	string ownerId = 1;
+	string version = 2;
 }
 
 message SetBioRequest{

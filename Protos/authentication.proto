@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option csharp_namespace = "core";
 
+import "google/protobuf/timestamp.proto";
+
 package authentication;
 
 
@@ -20,9 +22,11 @@ message AuthReply {
 }
 
 message basicprofile{
-	string name = 1;	
+	string name = 1;
 	string email = 3;
 	string id = 4;
 	string pictureUrl = 5;
 	string status = 6;
+	google.protobuf.Timestamp termsAcceptedAt = 7;
+	string termsAcceptedVersion = 8;
 }

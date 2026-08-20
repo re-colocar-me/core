@@ -95,6 +95,25 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> AcceptTerms(AcceptTermsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                await _service.AcceptTermsAsync(Guid.Parse(request.OwnerId), request.Version);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = ex.Message
+                };
+            }
+            return reply;
+        }
+
         public override async Task<defaultReply> SetAdditionalData(SetAdditionalDataRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();
