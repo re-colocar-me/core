@@ -1,0 +1,139 @@
+# TESTE DE RESTAURAÇÃO do backup NDJSON do Elasticsearch. Baixa a exportação mais recente do bucket,
+# confere o SHA256SUMS, recria cada índice com o mapeamento e as configurações salvos em um índice de
+# TESTE (`restore-test-<nome>`), carrega os documentos por `_bulk`, compara a contagem de documentos
+# com o manifest.json e com o índice real, e APAGA os índices de teste no fim (também em caso de
+# falha). Não altera os índices reais. Ver docs/runbooks/restauracao-postgres-e-elasticsearch.md.
+#
+# Uso (a cada trimestre e depois de qualquer mudança no backup). Um Job não pode ser reaplicado:
+#   kubectl delete job elasticsearch-restore-test -n consultor --ignore-not-found
+#   kubectl create -f core/k8s/42-elasticsearch-restore-test-job.yaml
+#   kubectl logs job/elasticsearch-restore-test -n consultor -c restore
+#
+# Diferenças entre o restaurado e o índice real são ESPERADAS se houve escrita depois da exportação.
+# DUMPS CRIPTOGRAFADOS (`.age`): a chave PRIVADA nunca deve morar no cluster. Para o exercício, crie um
+# Secret TEMPORÁRIO num terminal seu (fora do Claude Code), rode o teste e apague:
+#   kubectl create secret generic age-identity -n consultor --from-file=key=./chave-privada-age.txt
+#   ... rodar o teste ...
+#   kubectl delete secret age-identity -n consultor
+# Sem o Secret, um arquivo `.age` faz o teste parar com uma mensagem clara.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-restore-test
+  namespace: consultor
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 1800
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: restore
+          emptyDir: {}
+      initContainers:
+        - name: fetch
+          image: alpine:3.20
+          env:
+            - {name: AWS_ACCESS_KEY_ID, valueFrom: {secretKeyRef: {name: backup-s3, key: access-key}}}
+            - {name: AWS_SECRET_ACCESS_KEY, valueFrom: {secretKeyRef: {name: backup-s3, key: secret-key}}}
+            - {name: S3_HOST, valueFrom: {secretKeyRef: {name: backup-s3, key: endpoint-host}}}
+            - {name: AWS_DEFAULT_REGION, valueFrom: {secretKeyRef: {name: backup-s3, key: region}}}
+            - {name: BUCKET, valueFrom: {secretKeyRef: {name: backup-s3, key: bucket-pg}}}
+            - {name: AWS_EC2_METADATA_DISABLED, value: "true"}
+            - {name: AWS_REQUEST_CHECKSUM_CALCULATION, value: when_required}
+            - {name: AWS_RESPONSE_CHECKSUM_VALIDATION, value: when_required}
+            - name: AGE_IDENTITY
+              valueFrom: {secretKeyRef: {name: age-identity, key: key, optional: true}}
+          volumeMounts:
+            - {name: restore, mountPath: /restore}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 384Mi}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache aws-cli > /dev/null
+              E="https://$S3_HOST"
+              KEY=$(aws s3api list-objects-v2 --bucket "$BUCKET" --prefix elasticsearch/ --endpoint-url "$E" --query 'sort_by(Contents,&LastModified)[-1].Key' --output text)
+              [ -n "$KEY" ] && [ "$KEY" != "None" ] || { echo "ERRO: nenhuma exportação do ES no bucket"; exit 1; }
+              DIR=$(dirname "$KEY")
+              echo "exportação mais recente: s3://$BUCKET/$DIR/"
+              aws s3 cp "s3://$BUCKET/$DIR/" /restore/ --recursive --endpoint-url "$E" --only-show-errors
+              cd /restore
+              ls -la
+              # Integridade dos arquivos exatamente como estão no bucket (cifrados, se for o caso).
+              sha256sum -c SHA256SUMS
+              if ls ./*.age > /dev/null 2>&1; then
+                [ -n "${AGE_IDENTITY:-}" ] || { echo "ERRO: arquivos criptografados (.age) e não há Secret age-identity (ver o cabeçalho deste arquivo)"; exit 2; }
+                apk add --no-cache age > /dev/null
+                printf '%s\n' "$AGE_IDENTITY" > /tmp/identity.txt
+                chmod 600 /tmp/identity.txt
+                for f in ./*.age; do
+                  age -d -i /tmp/identity.txt -o "${f%.age}" "$f"
+                  echo "descriptografado: ${f%.age}"
+                done
+                rm -f /tmp/identity.txt ./*.age
+              fi
+      containers:
+        - name: restore
+          image: alpine:3.20
+          env:
+            - {name: ES_URL, value: "http://elasticsearch:9200"}
+          volumeMounts:
+            - {name: restore, mountPath: /restore}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -u
+              apk add --no-cache curl jq > /dev/null
+              cd /restore
+              FAIL=0
+              CREATED=""
+
+              # Apaga os índices de teste ao sair, aconteça o que acontecer.
+              cleanup() {
+                for t in $CREATED; do
+                  echo "removendo índice de teste $t"
+                  curl -s -X DELETE "$ES_URL/$t" > /dev/null || true
+                done
+              }
+              trap cleanup EXIT
+
+              echo "manifest:"; cat manifest.json; echo
+              for f in *.docs.ndjson; do
+                [ -e "$f" ] || { echo "nenhum índice na exportação"; break; }
+                idx="${f%.docs.ndjson}"
+                test="restore-test-$idx"
+                echo "=================== $idx -> $test"
+                curl -s -X DELETE "$ES_URL/$test" > /dev/null
+                # Recria com as configurações e o mapeamento salvos; sem réplica (o cluster tem 1 nó).
+                body=$(jq -n --slurpfile s "$idx.settings.json" --slurpfile m "$idx.mapping.json" '{settings: ($s[0] + {number_of_replicas: "0"}), mappings: $m[0]}')
+                code=$(curl -sS -o /tmp/resp -w '%{http_code}' -X PUT -H 'Content-Type: application/json' "$ES_URL/$test" -d "$body")
+                if [ "$code" != "200" ]; then echo "ERRO ao criar $test (HTTP $code):"; cut -c1-500 /tmp/resp; echo; FAIL=1; continue; fi
+                CREATED="$CREATED $test"
+
+                if [ -s "$f" ]; then
+                  errors=$(curl -sS -X POST -H 'Content-Type: application/x-ndjson' "$ES_URL/$test/_bulk?refresh=true" --data-binary "@$f" | jq -r '.errors')
+                  [ "$errors" = "false" ] || { echo "ERRO: o _bulk devolveu erros em $test"; FAIL=1; continue; }
+                fi
+
+                restored=$(curl -sS "$ES_URL/$test/_count" | jq -r '.count')
+                expected=$(jq -r --arg i "$idx" '.[] | select(.index==$i) | .docs' manifest.json)
+                live=$(curl -sS "$ES_URL/$idx/_count" | jq -r '.count')
+                if [ "$restored" = "$expected" ]; then
+                  echo "OK: $restored documentos restaurados (manifest: $expected; índice real agora: $live)"
+                else
+                  echo "ERRO: restaurados $restored, manifest $expected (índice real agora: $live)"; FAIL=1
+                fi
+                # Confere que o mapeamento restaurado é igual ao salvo.
+                curl -sS "$ES_URL/$test/_mapping" | jq --arg i "$test" '.[$i].mappings' > /tmp/mapping.restored.json
+                if [ "$(jq -S . /tmp/mapping.restored.json)" = "$(jq -S . "$idx.mapping.json")" ]; then echo "OK: mapeamento idêntico ao salvo"; else echo "AVISO: o mapeamento restaurado difere do salvo"; fi
+              done
+
+              [ "$FAIL" = "0" ] && echo "TESTE DE RESTAURAÇÃO DO ES: OK" || echo "TESTE DE RESTAURAÇÃO DO ES: FALHOU"
+              exit $FAIL

@@ -1,0 +1,196 @@
+# Backup do Postgres: pg_dump de cada banco + papéis, validado e enviado ao Object Storage da
+# Hetzner. Ver docs/specs/backup-elasticsearch-postgres.md (seção 3.1) e o runbook de restauração
+# em docs/runbooks/restauracao-postgres-e-elasticsearch.md.
+#
+# NÃO é aplicado pelo CI do `core` (ele só aplica k8s/20-core.yaml). Aplicar à mão, DEPOIS de o
+# Secret `backup-s3` existir:   kubectl apply -f core/k8s/30-postgres-backup-cronjob.yaml
+# Disparar um teste sem esperar o horário:
+#   kubectl create job --from=cronjob/postgres-backup postgres-backup-manual-1 -n consultor
+#
+# Horário: a cada 6 horas, às 00:30, 06:30, 12:30 e 18:30 UTC (21:30, 03:30, 09:30 e 15:30 em
+# Brasília). A frequência é uma decisão em aberto da spec; com bancos de menos de 10 MB o custo é
+# desprezível, então 6 h é o padrão sugerido.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: consultor
+spec:
+  schedule: "30 */6 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: backup
+              emptyDir: {}
+          initContainers:
+            # 1) Gera os dumps. Mesma versão maior do servidor (16), sem instalar nada em runtime.
+            - name: dump
+              image: postgres:16-alpine
+              env:
+                - name: PGHOST
+                  value: postgres
+                - name: PGUSER
+                  value: postgres
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-secrets
+                      key: postgres-password
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  TS=$(date -u +%Y%m%dT%H%M%SZ)
+                  OUT="/backup/$TS"
+                  mkdir -p "$OUT"
+                  echo "$TS" > /backup/LATEST_TS
+
+                  # Lista os bancos em vez de fixar 6 nomes: um banco novo entra no backup sozinho.
+                  DBS=$(psql -At -c "select datname from pg_database where datistemplate = false and datname <> 'postgres' order by datname")
+                  [ -n "$DBS" ] || { echo "ERRO: nenhum banco encontrado"; exit 1; }
+
+                  for db in $DBS; do
+                    echo "pg_dump $db"
+                    pg_dump -Fc -d "$db" -f "$OUT/$db.dump"
+                    # Um dump que não abre não é backup: falha o job aqui, antes do upload.
+                    pg_restore --list "$OUT/$db.dump" > /dev/null
+                  done
+
+                  # Papéis e propriedades globais (necessários pra restaurar em um servidor novo).
+                  pg_dumpall --globals-only > "$OUT/globals.sql"
+
+                  cd "$OUT" && sha256sum ./* > SHA256SUMS
+                  echo "dump ok: $(ls "$OUT" | wc -l) arquivos em $OUT"
+          containers:
+            # 2) Criptografa (se houver chave age), envia, confere e registra o status no Elasticsearch.
+            - name: upload
+              image: alpine:3.20
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: access-key
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: secret-key
+                - name: S3_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: endpoint-host
+                - name: AWS_DEFAULT_REGION
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: region
+                - name: BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: bucket-pg
+                - name: AGE_RECIPIENT
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: age-recipient
+                      optional: true
+                - name: ES_URL
+                  value: http://elasticsearch:9200
+                # Alguns armazenamentos compatíveis com S3 rejeitam os cabeçalhos de checksum que
+                # as versões novas do cliente AWS mandam por padrão.
+                - name: AWS_REQUEST_CHECKSUM_CALCULATION
+                  value: when_required
+                - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+                  value: when_required
+                - name: AWS_EC2_METADATA_DISABLED
+                  value: "true"
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 384Mi
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  # Pacotes instalados a cada execução (imagem base sem cliente S3 nem age): se o
+                  # espelho do Alpine estiver fora, o backup FALHA visivelmente em vez de sumir.
+                  apk add --no-cache aws-cli age curl > /dev/null
+
+                  START=$(date +%s)
+                  STATUS=failed
+                  COUNT=0
+                  BYTES=0
+                  TS=$(cat /backup/LATEST_TS)
+                  OUT="/backup/$TS"
+                  PREFIX="postgres/$(echo "$TS" | cut -c1-4)/$(echo "$TS" | cut -c5-6)/$(echo "$TS" | cut -c7-8)/$TS"
+                  ENDPOINT="https://$S3_HOST"
+
+                  # Registra sucesso ou falha no Elasticsearch (best-effort) pro painel do Kibana
+                  # "último backup bem-sucedido". O trap roda em qualquer saída, inclusive com erro.
+                  post_status() {
+                    curl -s -m 10 -X POST -H 'Content-Type: application/json' "$ES_URL/backup-status/_doc" \
+                      -d "{\"@timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"target\":\"postgres\",\"status\":\"$STATUS\",\"files\":$COUNT,\"bytes\":$BYTES,\"duration_seconds\":$(( $(date +%s) - START )),\"prefix\":\"$PREFIX\",\"encrypted\":$([ -n "${AGE_RECIPIENT:-}" ] && echo true || echo false)}" \
+                      > /dev/null || echo "aviso: não consegui registrar o status no Elasticsearch"
+                  }
+                  trap post_status EXIT
+
+                  if [ -n "${AGE_RECIPIENT:-}" ]; then
+                    # AGE_RECIPIENT aceita VÁRIAS chaves públicas separadas por vírgula (recomendado:
+                    # uma principal e uma de reserva guardada em outro lugar). Qualquer uma das
+                    # chaves privadas correspondentes abre o dump.
+                    RARGS=""
+                    for r in $(echo "$AGE_RECIPIENT" | tr ',' ' '); do RARGS="$RARGS -r $r"; done
+                    echo "criptografando com age ($(echo "$RARGS" | wc -w | tr -d ' ') argumentos de destinatário)"
+                    for f in "$OUT"/*.dump "$OUT"/globals.sql; do
+                      # shellcheck disable=SC2086
+                      age $RARGS -o "$f.age" "$f"
+                      # Só apaga o texto claro depois de o arquivo cifrado existir e não estar vazio.
+                      [ -s "$f.age" ] || { echo "ERRO: falha ao criptografar $f"; exit 1; }
+                      rm "$f"
+                    done
+                    # SHA256SUMS passa a descrever os arquivos que realmente sobem (os .age).
+                    ( cd "$OUT" && rm -f SHA256SUMS && sha256sum ./* > SHA256SUMS )
+                  fi
+
+                  for f in "$OUT"/*; do
+                    name=$(basename "$f")
+                    aws s3 cp "$f" "s3://$BUCKET/$PREFIX/$name" --endpoint-url "$ENDPOINT" --only-show-errors
+                    # Confere que o objeto existe com o tamanho local; sem isso um upload
+                    # silenciosamente truncado passaria por sucesso.
+                    remote=$(aws s3api head-object --bucket "$BUCKET" --key "$PREFIX/$name" --endpoint-url "$ENDPOINT" --query ContentLength --output text)
+                    local_size=$(stat -c %s "$f")
+                    [ "$remote" = "$local_size" ] || { echo "ERRO: tamanho diferente em $name (local $local_size, remoto $remote)"; exit 1; }
+                    COUNT=$((COUNT + 1))
+                    BYTES=$((BYTES + local_size))
+                  done
+
+                  STATUS=ok
+                  echo "backup ok: $COUNT arquivos, $BYTES bytes em s3://$BUCKET/$PREFIX"

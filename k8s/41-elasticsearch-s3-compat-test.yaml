@@ -1,0 +1,148 @@
+# TESTE DE COMPATIBILIDADE do Object Storage da Hetzner com o repositório S3 do Elasticsearch, feito
+# em um Elasticsearch DESCARTÁVEL (mesmo 8.17.6, 1 nó, dados em emptyDir). NÃO toca no ES de
+# produção e NÃO o reinicia: serve para saber, antes da janela de manutenção, se o backup do ES
+# funciona contra a Hetzner (upload multiparte, exclusão em lote, leituras) ou se será preciso o
+# plano B (exportação NDJSON). Ver docs/specs/backup-elasticsearch-postgres.md (seção 3.2).
+#
+# Testa VÁRIOS clientes S3 com configurações diferentes no mesmo pod (cada um é um `client` nomeado
+# do ES) para achar a que a Hetzner aceita; o resultado imprime um resumo por cliente.
+# O log de requisições da AWS (DEBUG) fica ligado: ver o que o ES envia com
+#   kubectl logs es-s3-compat-test -n consultor -c elasticsearch | grep -i "com.amazonaws.request"
+#
+# Pré-requisitos: Secret `backup-s3` com `bucket-es` apontando para o bucket do ES (SEM Object Lock,
+# SEM versionamento e SEM regra de expiração).
+#
+# Uso:
+#   kubectl apply -f core/k8s/41-elasticsearch-s3-compat-test.yaml
+#   kubectl logs es-s3-compat-test -n consultor -c probe -f        # resultado do teste
+#   kubectl delete pod es-s3-compat-test -n consultor              # SEMPRE apagar no fim
+#
+# Usa ~1,5 GB de memória enquanto existe. O pod não se apaga sozinho (o ES não termina).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: es-s3-compat-test
+  namespace: consultor
+  labels:
+    app: es-s3-compat-test
+spec:
+  restartPolicy: Never
+  securityContext:
+    fsGroup: 1000
+  volumes:
+    - name: es-keystore
+      emptyDir: {}
+    - name: es-data
+      emptyDir: {}
+  initContainers:
+    - name: keystore
+      image: docker.elastic.co/elasticsearch/elasticsearch:8.17.6
+      env:
+        - name: S3_ACCESS_KEY
+          valueFrom: {secretKeyRef: {name: backup-s3, key: access-key}}
+        - name: S3_SECRET_KEY
+          valueFrom: {secretKeyRef: {name: backup-s3, key: secret-key}}
+      volumeMounts:
+        - {name: es-keystore, mountPath: /keystore}
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -eu
+          BIN=/usr/share/elasticsearch/bin/elasticsearch-keystore
+          KS=/usr/share/elasticsearch/config/elasticsearch.keystore
+          [ -f "$KS" ] || "$BIN" create
+          # Mesmas credenciais para cada cliente nomeado testado.
+          for c in default virt; do
+            printf %s "$S3_ACCESS_KEY" | "$BIN" add --stdin --force "s3.client.$c.access_key"
+            printf %s "$S3_SECRET_KEY" | "$BIN" add --stdin --force "s3.client.$c.secret_key"
+          done
+          cp "$KS" /keystore/elasticsearch.keystore
+  containers:
+    - name: elasticsearch
+      image: docker.elastic.co/elasticsearch/elasticsearch:8.17.6
+      env:
+        - {name: cluster.name, value: es-s3-compat-test}
+        - {name: discovery.type, value: single-node}
+        - {name: xpack.security.enabled, value: "false"}
+        - {name: ES_JAVA_OPTS, value: "-Xms512m -Xmx512m"}
+        # Cliente "default": endereçamento por caminho (path style).
+        - name: s3.client.default.endpoint
+          valueFrom: {secretKeyRef: {name: backup-s3, key: endpoint-host}}
+        - name: s3.client.default.region
+          valueFrom: {secretKeyRef: {name: backup-s3, key: region}}
+        - {name: s3.client.default.path_style_access, value: "true"}
+        # Cliente "virt": endereçamento virtual-hosted (bucket no nome do host).
+        - name: s3.client.virt.endpoint
+          valueFrom: {secretKeyRef: {name: backup-s3, key: endpoint-host}}
+        - name: s3.client.virt.region
+          valueFrom: {secretKeyRef: {name: backup-s3, key: region}}
+        - {name: s3.client.virt.path_style_access, value: "false"}
+      volumeMounts:
+        - {name: es-data, mountPath: /usr/share/elasticsearch/data}
+        - name: es-keystore
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.keystore
+          subPath: elasticsearch.keystore
+      resources:
+        requests: {cpu: 250m, memory: 1Gi}
+        limits: {cpu: 1000m, memory: 1536Mi}
+    # Roda o teste contra o ES descartável (mesmo pod: localhost) e imprime o resultado.
+    - name: probe
+      image: curlimages/curl:8.10.1
+      env:
+        - name: BUCKET
+          valueFrom: {secretKeyRef: {name: backup-s3, key: bucket-es}}
+      resources:
+        requests: {cpu: 20m, memory: 32Mi}
+        limits: {cpu: 200m, memory: 128Mi}
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -u
+          ES=http://localhost:9200
+          JSON='Content-Type: application/json'
+
+          echo "aguardando o Elasticsearch descartável subir..."
+          i=0
+          while [ $i -lt 60 ]; do
+            curl -s "$ES/_cluster/health?wait_for_status=yellow&timeout=5s" | grep -q '"status"' && break
+            i=$((i + 1)); sleep 5
+          done
+
+          # Liga o log de requisições da AWS (mostra host, caminho e cabeçalhos de cada chamada).
+          curl -s -X PUT -H "$JSON" "$ES/_cluster/settings" -d '{"persistent":{"logger.com.amazonaws.request":"DEBUG"}}' > /dev/null
+
+          # Executa uma chamada e devolve o status; guarda a resposta em /tmp/resp.
+          call() {
+            method="$1"; path="$2"; body="${3:-}"
+            if [ -n "$body" ]; then
+              code=$(curl -sS -o /tmp/resp -w '%{http_code}' -X "$method" -H "$JSON" "$ES$path" -d "$body")
+            else
+              code=$(curl -sS -o /tmp/resp -w '%{http_code}' -X "$method" -H "$JSON" "$ES$path")
+            fi
+            echo "$code"
+          }
+
+          for client in default virt; do
+            BASE="compat-$client-$(date +%Y%m%d%H%M%S)"
+            echo
+            echo "################ cliente: $client (base_path $BASE)"
+            code=$(call PUT "/_snapshot/repo-$client" "{\"type\":\"s3\",\"settings\":{\"bucket\":\"$BUCKET\",\"base_path\":\"$BASE\",\"client\":\"$client\"}}")
+            echo "registro/verificação do repositório -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "RESULTADO [$client]: FALHOU ao registrar/verificar"
+              cut -c1-700 /tmp/resp; echo
+              continue
+            fi
+            echo "análise de compatibilidade (_analyze)..."
+            code=$(call POST "/_snapshot/repo-$client/_analyze?blob_count=20&max_blob_size=20mb&timeout=300s")
+            echo "_analyze -> HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "RESULTADO [$client]: COMPATÍVEL"
+              grep -o '"summary":{[^}]*}[^}]*}' /tmp/resp | head -c 500; echo
+            else
+              echo "RESULTADO [$client]: FALHOU no _analyze"
+              cut -c1-900 /tmp/resp; echo
+            fi
+          done
+          echo
+          echo "FIM DO TESTE (apague o pod: kubectl delete pod es-s3-compat-test -n consultor)"

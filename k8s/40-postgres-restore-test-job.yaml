@@ -1,0 +1,148 @@
+# TESTE DE RESTAURAÇÃO do backup do Postgres. Baixa o dump mais recente do bucket, confere o
+# SHA256SUMS, restaura cada banco em um banco de TESTE (`restore_test_<nome>`), compara a contagem
+# exata de linhas de todas as tabelas com o banco real e APAGA os bancos de teste no fim (também em
+# caso de falha). Não altera nem lê nada além de contagens dos bancos reais. Ver
+# docs/runbooks/restauracao-postgres-e-elasticsearch.md.
+#
+# Uso (a cada trimestre e depois de qualquer mudança no backup). Um Job não pode ser reaplicado:
+#   kubectl delete job postgres-restore-test -n consultor --ignore-not-found
+#   kubectl create -f core/k8s/40-postgres-restore-test-job.yaml
+#   kubectl logs job/postgres-restore-test -n consultor -c restore
+#
+# Diferenças de contagem são ESPERADAS quando o banco real recebeu escritas depois do horário do
+# dump; o que importa é o restore terminar sem erro e as contagens serem coerentes.
+# Não testa o globals.sql (papéis): restaurá-lo no servidor real alteraria papéis; teste isso num
+# servidor descartável.
+#
+# DUMPS CRIPTOGRAFADOS (`.age`): a chave PRIVADA nunca deve morar no cluster. Para o exercício,
+# crie um Secret TEMPORÁRIO a partir de um terminal seu (fora do Claude Code), rode o teste e apague:
+#   kubectl create secret generic age-identity -n consultor --from-file=key=./chave-privada-age.txt
+#   ... rodar o teste ...
+#   kubectl delete secret age-identity -n consultor
+# Sem o Secret, um dump `.age` faz o teste parar com uma mensagem clara.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore-test
+  namespace: consultor
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 1800
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: restore
+          emptyDir: {}
+      initContainers:
+        - name: fetch
+          image: alpine:3.20
+          env:
+            - {name: AWS_ACCESS_KEY_ID, valueFrom: {secretKeyRef: {name: backup-s3, key: access-key}}}
+            - {name: AWS_SECRET_ACCESS_KEY, valueFrom: {secretKeyRef: {name: backup-s3, key: secret-key}}}
+            - {name: S3_HOST, valueFrom: {secretKeyRef: {name: backup-s3, key: endpoint-host}}}
+            - {name: AWS_DEFAULT_REGION, valueFrom: {secretKeyRef: {name: backup-s3, key: region}}}
+            - {name: BUCKET, valueFrom: {secretKeyRef: {name: backup-s3, key: bucket-pg}}}
+            - {name: AWS_EC2_METADATA_DISABLED, value: "true"}
+            - {name: AWS_REQUEST_CHECKSUM_CALCULATION, value: when_required}
+            - {name: AWS_RESPONSE_CHECKSUM_VALIDATION, value: when_required}
+            # Identidade (chave PRIVADA) age, só se o Secret temporário existir.
+            - name: AGE_IDENTITY
+              valueFrom: {secretKeyRef: {name: age-identity, key: key, optional: true}}
+          volumeMounts:
+            - {name: restore, mountPath: /restore}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 384Mi}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache aws-cli > /dev/null
+              E="https://$S3_HOST"
+              KEY=$(aws s3api list-objects-v2 --bucket "$BUCKET" --prefix postgres/ --endpoint-url "$E" --query 'sort_by(Contents,&LastModified)[-1].Key' --output text)
+              [ -n "$KEY" ] && [ "$KEY" != "None" ] || { echo "ERRO: nenhum dump no bucket"; exit 1; }
+              DIR=$(dirname "$KEY")
+              echo "dump mais recente: s3://$BUCKET/$DIR/"
+              aws s3 cp "s3://$BUCKET/$DIR/" /restore/ --recursive --endpoint-url "$E" --only-show-errors
+              cd /restore
+              ls -la
+              # Integridade dos arquivos exatamente como estão no bucket (cifrados, se for o caso).
+              sha256sum -c SHA256SUMS
+              if ls ./*.age > /dev/null 2>&1; then
+                [ -n "${AGE_IDENTITY:-}" ] || { echo "ERRO: dump criptografado (.age) e não há Secret age-identity (ver o cabeçalho deste arquivo)"; exit 2; }
+                apk add --no-cache age > /dev/null
+                printf '%s\n' "$AGE_IDENTITY" > /tmp/identity.txt
+                chmod 600 /tmp/identity.txt
+                for f in ./*.age; do
+                  age -d -i /tmp/identity.txt -o "${f%.age}" "$f"
+                  echo "descriptografado: ${f%.age}"
+                done
+                rm -f /tmp/identity.txt ./*.age
+              fi
+      containers:
+        - name: restore
+          image: postgres:16-alpine
+          env:
+            - {name: PGHOST, value: postgres}
+            - {name: PGUSER, value: postgres}
+            - name: PGPASSWORD
+              valueFrom: {secretKeyRef: {name: postgres-secrets, key: postgres-password}}
+          volumeMounts:
+            - {name: restore, mountPath: /restore}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -u
+              cd /restore
+              FAIL=0
+              TESTDBS=""
+
+              # Apaga os bancos de teste ao sair, aconteça o que acontecer.
+              cleanup() {
+                for t in $TESTDBS; do
+                  echo "removendo banco de teste $t"
+                  psql -d postgres -qc "drop database if exists \"$t\"" || true
+                done
+              }
+              trap cleanup EXIT
+
+              # Contagem exata de linhas de todas as tabelas de usuário, ordenada.
+              counts() {
+                psql -d "$1" -At -F '|' <<'SQL' | sort
+              select format('select %L, count(*) from %I.%I', schemaname || '.' || tablename, schemaname, tablename)
+                from pg_tables where schemaname not in ('pg_catalog','information_schema') \gexec
+              SQL
+              }
+
+              for f in *.dump; do
+                real="${f%.dump}"
+                test="restore_test_$(echo "$real" | tr 'A-Z' 'a-z')"
+                echo "=================== $real -> $test"
+                psql -d postgres -qc "drop database if exists \"$test\""
+                psql -d postgres -qc "create database \"$test\""
+                TESTDBS="$TESTDBS $test"
+
+                if ! pg_restore -d "$test" --no-owner "$f" 2> "/tmp/$real.err"; then
+                  echo "ERRO no pg_restore de $real:"; head -20 "/tmp/$real.err"; FAIL=1; continue
+                fi
+                [ -s "/tmp/$real.err" ] && { echo "avisos do pg_restore:"; head -10 "/tmp/$real.err"; }
+
+                counts "$test" > "/tmp/$real.restored"
+                counts "$real" > "/tmp/$real.live"
+                tables=$(wc -l < "/tmp/$real.restored")
+                if diff -q "/tmp/$real.restored" "/tmp/$real.live" > /dev/null; then
+                  echo "OK: $tables tabelas, contagens idênticas ao banco real"
+                else
+                  echo "DIFERENÇAS de contagem (tabela|restaurado  vs  real; esperado se houve escrita depois do dump):"
+                  diff "/tmp/$real.restored" "/tmp/$real.live" || true
+                fi
+                echo "linhas restauradas por tabela:"; cat "/tmp/$real.restored"
+              done
+
+              [ "$FAIL" = "0" ] && echo "TESTE DE RESTAURAÇÃO: OK" || echo "TESTE DE RESTAURAÇÃO: FALHOU"
+              exit $FAIL
