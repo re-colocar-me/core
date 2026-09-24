@@ -1,0 +1,9 @@
+{
+  "data_view": {
+    "id": "backup-status",
+    "title": "backup-status",
+    "name": "Backups (status)",
+    "timeFieldName": "@timestamp"
+  },
+  "override": true
+}

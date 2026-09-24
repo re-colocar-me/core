@@ -1,0 +1,165 @@
+[
+  {
+    "type": "visualization",
+    "id": "backup-vis-last-ok",
+    "attributes": {
+      "title": "Último backup OK por alvo",
+      "visState": "{\"title\": \"Último backup OK por alvo\", \"type\": \"table\", \"aggs\": [{\"id\": \"1\", \"enabled\": true, \"type\": \"max\", \"schema\": \"metric\", \"params\": {\"field\": \"@timestamp\", \"customLabel\": \"Último backup OK\"}}, {\"id\": \"2\", \"enabled\": true, \"type\": \"terms\", \"schema\": \"bucket\", \"params\": {\"field\": \"target.keyword\", \"orderBy\": \"_key\", \"order\": \"asc\", \"size\": 5, \"otherBucket\": false, \"otherBucketLabel\": \"Outros\", \"missingBucket\": false, \"missingBucketLabel\": \"Sem valor\", \"customLabel\": \"Alvo\"}}], \"params\": {\"perPage\": 10, \"showPartialRows\": false, \"showMetricsAtAllLevels\": false, \"showToolbar\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"percentageCol\": \"\", \"autoFitRowToContent\": false}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"status : \\\"ok\\\"\", \"language\": \"kuery\"}, \"filter\": [], \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+    },
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "backup-status"
+      }
+    ]
+  },
+  {
+    "type": "visualization",
+    "id": "backup-vis-per-day",
+    "attributes": {
+      "title": "Backups por dia",
+      "visState": "{\"title\": \"Backups por dia\", \"type\": \"table\", \"aggs\": [{\"id\": \"1\", \"enabled\": true, \"type\": \"count\", \"schema\": \"metric\", \"params\": {\"customLabel\": \"Execuções\"}}, {\"id\": \"2\", \"enabled\": true, \"type\": \"date_histogram\", \"schema\": \"bucket\", \"params\": {\"field\": \"@timestamp\", \"useNormalizedEsInterval\": true, \"scaleMetricValues\": false, \"interval\": \"1d\", \"drop_partials\": false, \"min_doc_count\": 1, \"extended_bounds\": {}, \"customLabel\": \"Dia\"}}, {\"id\": \"3\", \"enabled\": true, \"type\": \"terms\", \"schema\": \"bucket\", \"params\": {\"field\": \"target.keyword\", \"orderBy\": \"_key\", \"order\": \"asc\", \"size\": 5, \"otherBucket\": false, \"otherBucketLabel\": \"Outros\", \"missingBucket\": false, \"missingBucketLabel\": \"Sem valor\", \"customLabel\": \"Alvo\"}}, {\"id\": \"4\", \"enabled\": true, \"type\": \"terms\", \"schema\": \"bucket\", \"params\": {\"field\": \"status.keyword\", \"orderBy\": \"_key\", \"order\": \"asc\", \"size\": 5, \"otherBucket\": false, \"otherBucketLabel\": \"Outros\", \"missingBucket\": false, \"missingBucketLabel\": \"Sem valor\", \"customLabel\": \"Resultado\"}}], \"params\": {\"perPage\": 10, \"showPartialRows\": false, \"showMetricsAtAllLevels\": false, \"showToolbar\": false, \"showTotal\": false, \"totalFunc\": \"sum\", \"percentageCol\": \"\", \"autoFitRowToContent\": false}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+    },
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "backup-status"
+      }
+    ]
+  },
+  {
+    "type": "visualization",
+    "id": "backup-vis-failures",
+    "attributes": {
+      "title": "Falhas no período",
+      "visState": "{\"title\": \"Falhas no período\", \"type\": \"metric\", \"aggs\": [{\"id\": \"1\", \"enabled\": true, \"type\": \"count\", \"schema\": \"metric\", \"params\": {\"customLabel\": \"Falhas no período\"}}], \"params\": {\"addTooltip\": true, \"addLegend\": false, \"type\": \"metric\", \"metric\": {\"percentageMode\": false, \"useRanges\": true, \"colorSchema\": \"Green to Red\", \"metricColorMode\": \"Background\", \"colorsRange\": [{\"from\": 0, \"to\": 1}, {\"from\": 1, \"to\": 1000000}], \"labels\": {\"show\": true}, \"invertColors\": false, \"style\": {\"bgFill\": \"#000\", \"bgColor\": false, \"labelColor\": false, \"subText\": \"\", \"fontSize\": 60}}}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"status : \\\"failed\\\"\", \"language\": \"kuery\"}, \"filter\": [], \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+    },
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "backup-status"
+      }
+    ]
+  },
+  {
+    "type": "visualization",
+    "id": "backup-vis-help",
+    "attributes": {
+      "title": "Como ler este painel",
+      "visState": "{\"title\": \"Como ler\", \"type\": \"markdown\", \"aggs\": [], \"params\": {\"fontSize\": 12, \"openLinksInNewTab\": false, \"markdown\": \"### Backups: como ler este painel\\n\\n- **Esperado**: um backup `ok` de cada alvo a cada **6 horas**: Postgres às :30 e Elasticsearch às :50 (UTC) das 00, 06, 12 e 18 h.\\n- **Alerta manual**: se o *Último backup OK* de algum alvo tiver **mais de ~7 horas**, ou houver *Falhas no período* acima de zero, investigar.\\n- Se um alvo **não aparece** na tabela, não há nenhum backup `ok` dele no período selecionado (ajuste o intervalo de tempo).\\n- Falhas que acontecem antes do envio (por exemplo no `dump`) não gravam status aqui: conferir `kubectl get jobs -n consultor` e `kubectl logs job/<nome> -n consultor --all-containers`.\\n- Restaurações: `docs/runbooks/restauracao-postgres-e-elasticsearch.md`.\"}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": []}"
+      }
+    },
+    "references": []
+  },
+  {
+    "type": "search",
+    "id": "backup-search-recent",
+    "attributes": {
+      "title": "Últimas execuções de backup",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "target",
+        "status",
+        "files",
+        "bytes",
+        "indices",
+        "docs",
+        "encrypted",
+        "duration_seconds",
+        "prefix"
+      ],
+      "sort": [
+        [
+          "@timestamp",
+          "desc"
+        ]
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+    },
+    "references": [
+      {
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "backup-status"
+      }
+    ]
+  },
+  {
+    "type": "dashboard",
+    "id": "backup-status-dashboard",
+    "attributes": {
+      "title": "Backups: estado",
+      "description": "Estado dos backups do Postgres e do Elasticsearch (índice backup-status).",
+      "panelsJSON": "[{\"version\": \"8.17.6\", \"type\": \"visualization\", \"gridData\": {\"x\": 0, \"y\": 0, \"w\": 24, \"h\": 10, \"i\": \"0\"}, \"panelIndex\": \"0\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_0\"}, {\"version\": \"8.17.6\", \"type\": \"visualization\", \"gridData\": {\"x\": 24, \"y\": 0, \"w\": 24, \"h\": 10, \"i\": \"1\"}, \"panelIndex\": \"1\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_1\"}, {\"version\": \"8.17.6\", \"type\": \"visualization\", \"gridData\": {\"x\": 0, \"y\": 10, \"w\": 24, \"h\": 12, \"i\": \"2\"}, \"panelIndex\": \"2\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_2\"}, {\"version\": \"8.17.6\", \"type\": \"visualization\", \"gridData\": {\"x\": 24, \"y\": 10, \"w\": 24, \"h\": 12, \"i\": \"3\"}, \"panelIndex\": \"3\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_3\"}, {\"version\": \"8.17.6\", \"type\": \"search\", \"gridData\": {\"x\": 0, \"y\": 22, \"w\": 48, \"h\": 16, \"i\": \"4\"}, \"panelIndex\": \"4\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_4\"}]",
+      "optionsJSON": "{\"useMargins\": true, \"syncColors\": false, \"syncCursor\": true, \"syncTooltips\": false, \"hidePanelTitles\": false}",
+      "timeRestore": true,
+      "timeFrom": "now-7d",
+      "timeTo": "now",
+      "refreshInterval": {
+        "pause": false,
+        "value": 60000
+      },
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": []}"
+      }
+    },
+    "references": [
+      {
+        "name": "panel_0",
+        "type": "visualization",
+        "id": "backup-vis-help"
+      },
+      {
+        "name": "panel_1",
+        "type": "visualization",
+        "id": "backup-vis-failures"
+      },
+      {
+        "name": "panel_2",
+        "type": "visualization",
+        "id": "backup-vis-last-ok"
+      },
+      {
+        "name": "panel_3",
+        "type": "visualization",
+        "id": "backup-vis-per-day"
+      },
+      {
+        "name": "panel_4",
+        "type": "search",
+        "id": "backup-search-recent"
+      }
+    ]
+  }
+]

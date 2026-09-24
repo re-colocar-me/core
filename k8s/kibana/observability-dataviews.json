@@ -1,0 +1,52 @@
+[
+  {
+    "data_view": {
+      "id": "logs-all",
+      "title": "logs-*",
+      "name": "Logs (todos os serviços)",
+      "timeFieldName": "@timestamp"
+    },
+    "override": true
+  },
+  {
+    "data_view": {
+      "id": "logs-http",
+      "title": "logs-consultant-bff-production,logs-talent-bff-production,logs-backofficebff-production,logs-vocacionalbff-production,logs-subscribers-production",
+      "name": "Logs HTTP (BFFs e subscribers)",
+      "timeFieldName": "@timestamp",
+      "runtimeFieldMap": {
+        "endpoint": {
+          "type": "keyword",
+          "script": {
+            "source": "def p = doc['metadata.LogDetails.RequestPath.Value']; def m = doc['metadata.LogDetails.RequestMethod']; if (p.size() == 0 || m.size() == 0) return; def norm = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.matcher(p.value).replaceAll('{id}'); emit(m.value + ' ' + norm);"
+          }
+        },
+        "owner_id": {
+          "type": "keyword",
+          "script": {
+            "source": "def p = doc['metadata.LogDetails.RequestPath.Value']; if (p.size() == 0) return; def v = p.value; if (!(v.startsWith('/profile/') || v.startsWith('/notification/') || v.startsWith('/wallet/') || v.startsWith('/schedule/') || v.startsWith('/tratativas/') || v.startsWith('/connections/') || v.startsWith('/resume/') || v.startsWith('/consultant/') || v.startsWith('/services/consultant/'))) return; def m = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.matcher(v); if (m.find()) { emit(m.group()); }"
+          }
+        }
+      }
+    },
+    "override": true
+  },
+  {
+    "data_view": {
+      "id": "logs-grpc",
+      "title": "logs-core-production,logs-wallet-production,logs-vocacional-production,logs-backoffice-production,logs-promocodes-production",
+      "name": "Logs gRPC (core-*)",
+      "timeFieldName": "@timestamp"
+    },
+    "override": true
+  },
+  {
+    "data_view": {
+      "id": "audit-all",
+      "title": "audit-*",
+      "name": "Auditoria",
+      "timeFieldName": "@timestamp"
+    },
+    "override": true
+  }
+]
