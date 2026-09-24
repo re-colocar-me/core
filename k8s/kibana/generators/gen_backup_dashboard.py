@@ -89,8 +89,8 @@ objects.append({"type": "visualization", "id": "backup-vis-failures", "attribute
 # 4) Texto de ajuda (markdown)
 help_md = (
     "### Backups: como ler este painel\n\n"
-    "- **Esperado**: um backup `ok` de cada alvo a cada **6 horas**: Postgres às :30 e Elasticsearch às :50 "
-    "(UTC) das 00, 06, 12 e 18 h.\n"
+    "- **Esperado**: um backup `ok` de cada alvo a cada **6 horas** (UTC, às 00, 06, 12 e 18 h): "
+    "**cluster** (Secrets) às :10, **Postgres** às :30 e **Elasticsearch** às :50.\n"
     "- **Alerta manual**: se o *Último backup OK* de algum alvo tiver **mais de ~7 horas**, ou houver "
     "*Falhas no período* acima de zero, investigar.\n"
     "- Se um alvo **não aparece** na tabela, não há nenhum backup `ok` dele no período selecionado "
