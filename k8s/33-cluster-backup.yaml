@@ -1,0 +1,179 @@
+# Backup LÓGICO do que só existe no cluster: os Secrets do namespace `consultor` (criados à mão, sem
+# cópia no git: só há templates EXAMPLE) e um retrato dos demais recursos vivos (para comparar com o
+# git e reconstruir). Ver docs/specs/backup-elasticsearch-postgres.md (seção 10) e
+# docs/runbooks/reconstruir-cluster.md.
+#
+# Por que não copiar o estado do k3s: o k3s aqui usa SQLite (`server --tls-san ... --write-kubeconfig-mode 644`,
+# sem etcd), então `k3s etcd-snapshot` não existe; copiar o arquivo do banco exigiria hostPath no nó, teria
+# todos os namespaces (inclusive o outro projeto que divide o servidor) e é frágil para restaurar em
+# outro nó. O backup lógico abaixo + manifestos no git + Secrets recria o cluster; o servidor inteiro
+# fica para os backups do Hetzner Cloud (decisão do fundador).
+#
+# SEGURANÇA: este Job tem permissão de LEITURA em todos os Secrets do namespace. Por isso: ServiceAccount
+# própria, só get/list, e o job RECUSA rodar sem `age-recipient` (nunca envia Secret em texto claro); o texto
+# claro só existe em memória (emptyDir em RAM). Não são exportados os Secrets `kubernetes.io/tls` (o
+# cert-manager reemite), tokens de ServiceAccount e o Secret TEMPORÁRIO `age-identity` (a chave PRIVADA
+# usada nos exercícios de restauração: nunca pode entrar num backup, nem cifrada).
+#
+# NÃO é aplicado pelo CI do `core`. Aplicar à mão, com o Secret `backup-s3` (incluindo `age-recipient`):
+#   kubectl apply -f core/k8s/33-cluster-backup.yaml
+# Disparar um teste: kubectl create job --from=cronjob/cluster-backup cluster-backup-manual-1 -n consultor
+# Horário: a cada 6 horas às 00:10, 06:10, 12:10 e 18:10 UTC (antes do Postgres :30 e do ES :50).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-backup
+  namespace: consultor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cluster-backup-reader
+  namespace: consultor
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps", "services", "persistentvolumeclaims"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["get", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cluster-backup-reader
+  namespace: consultor
+subjects:
+  - kind: ServiceAccount
+    name: cluster-backup
+    namespace: consultor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cluster-backup-reader
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cluster-backup
+  namespace: consultor
+spec:
+  schedule: "10 */6 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 900
+      template:
+        spec:
+          serviceAccountName: cluster-backup
+          restartPolicy: Never
+          volumes:
+            # Em RAM: o texto claro dos Secrets nunca toca o disco do nó.
+            - name: work
+              emptyDir: {medium: Memory, sizeLimit: 64Mi}
+          containers:
+            - name: export
+              image: alpine:3.20
+              env:
+                - {name: AWS_ACCESS_KEY_ID, valueFrom: {secretKeyRef: {name: backup-s3, key: access-key}}}
+                - {name: AWS_SECRET_ACCESS_KEY, valueFrom: {secretKeyRef: {name: backup-s3, key: secret-key}}}
+                - {name: S3_HOST, valueFrom: {secretKeyRef: {name: backup-s3, key: endpoint-host}}}
+                - {name: AWS_DEFAULT_REGION, valueFrom: {secretKeyRef: {name: backup-s3, key: region}}}
+                - {name: BUCKET, valueFrom: {secretKeyRef: {name: backup-s3, key: bucket-pg}}}
+                - name: AGE_RECIPIENT
+                  valueFrom: {secretKeyRef: {name: backup-s3, key: age-recipient, optional: true}}
+                - {name: ES_URL, value: "http://elasticsearch:9200"}
+                - {name: AWS_REQUEST_CHECKSUM_CALCULATION, value: when_required}
+                - {name: AWS_RESPONSE_CHECKSUM_VALIDATION, value: when_required}
+                - {name: AWS_EC2_METADATA_DISABLED, value: "true"}
+              volumeMounts:
+                - {name: work, mountPath: /work}
+              resources:
+                requests: {cpu: 50m, memory: 64Mi}
+                limits: {cpu: 300m, memory: 192Mi}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  # Falha fechada: Secret nunca sobe sem criptografia.
+                  [ -n "${AGE_RECIPIENT:-}" ] || { echo "ERRO: sem age-recipient no Secret backup-s3; recuso fazer backup de Secrets em texto claro"; exit 1; }
+                  apk add --no-cache curl jq aws-cli age > /dev/null
+
+                  START=$(date +%s); STATUS=failed; COUNT=0; BYTES=0; NSECRETS=0; NRES=0
+                  SA=/var/run/secrets/kubernetes.io/serviceaccount
+                  NS=$(cat $SA/namespace); TOKEN=$(cat $SA/token)
+                  API="https://kubernetes.default.svc"
+                  TS=$(date -u +%Y%m%dT%H%M%SZ)
+                  OUT="/work/$TS"; mkdir -p "$OUT"
+                  PREFIX="cluster/$(echo "$TS" | cut -c1-4)/$(echo "$TS" | cut -c5-6)/$(echo "$TS" | cut -c7-8)/$TS"
+                  ENDPOINT="https://$S3_HOST"
+
+                  post_status() {
+                    curl -s -m 10 -X POST -H 'Content-Type: application/json' "$ES_URL/backup-status/_doc" \
+                      -d "{\"@timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"target\":\"cluster\",\"status\":\"$STATUS\",\"files\":$COUNT,\"bytes\":$BYTES,\"secrets\":$NSECRETS,\"resources\":$NRES,\"duration_seconds\":$(( $(date +%s) - START )),\"prefix\":\"$PREFIX\",\"encrypted\":true}" \
+                      > /dev/null || echo "aviso: não consegui registrar o status no Elasticsearch"
+                  }
+                  trap post_status EXIT
+
+                  api() { curl -sS -f --cacert "$SA/ca.crt" -H "Authorization: Bearer $TOKEN" "$API$1"; }
+
+                  # 1) Secrets: só Opaque e dockerconfigjson (sem TLS, sem tokens de ServiceAccount), sem campos
+                  #    gerados pelo cluster. A anotação last-applied-configuration é removida porque pode
+                  #    guardar uma cópia dos valores.
+                  api "/api/v1/namespaces/$NS/secrets" | jq '{
+                      apiVersion: "v1", kind: "List",
+                      items: [ .items[]
+                        | select(.type != "kubernetes.io/tls" and .type != "kubernetes.io/service-account-token")
+                        | select(.metadata.name != "age-identity")
+                        | del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.managedFields, .metadata.selfLink, .metadata.ownerReferences)
+                        | del(.metadata.annotations["kubectl.kubernetes.io/last-applied-configuration"]) ] }' > "$OUT/secrets.json"
+                  NSECRETS=$(jq '.items | length' "$OUT/secrets.json")
+                  [ "$NSECRETS" -gt 0 ] || { echo "ERRO: nenhum Secret exportado (RBAC ou filtro errado?)"; exit 1; }
+                  echo "secrets exportados: $NSECRETS"
+
+                  # 2) Retrato dos demais recursos vivos (referência para reconstruir e detectar divergência do git).
+                  : > "$OUT/resources.ndjson"
+                  for p in "api/v1/namespaces/$NS/configmaps" "api/v1/namespaces/$NS/services" "api/v1/namespaces/$NS/persistentvolumeclaims" \
+                           "apis/apps/v1/namespaces/$NS/deployments" "apis/apps/v1/namespaces/$NS/statefulsets" "apis/apps/v1/namespaces/$NS/daemonsets" \
+                           "apis/batch/v1/namespaces/$NS/cronjobs" "apis/networking.k8s.io/v1/namespaces/$NS/ingresses"; do
+                    api "/$p" | jq -c '. as $l | ($l.kind | sub("List$"; "")) as $k | $l.items[]
+                        | del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.managedFields, .metadata.generation, .metadata.selfLink, .status)
+                        | del(.metadata.annotations["kubectl.kubernetes.io/last-applied-configuration"])
+                        | . + {apiVersion: $l.apiVersion, kind: $k}' >> "$OUT/resources.ndjson"
+                  done
+                  NRES=$(wc -l < "$OUT/resources.ndjson")
+                  echo "recursos exportados: $NRES"
+                  printf '{"timestamp":"%s","namespace":"%s","secrets":%s,"resources":%s}\n' "$TS" "$NS" "$NSECRETS" "$NRES" > "$OUT/manifest.json"
+
+                  # 3) Criptografa tudo (várias chaves separadas por vírgula) e apaga o texto claro.
+                  RARGS=""
+                  for r in $(echo "$AGE_RECIPIENT" | tr ',' ' '); do RARGS="$RARGS -r $r"; done
+                  for f in "$OUT"/*; do
+                    # shellcheck disable=SC2086
+                    age $RARGS -o "$f.age" "$f"
+                    [ -s "$f.age" ] || { echo "ERRO: falha ao criptografar $f"; exit 1; }
+                    rm "$f"
+                  done
+                  ( cd "$OUT" && sha256sum ./* > SHA256SUMS )
+
+                  # 4) Envia e confere o tamanho de cada objeto.
+                  for f in "$OUT"/*; do
+                    name=$(basename "$f")
+                    aws s3 cp "$f" "s3://$BUCKET/$PREFIX/$name" --endpoint-url "$ENDPOINT" --only-show-errors
+                    remote=$(aws s3api head-object --bucket "$BUCKET" --key "$PREFIX/$name" --endpoint-url "$ENDPOINT" --query ContentLength --output text)
+                    local_size=$(stat -c %s "$f")
+                    [ "$remote" = "$local_size" ] || { echo "ERRO: tamanho diferente em $name (local $local_size, remoto $remote)"; exit 1; }
+                    COUNT=$((COUNT + 1)); BYTES=$((BYTES + local_size))
+                  done
+                  STATUS=ok
+                  echo "backup do cluster ok: $NSECRETS secrets, $NRES recursos, $COUNT arquivos, $BYTES bytes em s3://$BUCKET/$PREFIX"
