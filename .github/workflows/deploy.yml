@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write   # OIDC para assumir o papel IAM do deploy
     steps:
       - name: Checkout core
         uses: actions/checkout@v4
@@ -45,6 +46,26 @@ jobs:
           docker build -f core/Dockerfile -t ghcr.io/re-colocar-me/core:${{ github.sha }} -t ghcr.io/re-colocar-me/core:latest .
           docker push ghcr.io/re-colocar-me/core:${{ github.sha }}
           docker push ghcr.io/re-colocar-me/core:latest
+
+      - name: Configure AWS credentials (OIDC, no stored keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::492715478912:role/recolocarme-staging-github-deploy
+          aws-region: sa-east-1
+
+      # A 6443 do no NAO e aberta a internet: o job abre um tunel do Session Manager ate ela e o kubectl usa 127.0.0.1:16443.
+      - name: Install Session Manager plugin
+        run: |
+          curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/ssm-plugin.deb
+          sudo dpkg -i /tmp/ssm-plugin.deb > /dev/null
+
+      - name: Open SSM tunnel to the cluster API
+        run: |
+          ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=recolocarme-staging-recolocarme" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].InstanceId" --output text)
+          [ -n "$ID" ] && [ "$ID" != "None" ] || { echo "no do cluster nao encontrado"; exit 1; }
+          nohup aws ssm start-session --target "$ID" --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["6443"],"localPortNumber":["16443"]}' > /tmp/ssm-tunnel.log 2>&1 &
+          for i in $(seq 1 40); do (echo > /dev/tcp/127.0.0.1/16443) 2>/dev/null && exit 0; sleep 1; done
+          echo "tunel SSM nao abriu:"; cat /tmp/ssm-tunnel.log; exit 1
 
       - name: Configure kubeconfig
         run: |
