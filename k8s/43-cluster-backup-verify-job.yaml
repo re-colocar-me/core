@@ -5,16 +5,16 @@
 #
 # Precisa da chave PRIVADA age, que nunca deve morar no cluster: crie um Secret TEMPORÁRIO num terminal
 # seu (fora do Claude Code), rode o teste e apague:
-#   kubectl create secret generic age-identity -n consultor --from-file=key=./chave-privada-age.txt
-#   kubectl delete job cluster-backup-verify -n consultor --ignore-not-found
+#   kubectl create secret generic age-identity -n recolocarme --from-file=key=./chave-privada-age.txt
+#   kubectl delete job cluster-backup-verify -n recolocarme --ignore-not-found
 #   kubectl create -f core/k8s/43-cluster-backup-verify-job.yaml
-#   kubectl logs job/cluster-backup-verify -n consultor
-#   kubectl delete secret age-identity -n consultor
+#   kubectl logs job/cluster-backup-verify -n recolocarme
+#   kubectl delete secret age-identity -n recolocarme
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: cluster-backup-verify
-  namespace: consultor
+  namespace: recolocarme
 spec:
   backoffLimit: 0
   activeDeadlineSeconds: 600

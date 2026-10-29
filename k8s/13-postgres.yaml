@@ -5,7 +5,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init
-  namespace: consultor
+  namespace: recolocarme
 data:
   create-databases.sh: |
     #!/bin/bash
@@ -21,7 +21,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: consultor
+  namespace: recolocarme
 spec:
   clusterIP: None
   selector:
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: consultor
+  namespace: recolocarme
 spec:
   serviceName: postgres
   replicas: 1

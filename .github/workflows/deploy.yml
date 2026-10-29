@@ -54,5 +54,5 @@ jobs:
       - name: Apply manifests and roll out new image
         run: |
           kubectl apply -f core/k8s/20-core.yaml
-          kubectl set image deployment/core core=ghcr.io/re-colocar-me/core:${{ github.sha }} -n consultor
-          kubectl rollout status deployment/core -n consultor --timeout=180s
+          kubectl set image deployment/core core=ghcr.io/re-colocar-me/core:${{ github.sha }} -n recolocarme
+          kubectl rollout status deployment/core -n recolocarme --timeout=180s

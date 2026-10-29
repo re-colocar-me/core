@@ -5,7 +5,7 @@
 # NÃO é aplicado pelo CI do `core` (ele só aplica k8s/20-core.yaml). Aplicar à mão, DEPOIS de o
 # Secret `backup-s3` existir:   kubectl apply -f core/k8s/30-postgres-backup-cronjob.yaml
 # Disparar um teste sem esperar o horário:
-#   kubectl create job --from=cronjob/postgres-backup postgres-backup-manual-1 -n consultor
+#   kubectl create job --from=cronjob/postgres-backup postgres-backup-manual-1 -n recolocarme
 #
 # Horário: a cada 6 horas, às 00:30, 06:30, 12:30 e 18:30 UTC (21:30, 03:30, 09:30 e 15:30 em
 # Brasília). A frequência é uma decisão em aberto da spec; com bancos de menos de 10 MB o custo é
@@ -14,7 +14,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: postgres-backup
-  namespace: consultor
+  namespace: recolocarme
 spec:
   schedule: "30 */6 * * *"
   concurrencyPolicy: Forbid

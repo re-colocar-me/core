@@ -1,4 +1,4 @@
-# Backup LÓGICO do que só existe no cluster: os Secrets do namespace `consultor` (criados à mão, sem
+# Backup LÓGICO do que só existe no cluster: os Secrets do namespace `recolocarme` (criados à mão, sem
 # cópia no git: só há templates EXAMPLE) e um retrato dos demais recursos vivos (para comparar com o
 # git e reconstruir). Ver docs/specs/backup-elasticsearch-postgres.md (seção 10) e
 # docs/runbooks/reconstruir-cluster.md.
@@ -17,19 +17,19 @@
 #
 # NÃO é aplicado pelo CI do `core`. Aplicar à mão, com o Secret `backup-s3` (incluindo `age-recipient`):
 #   kubectl apply -f core/k8s/33-cluster-backup.yaml
-# Disparar um teste: kubectl create job --from=cronjob/cluster-backup cluster-backup-manual-1 -n consultor
+# Disparar um teste: kubectl create job --from=cronjob/cluster-backup cluster-backup-manual-1 -n recolocarme
 # Horário: a cada 6 horas às 00:10, 06:10, 12:10 e 18:10 UTC (antes do Postgres :30 e do ES :50).
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cluster-backup
-  namespace: consultor
+  namespace: recolocarme
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: cluster-backup-reader
-  namespace: consultor
+  namespace: recolocarme
 rules:
   - apiGroups: [""]
     resources: ["secrets", "configmaps", "services", "persistentvolumeclaims"]
@@ -48,11 +48,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cluster-backup-reader
-  namespace: consultor
+  namespace: recolocarme
 subjects:
   - kind: ServiceAccount
     name: cluster-backup
-    namespace: consultor
+    namespace: recolocarme
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -62,7 +62,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: cluster-backup
-  namespace: consultor
+  namespace: recolocarme
 spec:
   schedule: "10 */6 * * *"
   concurrencyPolicy: Forbid

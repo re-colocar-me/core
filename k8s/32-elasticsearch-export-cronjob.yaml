@@ -16,14 +16,14 @@
 # NÃO é aplicado pelo CI do `core`. Aplicar à mão, com o Secret `backup-s3` existente:
 #   kubectl apply -f core/k8s/32-elasticsearch-export-cronjob.yaml
 # Disparar um teste sem esperar o horário:
-#   kubectl create job --from=cronjob/elasticsearch-export es-export-manual-1 -n consultor
+#   kubectl create job --from=cronjob/elasticsearch-export es-export-manual-1 -n recolocarme
 #
 # Horário: a cada 6 horas às 00:50, 06:50, 12:50 e 18:50 UTC (20 minutos depois do dump do Postgres).
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: elasticsearch-export
-  namespace: consultor
+  namespace: recolocarme
 spec:
   schedule: "50 */6 * * *"
   concurrencyPolicy: Forbid
