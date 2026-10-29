@@ -67,7 +67,7 @@ spec:
             - name: HermesAgentOptions__Model
               value: hermes-agent
             - name: HermesAgentOptions__BaseAddress
-              value: "https://bot.colocar-me.com.br/agent-api/"
+              value: "http://hermes.hermes-recolocarme.svc.cluster.local:8642/"
             - name: HermesAgentOptions__ApiKey
               valueFrom:
                 secretKeyRef:
