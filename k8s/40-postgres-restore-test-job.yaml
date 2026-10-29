@@ -5,9 +5,9 @@
 # docs/runbooks/restauracao-postgres-e-elasticsearch.md.
 #
 # Uso (a cada trimestre e depois de qualquer mudança no backup). Um Job não pode ser reaplicado:
-#   kubectl delete job postgres-restore-test -n consultor --ignore-not-found
+#   kubectl delete job postgres-restore-test -n recolocarme --ignore-not-found
 #   kubectl create -f core/k8s/40-postgres-restore-test-job.yaml
-#   kubectl logs job/postgres-restore-test -n consultor -c restore
+#   kubectl logs job/postgres-restore-test -n recolocarme -c restore
 #
 # Diferenças de contagem são ESPERADAS quando o banco real recebeu escritas depois do horário do
 # dump; o que importa é o restore terminar sem erro e as contagens serem coerentes.
@@ -16,15 +16,15 @@
 #
 # DUMPS CRIPTOGRAFADOS (`.age`): a chave PRIVADA nunca deve morar no cluster. Para o exercício,
 # crie um Secret TEMPORÁRIO a partir de um terminal seu (fora do Claude Code), rode o teste e apague:
-#   kubectl create secret generic age-identity -n consultor --from-file=key=./chave-privada-age.txt
+#   kubectl create secret generic age-identity -n recolocarme --from-file=key=./chave-privada-age.txt
 #   ... rodar o teste ...
-#   kubectl delete secret age-identity -n consultor
+#   kubectl delete secret age-identity -n recolocarme
 # Sem o Secret, um dump `.age` faz o teste parar com uma mensagem clara.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: postgres-restore-test
-  namespace: consultor
+  namespace: recolocarme
 spec:
   backoffLimit: 0
   activeDeadlineSeconds: 1800

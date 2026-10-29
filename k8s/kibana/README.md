@@ -27,7 +27,7 @@ Os logs HTTP e gRPC ficam em data views separados porque `metadata.LogDetails.St
 De um lugar com acesso ao cluster, na raiz do repo `core`:
 
 ```
-KB="kubectl exec -i -n consultor elasticsearch-0 -c elasticsearch -- curl -s -H kbn-xsrf:true -H Content-Type:application/json"
+KB="kubectl exec -i -n recolocarme elasticsearch-0 -c elasticsearch -- curl -s -H kbn-xsrf:true -H Content-Type:application/json"
 
 # 1) data views (um por linha; `override` recria o que já existir)
 python3 -c "import json; [print(json.dumps(d)) for d in json.load(open('k8s/kibana/observability-dataviews.json', encoding='utf-8'))]" > /tmp/dvs.txt

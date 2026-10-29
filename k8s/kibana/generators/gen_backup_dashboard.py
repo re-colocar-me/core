@@ -96,7 +96,7 @@ help_md = (
     "- Se um alvo **não aparece** na tabela, não há nenhum backup `ok` dele no período selecionado "
     "(ajuste o intervalo de tempo).\n"
     "- Falhas que acontecem antes do envio (por exemplo no `dump`) não gravam status aqui: conferir "
-    "`kubectl get jobs -n consultor` e `kubectl logs job/<nome> -n consultor --all-containers`.\n"
+    "`kubectl get jobs -n recolocarme` e `kubectl logs job/<nome> -n recolocarme --all-containers`.\n"
     "- Restaurações: `docs/runbooks/restauracao-postgres-e-elasticsearch.md`."
 )
 help_state = {"title": "Como ler", "type": "markdown", "aggs": [], "params": {"fontSize": 12, "openLinksInNewTab": False, "markdown": help_md}}
