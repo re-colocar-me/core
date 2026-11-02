@@ -134,6 +134,7 @@ builder.Services.AddDbContext<ReColocarmeContext>((IServiceProvider serviceProvi
 });
 
 builder.Services.RegisterMasstransit(configuration);
+builder.Services.AddHostedService<core.IoC.Messaging.JourneyEventsConsumer>();
 
 var app = builder.Build();
 
