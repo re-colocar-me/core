@@ -782,6 +782,61 @@ namespace core.Services
             return reply;
         }
 
+        // docs/specs/candidaturas-talent.md, 6.1
+        public override async Task<defaultReply> SuggestJobFitAnalysis(SuggestJobFitAnalysisRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var result = await _resumeSuggestionService.SuggestJobFitAnalysisAsync(Guid.Parse(request.OwnerId), request.JobDescription);
+
+                var data = new SuggestJobFitAnalysisReply
+                {
+                    HasScore = result.Score.HasValue,
+                    Score = result.Score ?? 0,
+                    Summary = result.Summary
+                };
+                data.MissingKeywords.AddRange(result.MissingKeywords);
+                data.SuggestedAdjustments.AddRange(result.Adjustments);
+
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
+        // docs/specs/candidaturas-talent.md, 6.2
+        public override async Task<defaultReply> SuggestFollowUpMessage(SuggestFollowUpMessageRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var messageText = await _resumeSuggestionService.SuggestFollowUpMessageAsync(
+                    Guid.Parse(request.OwnerId), request.Company, request.Role, request.DaysSinceApplied,
+                    string.IsNullOrWhiteSpace(request.JobDescription) ? null : request.JobDescription);
+
+                reply.Data = Any.Pack(new SuggestFollowUpMessageReply { MessageText = messageText });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception e)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error()
+                {
+                    Message = e.Message
+                };
+            }
+            return reply;
+        }
+
         // docs/specs/compra-agendamento-servico-consultor.md
         public override async Task<defaultReply> CreateServicePurchase(CreateServicePurchaseRequest request, ServerCallContext context)
         {
