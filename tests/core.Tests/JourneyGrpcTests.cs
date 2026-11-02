@@ -13,11 +13,12 @@ public class JourneyGrpcTests
 
     private readonly FakeTimeProvider _clock = new(new DateTimeOffset(2026, 11, 1, 12, 0, 0, TimeSpan.Zero));
     private readonly InMemoryJourneyRepository _repo = new();
+    private readonly FakeProfiles _profiles = new();
     private readonly core.Services.JourneyService _grpc;
 
     public JourneyGrpcTests()
     {
-        _grpc = new core.Services.JourneyService(new domain.Services.JourneyService(_repo, _clock), _clock);
+        _grpc = new core.Services.JourneyService(new domain.Services.JourneyService(_repo, _clock), _clock, _profiles);
     }
 
     private static T Data<T>(defaultReply reply) where T : Google.Protobuf.IMessage<T>, new()
@@ -204,6 +205,90 @@ public class JourneyGrpcTests
         AssertFail(await _grpc.StartNewCycle(new StartNewCycleRequest { ProfileId = Profile, Origin = "reactivation" }, null!), "ciclo anterior");
     }
 
+    // ---------- GetSearchStatuses (candidaturas-talent.md, seção 10) ----------
+
+    private const string Other = "22222222-2222-2222-2222-222222222222";
+    private const string Third = "33333333-3333-3333-3333-333333333333";
+
+    private async Task<SearchStatusesReply> Statuses(params string[] ids)
+    {
+        var request = new SearchStatusesRequest();
+        request.ProfileIds.AddRange(ids);
+        return Data<SearchStatusesReply>(await _grpc.GetSearchStatuses(request, null!));
+    }
+
+    private Task OpenCycleFor(string profile)
+        => _grpc.SetJourneySituation(new SetJourneySituationRequest { ProfileId = profile, Situation = "nao" }, null!);
+
+    [Fact]
+    public async Task Estado_da_busca_distingue_ativo_pausado_recolocado_e_sem_ciclo()
+    {
+        await OpenCycleFor(Profile);
+        await OpenCycleFor(Other);
+        await _grpc.PauseSearch(new JourneyActionRequest { ProfileId = Other }, null!);
+        await OpenCycleFor(Third);
+        await _grpc.ConfirmRecolocation(new ConfirmRecolocationRequest { ProfileId = Third, OutcomeType = "clt" }, null!);
+        const string never = "44444444-4444-4444-4444-444444444444";
+
+        var reply = await Statuses(Profile, Other, Third, never);
+
+        string StatusOf(string id) => reply.Items.Single(x => x.ProfileId == id).Status;
+        Assert.Equal("active", StatusOf(Profile));
+        Assert.Equal("paused", StatusOf(Other));
+        Assert.Equal("recolocated", StatusOf(Third));
+        Assert.Equal("none", StatusOf(never));
+        Assert.Equal(0, reply.Items.Single(x => x.ProfileId == never).CycleNumber);
+        Assert.Equal(1, reply.Items.Single(x => x.ProfileId == Profile).CycleNumber);
+    }
+
+    [Fact]
+    public async Task Depois_de_continuar_buscando_o_estado_e_o_do_ciclo_novo()
+    {
+        await OpenCycleFor(Profile);
+        await _grpc.ConfirmRecolocation(new ConfirmRecolocationRequest { ProfileId = Profile, OutcomeType = "clt" }, null!);
+        await _grpc.StartNewCycle(new StartNewCycleRequest { ProfileId = Profile, Origin = "continue_searching" }, null!);
+
+        var item = (await Statuses(Profile)).Items.Single();
+
+        Assert.Equal("active", item.Status);
+        Assert.Equal(2, item.CycleNumber);
+    }
+
+    [Fact]
+    public async Task Estado_da_busca_traz_o_nome_do_perfil_e_vazio_se_nao_ha_perfil()
+    {
+        _profiles.Add(Guid.Parse(Profile), "Maria", "Souza");
+        await OpenCycleFor(Profile);
+        await OpenCycleFor(Other);
+
+        var reply = await Statuses(Profile, Other);
+
+        Assert.Equal("Maria Souza", reply.Items.Single(x => x.ProfileId == Profile).Name);
+        Assert.Equal("", reply.Items.Single(x => x.ProfileId == Other).Name);
+    }
+
+    [Fact]
+    public async Task Pedido_repetido_de_perfil_devolve_uma_linha_so()
+    {
+        await OpenCycleFor(Profile);
+
+        Assert.Single((await Statuses(Profile, Profile)).Items);
+    }
+
+    [Fact]
+    public async Task Estado_da_busca_recusa_lista_vazia_perfil_invalido_e_lote_grande_demais()
+    {
+        AssertFail(await _grpc.GetSearchStatuses(new SearchStatusesRequest(), null!), "ao menos um");
+
+        var invalid = new SearchStatusesRequest();
+        invalid.ProfileIds.Add("nao-e-guid");
+        AssertFail(await _grpc.GetSearchStatuses(invalid, null!), "profileId");
+
+        var big = new SearchStatusesRequest();
+        big.ProfileIds.AddRange(Enumerable.Range(1, core.Services.JourneyService.MaxStatusBatch + 1).Select(_ => Guid.NewGuid().ToString()));
+        AssertFail(await _grpc.GetSearchStatuses(big, null!), "no máximo");
+    }
+
     [Fact]
     public void Nomes_de_fio_cobrem_todos_os_passos_e_eventos()
     {
@@ -216,4 +301,23 @@ public class JourneyGrpcTests
         }
         Assert.False(JourneyNames.TryParseEvent("nao-existe", out _));
     }
+}
+
+/// <summary>Perfis em memória: só o que o <c>GetSearchStatuses</c> usa (buscar por ids).</summary>
+internal sealed class FakeProfiles : core.domain.Interfaces.Infrastructure.Repositories.IProfileRepository
+{
+    private readonly Dictionary<Guid, core.domain.Entities.Profile> _items = [];
+
+    public void Add(Guid id, string first, string last)
+        => _items[id] = new core.domain.Entities.Profile { Id = id, Name = new core.domain.Entities.PersonName { FirstName = first, LastName = last } };
+
+    public Task<List<core.domain.Entities.Profile>> GetByIdsAsync(IEnumerable<Guid> ids)
+        => Task.FromResult(ids.Where(_items.ContainsKey).Select(x => _items[x]).ToList());
+
+    public Task<core.domain.Entities.Profile?> GetByIdAsync(Guid id) => throw new NotSupportedException();
+    public Task<core.domain.Entities.Profile?> GetByEmailAsync(string email, core.domain.Enums.RoleType? role = null) => throw new NotSupportedException();
+    public Task<core.domain.Entities.Profile?> GetByPlatformIdAsync(string source, string platformId) => throw new NotSupportedException();
+    public Task<core.domain.Entities.Profile> AddAsync(core.domain.Entities.Profile profile) => throw new NotSupportedException();
+    public Task UpdateAsync(core.domain.Entities.Profile profile) => throw new NotSupportedException();
+    public Task<List<core.domain.Entities.Profile>> SearchByNameAsync(string name, core.domain.Enums.RoleType? role) => throw new NotSupportedException();
 }

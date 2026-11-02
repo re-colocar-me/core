@@ -15,6 +15,27 @@ service Journey {
   rpc ConfirmRecolocation (ConfirmRecolocationRequest) returns (common.defaultReply);
   // "Continuar buscando" ou reativação; a reativação é da spec reativacao-jornada-talent.md.
   rpc StartNewCycle (StartNewCycleRequest) returns (common.defaultReply);
+  // Estado da busca de várias pessoas de uma vez, para quem publica lembretes (core-applications) decidir se emite (candidaturas-talent.md, seção 10).
+  rpc GetSearchStatuses (SearchStatusesRequest) returns (common.defaultReply);
+}
+
+// No máximo 500 perfis por chamada.
+message SearchStatusesRequest {
+  repeated string profileIds = 1;
+}
+
+message SearchStatusItem {
+  string profileId = 1;
+  // active | paused | recolocated | none (nunca teve ciclo, ou o último foi substituído sem outro aberto).
+  string status = 2;
+  // Número do ciclo aberto ou, sem aberto, do último; 0 se status = none.
+  int32 cycleNumber = 3;
+  // Nome completo do perfil para a saudação da mensagem; vazio se o perfil não existe ou não tem nome.
+  string name = 4;
+}
+
+message SearchStatusesReply {
+  repeated SearchStatusItem items = 1;
 }
 
 message JourneyProfileRequest {

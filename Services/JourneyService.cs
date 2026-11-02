@@ -2,6 +2,7 @@ using System.Globalization;
 using core.domain;
 using core.domain.Entities;
 using core.domain.Enums;
+using core.domain.Interfaces.Infrastructure.Repositories;
 using core.domain.Interfaces.Services;
 using core.domain.Services;
 using Grpc.Core;
@@ -17,14 +18,42 @@ namespace core.Services
     {
         private const string Producer = "core";
 
+        /// <summary>Teto de perfis por chamada de <c>GetSearchStatuses</c>.</summary>
+        public const int MaxStatusBatch = 500;
+
         private readonly IJourneyService _journey;
         private readonly TimeProvider _time;
+        private readonly IProfileRepository _profiles;
 
-        public JourneyService(IJourneyService journey, TimeProvider time)
+        public JourneyService(IJourneyService journey, TimeProvider time, IProfileRepository profiles)
         {
             _journey = journey;
             _time = time;
+            _profiles = profiles;
         }
+
+        public override Task<defaultReply> GetSearchStatuses(SearchStatusesRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                if (request.ProfileIds.Count == 0)
+                    throw new ArgumentException("Informe ao menos um profileId.");
+                if (request.ProfileIds.Count > MaxStatusBatch)
+                    throw new ArgumentException($"No máximo {MaxStatusBatch} perfis por chamada.");
+
+                var ids = request.ProfileIds.Select(x => ParseGuid(x, "profileId")).Distinct().ToList();
+                var statuses = await _journey.GetSearchStatusesAsync(ids);
+                var names = (await _profiles.GetByIdsAsync(ids)).ToDictionary(x => x.Id, x => x.Name?.FullName ?? string.Empty);
+
+                var reply = new SearchStatusesReply();
+                reply.Items.AddRange(statuses.Select(x => new SearchStatusItem
+                {
+                    ProfileId = x.ProfileId.ToString(),
+                    Status = x.Status is { } status and not JourneyCycleStatus.Superseded ? Status(status) : "none",
+                    CycleNumber = x.CycleNumber,
+                    Name = names.GetValueOrDefault(x.ProfileId, string.Empty)
+                }));
+                return reply;
+            });
 
         public override Task<defaultReply> GetJourneyState(JourneyProfileRequest request, ServerCallContext context)
             => Run(async () => await StateAsync(ParseGuid(request.ProfileId, "profileId")));
@@ -207,7 +236,7 @@ namespace core.Services
                 : throw new ArgumentException($"{field} inválido.");
 
         /// <summary>O padrão do projeto: nunca lança para o cliente; erro vira <c>statuscode</c> de falha com a mensagem.</summary>
-        private static async Task<defaultReply> Run(Func<Task<JourneyStateReply>> action)
+        private static async Task<defaultReply> Run<T>(Func<Task<T>> action) where T : Google.Protobuf.IMessage
         {
             var reply = new defaultReply();
             try
