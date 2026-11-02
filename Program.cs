@@ -89,6 +89,7 @@ builder.Services.AddTransient<IResumeSuggestionService, ResumeSuggestionService>
 builder.Services.AddTransient<ITutorialService, TutorialService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddTransient<IJourneyService, JourneyService>();
+builder.Services.AddTransient<IJourneyRecorder, JourneyRecorder>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.

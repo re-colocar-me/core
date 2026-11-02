@@ -18,9 +18,11 @@ namespace core.Services
         private readonly ISwotAnalysisRepository _swotAnalysisRepository;
         private readonly ISkillGapAnalysisRepository _skillGapAnalysisRepository;
         private readonly ILinkedinSuggestionRepository _linkedinSuggestionRepository;
+        private readonly IJourneyRecorder _journeyRecorder;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder)
         {
+            _journeyRecorder = journeyRecorder;
             _services = services;
             _profileService = profileService;
             _talentServices = talentServices;
@@ -575,6 +577,7 @@ namespace core.Services
                 var ownerId = Guid.Parse(request.OwnerId);
                 var analysisText = await _resumeSuggestionService.SuggestSwotAnalysisAsync(ownerId, request.VocationalSummary);
                 await _swotAnalysisRepository.SaveAsync(ownerId, analysisText);
+                await _journeyRecorder.RecordAsync(ownerId, JourneyEventType.SwotGenerated);
 
                 reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText, UpdatedAt = DateTime.UtcNow.ToString("O") });
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -670,6 +673,7 @@ namespace core.Services
                 var ownerId = Guid.Parse(request.OwnerId);
                 var suggestionText = await _resumeSuggestionService.SuggestLinkedinProfileAsync(ownerId);
                 await _linkedinSuggestionRepository.SaveAsync(ownerId, suggestionText);
+                await _journeyRecorder.RecordAsync(ownerId, JourneyEventType.LinkedinReviewGenerated);
 
                 reply.Data = Any.Pack(new LinkedinSuggestionReply { Found = true, SuggestionText = suggestionText, UpdatedAt = DateTime.UtcNow.ToString("O") });
                 reply.Statuscode = Constants.SuccessStatusCode;
@@ -808,6 +812,9 @@ namespace core.Services
                     unitPrice,
                     offering.PriceInLemonCoins,
                     Guid.Parse(request.WalletDebitTransactionId));
+
+                // Sem passo associado na tabela 3.2: fica no registro de eventos da jornada, sem mudar o estado.
+                await _journeyRecorder.RecordAsync(Guid.Parse(request.CandidateId), JourneyEventType.ServicePurchased);
 
                 reply.Data = Any.Pack(new CreateServicePurchaseReply { Id = purchase.Id.ToString(), TotalSessions = purchase.TotalSessions });
                 reply.Statuscode = Constants.SuccessStatusCode;
