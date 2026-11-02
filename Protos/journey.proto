@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package journey;
+
+// docs/specs/estado-historico-jornada-talent.md, seção 6. Todas as datas são ISO 8601 em UTC ("o"); vazio quando não há.
+service Journey {
+  // Ciclo vigente (ou o último, se nenhum está aberto), passo atual, passos com as datas, semana da busca e histórico.
+  rpc GetJourneyState (JourneyProfileRequest) returns (common.defaultReply);
+  rpc SetJourneySituation (SetJourneySituationRequest) returns (common.defaultReply);
+  rpc PauseSearch (JourneyActionRequest) returns (common.defaultReply);
+  rpc ResumeSearch (JourneyActionRequest) returns (common.defaultReply);
+  rpc ConfirmRecolocation (ConfirmRecolocationRequest) returns (common.defaultReply);
+  // "Continuar buscando" ou reativação; a reativação é da spec reativacao-jornada-talent.md.
+  rpc StartNewCycle (StartNewCycleRequest) returns (common.defaultReply);
+}
+
+message JourneyProfileRequest {
+  string profileId = 1;
+}
+
+// eventId é opcional: o BFF o manda para tornar a repetição do pedido idempotente (a mesma ação com o mesmo eventId vale uma vez).
+message JourneyActionRequest {
+  string profileId = 1;
+  string eventId = 2;
+}
+
+message SetJourneySituationRequest {
+  string profileId = 1;
+  string eventId = 2;
+  // desligado | transicao | empregado | outra | nao
+  string situation = 3;
+  // semana | quatro_semanas | um_a_tres_meses | mais_de_tres_meses | nao (só para "desligado")
+  string timeSinceLayoff = 4;
+}
+
+message ConfirmRecolocationRequest {
+  string profileId = 1;
+  string eventId = 2;
+  // clt | pj | autonomo | negocio | outro
+  string outcomeType = 3;
+  // Data aproximada do início (ISO 8601); opcional.
+  string outcomeDate = 4;
+  bool areaChange = 5;
+}
+
+message StartNewCycleRequest {
+  string profileId = 1;
+  // continue_searching | reactivation
+  string origin = 2;
+}
+
+message JourneyStepState {
+  // situation | vocational-test | resume | swot | linkedin-gift | adjustments | search | outcome
+  string stepKey = 1;
+  string becameCurrentAt = 2;
+  string completedAt = 3;
+  bool inherited = 4;
+  // Só em "adjustments": simulações de entrevista concluídas.
+  int32 count = 5;
+  // Só em "search": primeira candidatura.
+  string startedAt = 6;
+}
+
+message JourneyCycleState {
+  string id = 1;
+  int32 number = 2;
+  // first_access | continue_searching | reactivation
+  string origin = 3;
+  // active | paused | recolocated | superseded
+  string status = 4;
+  string startedAt = 5;
+  string pausedAt = 6;
+  string resumedAt = 7;
+  string situation = 8;
+  string timeSinceLayoff = 9;
+  string outcomeType = 10;
+  string outcomeDate = 11;
+  bool hasAreaChange = 12;
+  bool areaChange = 13;
+  string closedAt = 14;
+  repeated JourneyStepState steps = 15;
+}
+
+message JourneyCycleSummary {
+  int32 number = 1;
+  string origin = 2;
+  string status = 3;
+  string startedAt = 4;
+  string closedAt = 5;
+  string outcomeType = 6;
+  string outcomeDate = 7;
+  bool hasAreaChange = 8;
+  bool areaChange = 9;
+}
+
+message JourneyStateReply {
+  bool hasCycle = 1;
+  // O ciclo aberto; se não há, o último (por exemplo, o recolocado).
+  JourneyCycleState cycle = 2;
+  // O ciclo acima está aberto (active ou paused)?
+  bool isOpen = 3;
+  // Passo atual (chave) e desde quando; vazios se não há ciclo aberto ou o pré-requisito ainda falta.
+  string currentStep = 4;
+  string currentStepSince = 5;
+  // "Semana N da busca" (D5.2); 0 sem ciclo.
+  int32 weekOfSearch = 6;
+  // Todos os ciclos, do mais recente ao mais antigo.
+  repeated JourneyCycleSummary history = 7;
+}

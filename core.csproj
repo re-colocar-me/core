@@ -7,6 +7,14 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <!-- Os testes moram numa pasta própria dentro do projeto; sem isto o glob do SDK os compilaria no serviço. -->
+    <Compile Remove="tests\**" />
+    <None Remove="tests\**" />
+    <Content Remove="tests\**" />
+    <EmbeddedResource Remove="tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="Protos\consultant.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\profile.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\consultantservices.proto" GrpcServices="Server" />
@@ -14,6 +22,7 @@
     <Protobuf Include="Protos\notification.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\talent.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\tutorial.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\journey.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\common.proto" GrpcServices="None" />
   </ItemGroup>
 
