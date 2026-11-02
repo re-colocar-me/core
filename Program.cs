@@ -74,6 +74,7 @@ builder.Services.AddTransient<IConsultantServicesRepository, ConsultantServicesR
 builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddTransient<ITalentRepository, TalentRepository>();
 builder.Services.AddTransient<ITutorialRepository, TutorialRepository>();
+builder.Services.AddTransient<IJourneyRepository, JourneyRepository>();
 builder.Services.AddTransient<ISwotAnalysisRepository, SwotAnalysisRepository>();
 builder.Services.AddTransient<ISkillGapAnalysisRepository, SkillGapAnalysisRepository>();
 builder.Services.AddTransient<ILinkedinSuggestionRepository, LinkedinSuggestionRepository>();
@@ -86,6 +87,8 @@ builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IScheduleService, ScheduleService>();
 builder.Services.AddTransient<IResumeSuggestionService, ResumeSuggestionService>();
 builder.Services.AddTransient<ITutorialService, TutorialService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddTransient<IJourneyService, JourneyService>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
