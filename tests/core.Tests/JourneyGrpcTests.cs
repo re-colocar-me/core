@@ -328,6 +328,29 @@ public class JourneyGrpcTests
     }
 
     [Fact]
+    public async Task Estado_da_busca_traz_o_inicio_a_pausa_e_a_retomada_do_ciclo()
+    {
+        await OpenCycleFor(Profile);
+        var started = (await Statuses(Profile)).Items.Single();
+        Assert.Equal("2026-11-01T12:00:00.0000000Z", started.CycleStartedAt);
+        Assert.Equal("", started.CyclePausedAt);
+        Assert.Equal("", started.CycleResumedAt);
+
+        _clock.Advance(TimeSpan.FromDays(3));
+        await _grpc.PauseSearch(new JourneyActionRequest { ProfileId = Profile }, null!);
+        var paused = (await Statuses(Profile)).Items.Single();
+        Assert.Equal("paused", paused.Status);
+        Assert.Equal("2026-11-04T12:00:00.0000000Z", paused.CyclePausedAt);
+
+        _clock.Advance(TimeSpan.FromDays(14));
+        await _grpc.ResumeSearch(new JourneyActionRequest { ProfileId = Profile }, null!);
+        var resumed = (await Statuses(Profile)).Items.Single();
+        Assert.Equal("active", resumed.Status);
+        Assert.Equal("2026-11-18T12:00:00.0000000Z", resumed.CycleResumedAt);
+        Assert.Equal("2026-11-01T12:00:00.0000000Z", resumed.CycleStartedAt);   // o início do ciclo não muda
+    }
+
+    [Fact]
     public void Nomes_de_fio_cobrem_todos_os_passos_e_eventos()
     {
         foreach (var key in System.Enum.GetValues<domain.Enums.JourneyStepKey>())

@@ -50,7 +50,10 @@ namespace core.Services
                     ProfileId = x.ProfileId.ToString(),
                     Status = x.Status is { } status and not JourneyCycleStatus.Superseded ? Status(status) : "none",
                     CycleNumber = x.CycleNumber,
-                    Name = names.GetValueOrDefault(x.ProfileId, string.Empty)
+                    Name = names.GetValueOrDefault(x.ProfileId, string.Empty),
+                    CycleStartedAt = Iso(x.StartedAt),
+                    CyclePausedAt = Iso(x.PausedAt),
+                    CycleResumedAt = Iso(x.ResumedAt)
                 }));
                 return reply;
             });

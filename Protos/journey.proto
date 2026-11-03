@@ -34,6 +34,11 @@ message SearchStatusItem {
   int32 cycleNumber = 3;
   // Nome completo do perfil para a saudação da mensagem; vazio se o perfil não existe ou não tem nome.
   string name = 4;
+  // Datas do ciclo mostrado (ISO 8601 UTC; vazio quando não há): início, última pausa e última retomada. Servem ao check-in quinzenal
+  // (contado do início do ciclo ou da retomada) e ao lembrete de retomada (contado da pausa).
+  string cycleStartedAt = 5;
+  string cyclePausedAt = 6;
+  string cycleResumedAt = 7;
 }
 
 message SearchStatusesReply {
