@@ -58,6 +58,14 @@ namespace core.Services
         public override Task<defaultReply> GetJourneyState(JourneyProfileRequest request, ServerCallContext context)
             => Run(async () => await StateAsync(ParseGuid(request.ProfileId, "profileId")));
 
+        public override Task<defaultReply> EnsureJourneyCycle(JourneyProfileRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                var profileId = ParseGuid(request.ProfileId, "profileId");
+                await _journey.EnsureCycleAsync(profileId, _time.GetUtcNow().UtcDateTime);
+                return await StateAsync(profileId);
+            });
+
         public override Task<defaultReply> SetJourneySituation(SetJourneySituationRequest request, ServerCallContext context)
             => Run(async () =>
             {

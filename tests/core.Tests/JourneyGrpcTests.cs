@@ -289,6 +289,44 @@ public class JourneyGrpcTests
         AssertFail(await _grpc.GetSearchStatuses(big, null!), "no máximo");
     }
 
+    // ---------- EnsureJourneyCycle (primeiro acesso do BFF) ----------
+
+    [Fact]
+    public async Task Garantir_o_ciclo_abre_o_ciclo_1_sem_responder_a_situacao()
+    {
+        var state = Data<JourneyStateReply>(await _grpc.EnsureJourneyCycle(new JourneyProfileRequest { ProfileId = Profile }, null!));
+
+        Assert.True(state.HasCycle);
+        Assert.True(state.IsOpen);
+        Assert.Equal(1, state.Cycle.Number);
+        Assert.Equal("first_access", state.Cycle.Origin);
+        Assert.Equal("", state.Cycle.Situation);                                    // nada foi respondido
+        Assert.Equal("situation", state.CurrentStep);                               // a pessoa ainda precisa responder
+        Assert.All(state.Cycle.Steps, s => Assert.Equal("", s.CompletedAt));
+    }
+
+    [Fact]
+    public async Task Garantir_o_ciclo_e_idempotente_e_a_resposta_real_da_situacao_vale_depois()
+    {
+        await _grpc.EnsureJourneyCycle(new JourneyProfileRequest { ProfileId = Profile }, null!);
+        var again = Data<JourneyStateReply>(await _grpc.EnsureJourneyCycle(new JourneyProfileRequest { ProfileId = Profile }, null!));
+        Assert.Single(again.History);
+
+        var answered = Data<JourneyStateReply>(await Situation("desligado", "semana"));
+
+        Assert.Equal("desligado", answered.Cycle.Situation);
+        Assert.Equal("semana", answered.Cycle.TimeSinceLayoff);
+        Assert.Equal(1, answered.Cycle.Number);
+        Assert.Single(answered.History);
+    }
+
+    [Fact]
+    public async Task Garantir_o_ciclo_recusa_perfil_invalido_com_erro_e_nao_excecao()
+    {
+        AssertFail(await _grpc.EnsureJourneyCycle(new JourneyProfileRequest { ProfileId = "nao-e-guid" }, null!), "profileId");
+        AssertFail(await _grpc.EnsureJourneyCycle(new JourneyProfileRequest { ProfileId = "00000000-0000-0000-0000-000000000000" }, null!), "profileId");
+    }
+
     [Fact]
     public void Nomes_de_fio_cobrem_todos_os_passos_e_eventos()
     {

@@ -17,6 +17,8 @@ service Journey {
   rpc StartNewCycle (StartNewCycleRequest) returns (common.defaultReply);
   // Estado da busca de várias pessoas de uma vez, para quem publica lembretes (core-applications) decidir se emite (candidaturas-talent.md, seção 10).
   rpc GetSearchStatuses (SearchStatusesRequest) returns (common.defaultReply);
+  // Primeiro acesso: abre o ciclo 1 se a pessoa nunca teve ciclo, SEM responder a situação (o passo continua em aberto). Idempotente. Devolve o estado.
+  rpc EnsureJourneyCycle (JourneyProfileRequest) returns (common.defaultReply);
 }
 
 // No máximo 500 perfis por chamada.
