@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package account;
+
+// Exclusão de conta (docs/specs/exclusao-de-conta-talent.md). Só interno: chamado pelo talent-bff.
+service Account {
+  // Apaga a jornada, o currículo, as notificações, o tutorial e os documentos de análise do talento, e anonimiza conexões, compras e
+  // agendamentos (o consultor continua vendo o histórico, com "Conta excluída"). Idempotente. Perfil que não é só de talento: 409.
+  rpc DeleteTalentAccount (DeleteTalentAccountRequest) returns (common.defaultReply);
+}
+
+message DeleteTalentAccountRequest {
+  string profileId = 1;
+}
+
+message DeleteTalentAccountReply {
+  bool profileFound = 1;
+  bool talentRemoved = 2;
+  int32 cycles = 3;
+  int32 eventLogs = 4;
+  int32 notifications = 5;
+  int32 tutorialRecords = 6;
+  int32 connectionsAnonymized = 7;
+  int32 purchasesAnonymized = 8;
+  int32 schedulesAnonymized = 9;
+  int32 documents = 10;
+}

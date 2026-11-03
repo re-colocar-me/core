@@ -78,6 +78,9 @@ builder.Services.AddTransient<IJourneyRepository, JourneyRepository>();
 builder.Services.AddTransient<ISwotAnalysisRepository, SwotAnalysisRepository>();
 builder.Services.AddTransient<ISkillGapAnalysisRepository, SkillGapAnalysisRepository>();
 builder.Services.AddTransient<ILinkedinSuggestionRepository, LinkedinSuggestionRepository>();
+builder.Services.AddTransient<IAccountErasureRepository, AccountErasureRepository>();
+builder.Services.AddTransient<IPersonalDocumentsEraser, PersonalDocumentsEraser>();
+builder.Services.AddTransient<AccountErasureService>();
 
 builder.Services.AddTransient<IConsultantServiceServices, ConsultantServiceServices>();
 builder.Services.AddTransient<IConsultantServices, ConsultantService>();
@@ -144,6 +147,7 @@ app.MapGrpcService<coreServices.AuthenticationService>();
 app.MapGrpcService<coreServices.NotificationService>();
 app.MapGrpcService<coreServices.ConsultantService>();
 app.MapGrpcService<coreServices.TalentService>();
+app.MapGrpcService<coreServices.AccountService>();
 app.MapGrpcService<coreServices.ConsultantServicesService>();
 app.MapGrpcService<coreServices.ProfileService>();
 app.MapGrpcService<coreServices.TutorialService>();
