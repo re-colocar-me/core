@@ -9,7 +9,8 @@
 # lifecycle), sob o prefixo elasticsearch/AAAA/MM/DD/<timestamp>/. O restore está em
 # k8s/42-elasticsearch-restore-test-job.yaml e em docs/runbooks/restauracao-postgres-e-elasticsearch.md.
 #
-# Índices cobertos: emails-*, swot-analysis, linkedin-profile-suggestion, skill-gap-analysis.
+# Índices cobertos: emails-*, swot-analysis, linkedin-profile-suggestion, skill-gap-analysis e, do core-applications, applications,
+# free-practice e search-settings (cartões de candidatura, treinos e configurações: dado pessoal que não existe em outro lugar).
 # Logs e métricas ficam de fora de propósito (descartáveis). Índice que ainda não existe (por exemplo
 # emails-* antes de o core-emails ser implantado) é simplesmente ignorado.
 #
@@ -53,7 +54,7 @@ spec:
                   valueFrom: {secretKeyRef: {name: backup-s3, key: age-recipient, optional: true}}
                 - {name: ES_URL, value: "http://elasticsearch:9200"}
                 - {name: KIBANA_URL, value: "http://kibana:5601"}
-                - {name: INDEX_PATTERNS, value: "emails-*,swot-analysis,linkedin-profile-suggestion,skill-gap-analysis"}
+                - {name: INDEX_PATTERNS, value: "emails-*,swot-analysis,linkedin-profile-suggestion,skill-gap-analysis,applications,free-practice,search-settings"}
                 - {name: AWS_REQUEST_CHECKSUM_CALCULATION, value: when_required}
                 - {name: AWS_RESPONSE_CHECKSUM_VALIDATION, value: when_required}
                 - {name: AWS_EC2_METADATA_DISABLED, value: "true"}
