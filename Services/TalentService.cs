@@ -931,6 +931,9 @@ namespace core.Services
                     consultants[id] = consultant;
             }
 
+            // O andamento do processo é o estágio da tratativa do consultor ligada à compra (vazio se a compra não tem tratativa).
+            var stages = await _scheduleService.GetTratativaStagesByPurchase(purchases.Select(x => x.Id));
+
             var entries = new List<servicePurchaseEntry>();
             foreach (var purchase in purchases)
             {
@@ -949,7 +952,8 @@ namespace core.Services
                     UnitPriceInLemonCoins = purchase.UnitPriceInLemonCoins,
                     TotalPriceInLemonCoins = purchase.TotalPriceInLemonCoins,
                     PurchasedAt = purchase.PurchasedAt.ToString("O"),
-                    Status = purchase.Status.ToString()
+                    Status = purchase.Status.ToString(),
+                    ProcessStage = stages.TryGetValue(purchase.Id, out var stage) ? stage.ToString() : string.Empty
                 });
             }
             return entries;

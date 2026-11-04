@@ -287,6 +287,8 @@ message servicePurchaseEntry {
 	int64 totalPriceInLemonCoins = 11;
 	string purchasedAt = 12;
 	string status = 13;
+	// Estágio da tratativa do consultor ligada à compra (Conectado, Contatado, CompraRealizada, ProcessoAtivo, ProcessoSuspenso, ProcessoFinalizado, Cancelado); vazio se não há tratativa.
+	string processStage = 14;
 }
 
 message ListMyServicePurchasesReply {
