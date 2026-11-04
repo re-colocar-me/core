@@ -264,6 +264,8 @@ message tratativa{
 	string connectedAt = 14;
 	repeated tratativaStageChange stageHistory = 15;
 	bool hasSwotAnalysis = 16;
+	// ISO; preenchido quando o talento voltou a buscar e consentiu em avisar este consultor (RA.7). Vazio caso contrário.
+	string returnedToSearchAt = 17;
 }
 
 message tratativaStageChange{

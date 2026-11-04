@@ -15,6 +15,8 @@ service Journey {
   rpc ConfirmRecolocation (ConfirmRecolocationRequest) returns (common.defaultReply);
   // "Continuar buscando" ou reativação; a reativação é da spec reativacao-jornada-talent.md.
   rpc StartNewCycle (StartNewCycleRequest) returns (common.defaultReply);
+  // Os consultores que a pessoa pode escolher avisar ao voltar a buscar (reativacao-jornada-talent.md, RA.5 a RA.8): só quem tem compra e processo. Devolve ListReturnNotifiableReply.
+  rpc ListReturnNotifiable (JourneyProfileRequest) returns (common.defaultReply);
   // Estado da busca de várias pessoas de uma vez, para quem publica lembretes (core-applications) decidir se emite (candidaturas-talent.md, seção 10).
   rpc GetSearchStatuses (SearchStatusesRequest) returns (common.defaultReply);
   // Primeiro acesso: abre o ciclo 1 se a pessoa nunca teve ciclo, SEM responder a situação (o passo continua em aberto). Idempotente. Devolve o estado.
@@ -78,6 +80,20 @@ message StartNewCycleRequest {
   string profileId = 1;
   // continue_searching | reactivation
   string origin = 2;
+  // Perfis dos consultores que a pessoa consentiu em avisar (caixa "Quero avisar meus consultores"). O core refaz a conta: só avisa quem ainda é elegível. Vazio = ninguém é avisado.
+  repeated string noticeConsultantIds = 3;
+}
+
+message ReturnNotifiableConsultant {
+  string profileId = 1;
+  // Nome abreviado ("Ana S."): é assim que a pessoa e o consultor se veem.
+  string displayName = 2;
+}
+
+message ListReturnNotifiableReply {
+  repeated ReturnNotifiableConsultant consultants = 1;
+  // A versão do texto do consentimento que a tela mostra.
+  string consentTextVersion = 2;
 }
 
 message JourneyStepState {

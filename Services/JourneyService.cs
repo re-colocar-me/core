@@ -25,14 +25,16 @@ namespace core.Services
         private readonly TimeProvider _time;
         private readonly IProfileRepository _profiles;
         private readonly IConsultantServices? _consultants;
+        private readonly IReturnNoticeService? _returnNotice;
 
-        // `consultants` é opcional só para os testes do estado da jornada, que não tocam o CRM do consultor; no serviço, a injeção sempre o fornece.
-        public JourneyService(IJourneyService journey, TimeProvider time, IProfileRepository profiles, IConsultantServices? consultants = null)
+        // `consultants` e `returnNotice` são opcionais só para os testes do estado da jornada, que não tocam o CRM do consultor; no serviço, a injeção sempre os fornece.
+        public JourneyService(IJourneyService journey, TimeProvider time, IProfileRepository profiles, IConsultantServices? consultants = null, IReturnNoticeService? returnNotice = null)
         {
             _journey = journey;
             _time = time;
             _profiles = profiles;
             _consultants = consultants;
+            _returnNotice = returnNotice;
         }
 
         public override Task<defaultReply> GetSearchStatuses(SearchStatusesRequest request, ServerCallContext context)
@@ -129,6 +131,12 @@ namespace core.Services
                     try { await _consultants.MarcarRecolocado(ParseGuid(request.ProfileId, "profileId")); }
                     catch (Exception) { /* ver o comentário acima */ }
                 }
+                // A nova busca terminou: some a marca "Voltou a buscar" dos cartões (RA.7). Também sem derrubar a confirmação.
+                if (_returnNotice is not null)
+                {
+                    try { await _returnNotice.ClearMarksAsync(ParseGuid(request.ProfileId, "profileId")); }
+                    catch (Exception) { /* a marca some na próxima confirmação */ }
+                }
                 return state;
             });
 
@@ -144,7 +152,32 @@ namespace core.Services
                 };
 
                 await _journey.StartNewCycleAsync(profileId, origin, _time.GetUtcNow().UtcDateTime);
-                return await StateAsync(profileId);
+                var state = await StateAsync(profileId);
+
+                // RA.5 a RA.8: com o consentimento da pessoa, avisa (uma vez, só no app) os consultores listados que têm compra e processo. Sem consentimento ninguém é avisado. Se falhar,
+                // a nova busca já está aberta (é o que importa) e o aviso simplesmente não sai.
+                if (_returnNotice is not null && request.NoticeConsultantIds.Count > 0)
+                {
+                    try
+                    {
+                        var consented = request.NoticeConsultantIds.Select(x => ParseGuid(x, "noticeConsultantIds")).Distinct().ToList();
+                        var names = await _profiles.GetByIdsAsync([profileId]);
+                        var display = domain.Services.ReviewRules.AuthorDisplayName(names.FirstOrDefault()?.Name);
+                        await _returnNotice.NoticeAsync(profileId, display, consented, state.Cycle?.Number ?? 0, _time.GetUtcNow().UtcDateTime);
+                    }
+                    catch (Exception) { /* ver o comentário acima */ }
+                }
+                return state;
+            });
+
+        public override Task<defaultReply> ListReturnNotifiable(JourneyProfileRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                var profileId = ParseGuid(request.ProfileId, "profileId");
+                var reply = new ListReturnNotifiableReply { ConsentTextVersion = domain.Services.ReturnNoticeService.ConsentTextVersion };
+                if (_returnNotice is not null)
+                    reply.Consultants.AddRange((await _returnNotice.ListNotifiableAsync(profileId)).Select(x => new ReturnNotifiableConsultant { ProfileId = x.ProfileId.ToString(), DisplayName = x.DisplayName }));
+                return reply;
             });
 
         // ------------------------------------------------------------------

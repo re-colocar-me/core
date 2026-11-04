@@ -240,7 +240,8 @@ namespace core.Services
                         Observacao = x.Observacao ?? string.Empty,
                         CreatedAt = x.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"),
                         ConnectedAt = x.Connection?.ConnectedAt.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
-                        HasSwotAnalysis = x.Connection?.ShareSwotAnalysis ?? false
+                        HasSwotAnalysis = x.Connection?.ShareSwotAnalysis ?? false,
+                        ReturnedToSearchAt = x.Connection?.ReturnedToSearchAt?.ToString("O") ?? string.Empty
                     };
 
                     newTratativa.StageHistory.AddRange(x.StageHistory.Select(h =>

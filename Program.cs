@@ -72,6 +72,8 @@ builder.Services.AddTransient<IAiTextClient, HermesAgentClient>();
 builder.Services.AddTransient<IProfileRepository, ProfileRepository>();
 builder.Services.AddTransient<INotificationRepository, NotificationRepository>();
 builder.Services.AddTransient<IConsultantServicesRepository, ConsultantServicesRepository>();
+builder.Services.AddTransient<IReturnNoticeRepository, ReturnNoticeRepository>();
+builder.Services.AddTransient<IReturnNoticeService, ReturnNoticeService>();
 builder.Services.AddTransient<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddTransient<ITalentRepository, TalentRepository>();
 builder.Services.AddTransient<ITutorialRepository, TutorialRepository>();
