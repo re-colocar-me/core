@@ -24,12 +24,15 @@ namespace core.Services
         private readonly IJourneyService _journey;
         private readonly TimeProvider _time;
         private readonly IProfileRepository _profiles;
+        private readonly IConsultantServices? _consultants;
 
-        public JourneyService(IJourneyService journey, TimeProvider time, IProfileRepository profiles)
+        // `consultants` é opcional só para os testes do estado da jornada, que não tocam o CRM do consultor; no serviço, a injeção sempre o fornece.
+        public JourneyService(IJourneyService journey, TimeProvider time, IProfileRepository profiles, IConsultantServices? consultants = null)
         {
             _journey = journey;
             _time = time;
             _profiles = profiles;
+            _consultants = consultants;
         }
 
         public override Task<defaultReply> GetSearchStatuses(SearchStatusesRequest request, ServerCallContext context)
@@ -116,8 +119,17 @@ namespace core.Services
                     outcomeDate = parsed;
                 }
 
-                return await ApplyThenStateAsync(request.ProfileId, request.EventId, JourneyEventType.RecolocationConfirmed,
+                var state = await ApplyThenStateAsync(request.ProfileId, request.EventId, JourneyEventType.RecolocationConfirmed,
                     new JourneyEventData { OutcomeType = outcomeType, OutcomeDate = outcomeDate, AreaChange = request.AreaChange });
+
+                // D6.8: a confirmação move sozinhos, sem aviso, os cartões do talento que estão em Processo Finalizado para Recolocados no CRM do consultor. Se isto falhar a recolocação
+                // continua registrada (é o que importa à pessoa); o cartão fica onde estava e o próximo registro o move, porque a operação é idempotente.
+                if (_consultants is not null)
+                {
+                    try { await _consultants.MarcarRecolocado(ParseGuid(request.ProfileId, "profileId")); }
+                    catch (Exception) { /* ver o comentário acima */ }
+                }
+                return state;
             });
 
         public override Task<defaultReply> StartNewCycle(StartNewCycleRequest request, ServerCallContext context)
