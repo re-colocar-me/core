@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package match;
+
+// Match talento-consultor, onda 1 (docs/specs/match-talento-consultor.md). A pontuação NÃO é devolvida: nem o consultor nem o app a veem; só a posição, a etiqueta e o motivo.
+service Match {
+  // Os consultores do serviço, ordenados por "Combina com você". Com useAffinity = false (a pessoa pediu "Não ordenar por afinidade") volta à ordem padrão, sem etiqueta, e nada dela é lido.
+  rpc ListConsultantsForTalent (ListForTalentRequest) returns (common.defaultReply);
+}
+
+message ListForTalentRequest {
+  string candidateId = 1;
+  // Vazio: todos os consultores.
+  optional string serviceName = 2;
+  bool useAffinity = 3;
+}
+
+message MatchedConsultantItem {
+  string id = 1;
+  string name = 2;
+  repeated string services = 3;
+  repeated string skills = 4;
+  string pictureUrl = 5;
+  optional string bio = 6;
+  // Nota pública: 0 e 0 enquanto o consultor tiver menos de 3 avaliações gerais ("Nova aqui").
+  double ratingAverage = 7;
+  int32 ratingCount = 8;
+  // Próximo horário livre, no relógio dos horários (sem fuso), ISO sem "Z".
+  optional string nextSlot = 9;
+  int32 position = 10;
+  // Etiqueta "Combina com você" (até 3, só acima da aderência mínima).
+  bool bestMatch = 11;
+  // "Por que combina": só com etiqueta, só com fatos do catálogo.
+  optional string reason = 12;
+  bool newHere = 13;
+}
+
+message ListForTalentReply {
+  // A lista foi ordenada por afinidade?
+  bool affinityUsed = 1;
+  repeated MatchedConsultantItem consultants = 2;
+}

@@ -20,9 +20,11 @@ namespace core.Services
         private readonly ILinkedinSuggestionRepository _linkedinSuggestionRepository;
         private readonly IJourneyRecorder _journeyRecorder;
         private readonly IReviewService _reviewService;
+        private readonly IMatchService _matchService;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder, IReviewService reviewService)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder, IReviewService reviewService, IMatchService matchService)
         {
+            _matchService = matchService;
             _reviewService = reviewService;
             _journeyRecorder = journeyRecorder;
             _services = services;
@@ -607,6 +609,7 @@ namespace core.Services
                 var ownerId = Guid.Parse(request.OwnerId);
                 var analysisText = await _resumeSuggestionService.SuggestSwotAnalysisAsync(ownerId, request.VocationalSummary);
                 await _swotAnalysisRepository.SaveAsync(ownerId, analysisText, request.VocationalSummary);
+                await StartNeedsExtractionAsync(ownerId, analysisText);
                 await _journeyRecorder.RecordAsync(ownerId, JourneyEventType.SwotGenerated);
 
                 reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText, UpdatedAt = DateTime.UtcNow.ToString("O") });
@@ -621,6 +624,19 @@ namespace core.Services
                 };
             }
             return reply;
+        }
+
+        // As necessidades do SWOT para o match (spec do match, 4.1): o texto para a pessoa não muda e gerar o SWOT nunca espera nem falha por causa disto.
+        private async Task StartNeedsExtractionAsync(Guid ownerId, string analysisText)
+        {
+            try
+            {
+                _matchService.StartNeedsExtraction(ownerId, analysisText, await _matchService.ListCatalogSkillNamesAsync());
+            }
+            catch (Exception)
+            {
+                // Sem as necessidades o match usa os demais critérios.
+            }
         }
 
         public override async Task<defaultReply> GetSwotAnalysis(OwnerIdRequest request, ServerCallContext context)
