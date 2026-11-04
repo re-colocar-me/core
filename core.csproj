@@ -23,6 +23,7 @@
     <Protobuf Include="Protos\talent.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\tutorial.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\journey.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\reviews.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\account.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\common.proto" GrpcServices="None" />
   </ItemGroup>

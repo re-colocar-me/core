@@ -138,6 +138,9 @@ message consultant {
 	repeated string skills = 5;
 	string pictureUrl = 6;
 	optional string bio = 7;
+	// Nota pública (só com 3 ou mais avaliações gerais; senão 0 e 0: "Nova aqui").
+	double ratingAverage = 8;
+	int32 ratingCount = 9;
 }
 
 message ConnectRequest{

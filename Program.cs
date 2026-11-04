@@ -93,6 +93,8 @@ builder.Services.AddTransient<ITutorialService, TutorialService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddTransient<IJourneyService, JourneyService>();
 builder.Services.AddTransient<IJourneyRecorder, JourneyRecorder>();
+builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
+builder.Services.AddTransient<IReviewService, ReviewService>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
@@ -152,6 +154,7 @@ app.MapGrpcService<coreServices.ConsultantServicesService>();
 app.MapGrpcService<coreServices.ProfileService>();
 app.MapGrpcService<coreServices.TutorialService>();
 app.MapGrpcService<coreServices.JourneyService>();
+app.MapGrpcService<coreServices.ReviewsService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

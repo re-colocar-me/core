@@ -19,9 +19,11 @@ namespace core.Services
         private readonly ISkillGapAnalysisRepository _skillGapAnalysisRepository;
         private readonly ILinkedinSuggestionRepository _linkedinSuggestionRepository;
         private readonly IJourneyRecorder _journeyRecorder;
+        private readonly IReviewService _reviewService;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder, IReviewService reviewService)
         {
+            _reviewService = reviewService;
             _journeyRecorder = journeyRecorder;
             _services = services;
             _profileService = profileService;
@@ -199,10 +201,16 @@ namespace core.Services
                 var profiles = (await _profileService.GetByIdsAsync(response.Select(x => x.ProfileId)))
                     .ToDictionary(x => x.Id);
                 var data = new ListConsultantsReply();
+                var ratings = await _reviewService.GetPublicRatingsAsync(response.Select(x => x.Id));
 
                 foreach (var item in response)
                 {
                     var newConsultant = new consultant();
+                    if (ratings.TryGetValue(item.Id, out var rating))
+                    {
+                        newConsultant.RatingAverage = rating.Average;
+                        newConsultant.RatingCount = rating.Count;
+                    }
                     newConsultant.Id = item.Id.ToString();
                     newConsultant.Name = item.Name.FullName;
 

@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package reviews;
+
+// Avaliações de consultor (docs/specs/avaliacoes-consultor.md). O erro vira statuscode com a mensagem: 400 regra ou pedido inválido, 404 não existe, 409 já avaliou.
+service Reviews {
+  // O que o talento pode avaliar agora: encontros realizados ainda sem avaliação e compras com a geral aberta.
+  rpc GetReviewEligibility (CandidateRequest) returns (common.defaultReply);
+  rpc CreateEncounterReview (CreateEncounterReviewRequest) returns (common.defaultReply);
+  rpc CreateOverallReview (CreateOverallReviewRequest) returns (common.defaultReply);
+  // Nota pública (só com 3 gerais) e as principais recomendações (textos aprovados de 4 e 5 estrelas).
+  rpc GetConsultantReviews (ConsultantRequest) returns (common.defaultReply);
+  // Moderação do texto (backoffice): fila, aprovar ou ocultar com motivo, e a anonimização pedida pelo titular.
+  rpc ListPendingReviews (ListPendingReviewsRequest) returns (common.defaultReply);
+  rpc ModerateReview (ModerateReviewRequest) returns (common.defaultReply);
+  rpc AnonymizeReview (AnonymizeReviewRequest) returns (common.defaultReply);
+}
+
+message CandidateRequest {
+  string candidateId = 1;
+}
+
+message ConsultantRequest {
+  string consultantId = 1;
+}
+
+message EncounterToReviewItem {
+  string scheduleId = 1;
+  string servicePurchaseId = 2;
+  string consultantId = 3;
+  string consultantName = 4;
+  string serviceName = 5;
+  // Data e hora de parede do consultor (sem fuso), no formato ISO sem "Z".
+  string startTime = 6;
+  string endTime = 7;
+}
+
+message OverallToReviewItem {
+  string servicePurchaseId = 1;
+  string consultantId = 2;
+  string consultantName = 3;
+  string serviceName = 4;
+  // AllEncountersDone | ProcessFinished | Recolocation
+  string trigger = 5;
+}
+
+message ReviewEligibilityReply {
+  repeated EncounterToReviewItem encounters = 1;
+  repeated OverallToReviewItem overalls = 2;
+}
+
+message CreateEncounterReviewRequest {
+  string candidateId = 1;
+  string scheduleId = 2;
+  int32 rating = 3;
+  // pontualidade | clareza | utilidade | preparacao (outros são ignorados)
+  repeated string reasons = 4;
+  optional string text = 5;
+}
+
+message CreateOverallReviewRequest {
+  string candidateId = 1;
+  string servicePurchaseId = 2;
+  int32 rating = 3;
+  optional string text = 4;
+}
+
+message CreateReviewReply {
+  string id = 1;
+  // Pending (texto em análise) | Approved (só estrelas, nada a moderar)
+  string moderationStatus = 2;
+}
+
+message PublicReviewItem {
+  string authorDisplayName = 1;
+  string serviceName = 2;
+  int32 rating = 3;
+  string text = 4;
+  string createdAt = 5;
+}
+
+message ConsultantReviewsReply {
+  string consultantId = 1;
+  // 0 enquanto ratingCount for 0 ("Nova aqui")
+  double ratingAverage = 2;
+  int32 ratingCount = 3;
+  repeated PublicReviewItem recommendations = 4;
+}
+
+message ListPendingReviewsRequest {
+  int32 take = 1;
+}
+
+message PendingReviewItem {
+  string id = 1;
+  string kind = 2;
+  string consultantId = 3;
+  string authorDisplayName = 4;
+  string serviceName = 5;
+  int32 rating = 6;
+  string text = 7;
+  string createdAt = 8;
+}
+
+message ListPendingReviewsReply {
+  repeated PendingReviewItem items = 1;
+}
+
+message ModerateReviewRequest {
+  string reviewId = 1;
+  bool approve = 2;
+  // Obrigatório para ocultar.
+  optional string reason = 3;
+  string moderatedBy = 4;
+}
+
+message AnonymizeReviewRequest {
+  string reviewId = 1;
+}
+
+message ReviewActionReply {
+  bool found = 1;
+}
