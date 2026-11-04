@@ -23,6 +23,8 @@ service Talent {
   rpc GetMyConnections (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GetConsultantDetails (ConsultantIdRequest) returns (common.defaultReply);
   rpc RemoveConnection (RemoveConnectionRequest) returns (common.defaultReply);
+  // Liga ou desliga o compartilhamento do suco com um consultor; ao ligar, guarda o resumo do teste (se vier) junto do SWOT.
+  rpc SetConnectionSharing (SetConnectionSharingRequest) returns (common.defaultReply);
   rpc GenerateSwotAnalysis (GenerateSwotAnalysisRequest) returns (common.defaultReply);
   rpc GetSwotAnalysis (.consultant.OwnerIdRequest) returns (common.defaultReply);
   rpc GenerateSkillGapAnalysis (GenerateSkillGapAnalysisRequest) returns (common.defaultReply);
@@ -55,12 +57,26 @@ message RemoveConnectionRequest {
 	string consultantId = 2;
 }
 
+message SetConnectionSharingRequest {
+	string candidateId = 1;
+	string consultantId = 2;
+	bool share = 3;
+	// Resumo do teste vocacional (código Holland e áreas de maior compatibilidade), montado pelo BFF; só vale com share = true.
+	optional string vocationalSummary = 4;
+}
+
+message SetConnectionSharingReply {
+	int32 changed = 1;
+}
+
 message connectionSummary {
 	string id = 1;
 	string consultantId = 2;
 	string consultantName = 3;
 	string pictureUrl = 4;
 	string connectedAt = 5;
+	// O suco (SWOT e resumo do teste) está compartilhado com este consultor? (jornada, D4.6)
+	bool shareSwotAnalysis = 6;
 }
 
 message GetMyConnectionsReply {

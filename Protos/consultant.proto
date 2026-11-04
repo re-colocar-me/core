@@ -304,6 +304,8 @@ message GetTratativaSwotAnalysisRequest{
 message TratativaSwotAnalysisReply{
 	bool found = 1;
 	string analysisText = 2;
+	// Resumo do teste vocacional compartilhado junto do SWOT (mesmo consentimento); vazio se não há.
+	string vocationalSummary = 3;
 }
 
 message SetTratativaObservacaoRequest{

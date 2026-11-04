@@ -368,8 +368,8 @@ namespace core.Services
             var reply = new defaultReply();
             try
             {
-                var analysisText = await _consultantServices.GetTratativaSwotAnalysis(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId));
-                reply.Data = Any.Pack(new TratativaSwotAnalysisReply { Found = analysisText != null, AnalysisText = analysisText ?? string.Empty });
+                var shared = await _consultantServices.GetTratativaSharedProfile(Guid.Parse(request.OwnerId), Guid.Parse(request.TratativaId));
+                reply.Data = Any.Pack(new TratativaSwotAnalysisReply { Found = shared != null, AnalysisText = shared?.AnalysisText ?? string.Empty, VocationalSummary = shared?.VocationalSummary ?? string.Empty });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (Exception e)

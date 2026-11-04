@@ -69,7 +69,8 @@ namespace core.Services
                             Id = x.Id.ToString(),
                             ConsultantId = x.ConsultantId.ToString(),
                             ConsultantName = consultant.Name.FullName,
-                            ConnectedAt = x.ConnectedAt.ToString("O")
+                            ConnectedAt = x.ConnectedAt.ToString("O"),
+                            ShareSwotAnalysis = x.ShareSwotAnalysis
                         };
                         if (profiles.TryGetValue(consultant.ProfileId, out var profile))
                             newItem.PictureUrl = profile.PictureUrl;
@@ -304,6 +305,27 @@ namespace core.Services
                 {
                     Message = ex.Message
                 };
+            }
+            return reply;
+        }
+
+        public override async Task<defaultReply> SetConnectionSharing(SetConnectionSharingRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var changed = await _services.SetConnectionSharing(
+                    Guid.Parse(request.CandidateId),
+                    Guid.Parse(request.ConsultantId),
+                    request.Share,
+                    request.HasVocationalSummary ? request.VocationalSummary : null);
+                reply.Data = Any.Pack(new SetConnectionSharingReply { Changed = changed });
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error() { Message = ex.Message };
             }
             return reply;
         }
@@ -576,7 +598,7 @@ namespace core.Services
             {
                 var ownerId = Guid.Parse(request.OwnerId);
                 var analysisText = await _resumeSuggestionService.SuggestSwotAnalysisAsync(ownerId, request.VocationalSummary);
-                await _swotAnalysisRepository.SaveAsync(ownerId, analysisText);
+                await _swotAnalysisRepository.SaveAsync(ownerId, analysisText, request.VocationalSummary);
                 await _journeyRecorder.RecordAsync(ownerId, JourneyEventType.SwotGenerated);
 
                 reply.Data = Any.Pack(new SwotAnalysisReply { Found = true, AnalysisText = analysisText, UpdatedAt = DateTime.UtcNow.ToString("O") });
