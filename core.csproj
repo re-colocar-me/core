@@ -26,6 +26,7 @@
     <Protobuf Include="Protos\reviews.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\match.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\account.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\leads.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\common.proto" GrpcServices="None" />
   </ItemGroup>
 

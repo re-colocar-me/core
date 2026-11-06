@@ -98,6 +98,8 @@ builder.Services.AddTransient<IJourneyService, JourneyService>();
 builder.Services.AddTransient<IJourneyRecorder, JourneyRecorder>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
+builder.Services.AddTransient<ILeadRepository, LeadRepository>();
+builder.Services.AddTransient<ILeadService, LeadService>();
 builder.Services.AddTransient<IMatchRepository, MatchRepository>();
 builder.Services.AddSingleton(new MatchConfiguration());
 builder.Services.AddTransient<IMatchService, MatchService>();
@@ -162,6 +164,7 @@ app.MapGrpcService<coreServices.TutorialService>();
 app.MapGrpcService<coreServices.JourneyService>();
 app.MapGrpcService<coreServices.ReviewsService>();
 app.MapGrpcService<coreServices.MatchingService>();
+app.MapGrpcService<coreServices.LeadsService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
