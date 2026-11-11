@@ -5,7 +5,7 @@ option csharp_namespace = "core";
 
 package leads;
 
-// Leads captados fora do app, qualificados por tipo (docs/specs/leads-consultores-landing.md). Hoje só "Consultor".
+// Leads captados fora do app, qualificados por tipo (docs/specs/leads-consultores-landing.md): "Consultor" e "Candidato" (lista de espera, docs/specs/plano-aquisicao-marketing.md, seção 18).
 service Leads {
   rpc CreateLead (CreateLeadRequest) returns (common.defaultReply);
   rpc ListLeads (ListLeadsRequest) returns (common.defaultReply);
@@ -20,6 +20,14 @@ message CreateLeadRequest {
   string consentTextVersion = 6;
   string consentText = 7;
   string source = 8;
+  // Origem da visita (campanha da URL, domínio de referência e página de entrada); tudo opcional.
+  string utmSource = 9;
+  string utmMedium = 10;
+  string utmCampaign = 11;
+  string utmContent = 12;
+  string utmTerm = 13;
+  string referrer = 14;
+  string entryPage = 15;
 }
 
 message ListLeadsRequest {
@@ -37,6 +45,13 @@ message leadEntry {
   string source = 8;
   string createdAt = 9;
   string notifiedAt = 10;
+  string utmSource = 11;
+  string utmMedium = 12;
+  string utmCampaign = 13;
+  string utmContent = 14;
+  string utmTerm = 15;
+  string referrer = 16;
+  string entryPage = 17;
 }
 
 message ListLeadsReply {

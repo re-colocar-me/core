@@ -19,7 +19,8 @@ namespace core.Services
                 if (!Enum.TryParse<LeadKind>(request.Kind, ignoreCase: true, out var kind))
                     throw new ArgumentException("Tipo de lead inválido.");
 
-                await service.CreateAsync(new NewLead(kind, request.Name, request.Email, request.Phone, request.Consent, request.ConsentTextVersion, request.ConsentText, request.Source));
+                var origin = new LeadOrigin(request.UtmSource, request.UtmMedium, request.UtmCampaign, request.UtmContent, request.UtmTerm, request.Referrer, request.EntryPage);
+                await service.CreateAsync(new NewLead(kind, request.Name, request.Email, request.Phone, request.Consent, request.ConsentTextVersion, request.ConsentText, request.Source, origin));
                 reply.Statuscode = Constants.SuccessStatusCode;
             }
             catch (ArgumentException ex)
@@ -58,7 +59,14 @@ namespace core.Services
                     ConsentTextVersion = x.ConsentTextVersion,
                     Source = x.Source,
                     CreatedAt = x.CreatedAt.ToString("o"),
-                    NotifiedAt = x.NotifiedAt?.ToString("o") ?? string.Empty
+                    NotifiedAt = x.NotifiedAt?.ToString("o") ?? string.Empty,
+                    UtmSource = x.UtmSource,
+                    UtmMedium = x.UtmMedium,
+                    UtmCampaign = x.UtmCampaign,
+                    UtmContent = x.UtmContent,
+                    UtmTerm = x.UtmTerm,
+                    Referrer = x.Referrer,
+                    EntryPage = x.EntryPage
                 }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;
