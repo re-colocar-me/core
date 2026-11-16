@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package conversations;
+
+// A ponte talento-consultor, lado da mão levantada (docs/specs/ponte-talento-consultor.md, fatia P1). O erro vira statuscode com a mensagem:
+// 400 regra ou pedido inválido, 404 não existe (ou não é desta pessoa), 409 já há conversa aberta com o consultor. Os nomes das mensagens levam o
+// prefixo Conv porque o namespace C# é compartilhado com os outros protos do core.
+service Conversations {
+  rpc RaiseHand (ConvRaiseHandRequest) returns (common.defaultReply);
+  // O consultor propõe um serviço da oferta dele; o preço vem da oferta cadastrada.
+  rpc Propose (ConvProposeRequest) returns (common.defaultReply);
+  rpc Decline (ConvConsultantActionRequest) returns (common.defaultReply);
+  // O talento confirma: nasce a conexão e a identidade é revelada ao consultor.
+  rpc Confirm (ConvConfirmRequest) returns (common.defaultReply);
+  rpc Withdraw (ConvCandidateActionRequest) returns (common.defaultReply);
+  rpc ListForCandidate (ConvListForCandidateRequest) returns (common.defaultReply);
+  // A caixa do consultor NUNCA carrega o identificador do talento: só a ficha anônima e, depois do aceite, a conexão.
+  rpc ListForConsultant (ConvListForConsultantRequest) returns (common.defaultReply);
+}
+
+message ConvRaiseHandRequest {
+  string candidateId = 1;
+  string consultantId = 2;
+  optional string requestedOfferingId = 3;
+  optional string note = 4;
+  bool shareSuco = 5;
+  optional string situation = 6;
+  optional string timeSinceLayoffBand = 7;
+  optional string seniority = 8;
+  repeated string areasTop3 = 9;
+  optional string sucoSummary = 10;
+}
+
+message ConvProposeRequest {
+  string consultantId = 1;
+  string conversationId = 2;
+  string offeringId = 3;
+}
+
+message ConvConsultantActionRequest {
+  string consultantId = 1;
+  string conversationId = 2;
+}
+
+message ConvCandidateActionRequest {
+  string candidateId = 1;
+  string conversationId = 2;
+}
+
+message ConvConfirmRequest {
+  string candidateId = 1;
+  string conversationId = 2;
+  string firstName = 3;
+  string lastName = 4;
+  optional string email = 5;
+  optional string pictureUrl = 6;
+  optional string telephoneCountryCode = 7;
+  optional string telephoneAreaCode = 8;
+  optional string telephoneNumber = 9;
+}
+
+message ConvListForCandidateRequest {
+  string candidateId = 1;
+}
+
+message ConvListForConsultantRequest {
+  string consultantId = 1;
+  // HandRaised | Invite (vazio = todas)
+  optional string origin = 2;
+  // Raised | Proposed | Confirmed | Declined | Withdrawn | Expired ... (vazio = todos)
+  optional string status = 3;
+}
+
+message ConvActionReply {
+  string id = 1;
+  string status = 2;
+}
+
+message ConvEventItem {
+  string type = 1;
+  string actor = 2;
+  string at = 3;
+}
+
+message ConvCardItem {
+  string situation = 1;
+  string timeSinceLayoffBand = 2;
+  string seniority = 3;
+  repeated string areasTop3 = 4;
+  string sucoSummary = 5;
+}
+
+// O que o talento vê: o consultor identificado desde o início (cartão público).
+message ConvCandidateItem {
+  string id = 1;
+  string consultantId = 2;
+  string consultantName = 3;
+  string consultantPictureUrl = 4;
+  string origin = 5;
+  string status = 6;
+  string createdAt = 7;
+  string expiresAt = 8;
+  string requestedOfferingId = 9;
+  string proposalKind = 10;
+  string proposedOfferingId = 11;
+  int64 proposedPriceInLemonCoins = 12;
+  string proposedServiceName = 13;
+  string note = 14;
+  bool shareSuco = 15;
+  string connectionId = 16;
+  repeated ConvEventItem events = 17;
+}
+
+message ConvCandidateListReply {
+  repeated ConvCandidateItem items = 1;
+}
+
+// O que o consultor vê: a ficha anônima. NÃO há candidateId aqui, de propósito.
+message ConvConsultantItem {
+  string id = 1;
+  string origin = 2;
+  string status = 3;
+  string createdAt = 4;
+  string expiresAt = 5;
+  string requestedOfferingId = 6;
+  string proposalKind = 7;
+  string proposedOfferingId = 8;
+  int64 proposedPriceInLemonCoins = 9;
+  string proposedServiceName = 10;
+  string note = 11;
+  ConvCardItem card = 12;
+  // Só depois do aceite: a conexão por onde o consultor vê quem é a pessoa.
+  string connectionId = 13;
+  repeated ConvEventItem events = 14;
+}
+
+message ConvConsultantListReply {
+  repeated ConvConsultantItem items = 1;
+}

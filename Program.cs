@@ -6,6 +6,7 @@ using core.domain.Interfaces.Infrastructure;
 using core.domain.Interfaces.Infrastructure.Repositories;
 using core.domain.Interfaces.Services;
 using core.domain.Services;
+using core.domain.Services.Conversations;
 using core.domain.Services.Match;
 using core.infrastructure;
 using core.infrastructure.Auditing;
@@ -104,6 +105,13 @@ builder.Services.AddTransient<IMatchRepository, MatchRepository>();
 builder.Services.AddSingleton(new MatchConfiguration());
 builder.Services.AddTransient<IMatchService, MatchService>();
 
+// A ponte talento-consultor (docs/specs/ponte-talento-consultor.md): conversas, aceite que cria a conexão, e o job que expira as sem resposta.
+builder.Services.AddTransient<IConversationRepository, ConversationRepository>();
+builder.Services.AddSingleton(new ConversationConfiguration());
+builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();
+builder.Services.AddTransient<IConversationService, ConversationService>();
+builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
+
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
 var auditSerilogLogger = new LoggerConfiguration()
@@ -165,6 +173,7 @@ app.MapGrpcService<coreServices.JourneyService>();
 app.MapGrpcService<coreServices.ReviewsService>();
 app.MapGrpcService<coreServices.MatchingService>();
 app.MapGrpcService<coreServices.LeadsService>();
+app.MapGrpcService<coreServices.ConversationsService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
