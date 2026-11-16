@@ -16,7 +16,13 @@ namespace core.Services
     {
         private readonly IConversationService _conversations;
 
-        public ConversationsService(IConversationService conversations) => _conversations = conversations;
+        private readonly IAudienceService _audience;
+
+        public ConversationsService(IConversationService conversations, IAudienceService audience)
+        {
+            _conversations = conversations;
+            _audience = audience;
+        }
 
         public override Task<defaultReply> RaiseHand(ConvRaiseHandRequest request, ServerCallContext context) => Run(async () =>
         {
@@ -55,6 +61,49 @@ namespace core.Services
 
         public override Task<defaultReply> SetFirstConversation(ConvSetFirstConversationRequest request, ServerCallContext context) => Run(async () =>
             Any.Pack(ToReply(await _conversations.SetFirstConversationAsync(await ConsultantOf(request.ConsultantId, createIfMissing: true), request.Enabled, request.DurationMinutes, request.MonthlyQuota))));
+
+        // O meu público (seção 9). Quem nunca foi consultor vê o público vazio e a contagem geral; só gravar cria a linha de consultor.
+        public override Task<defaultReply> GetAudience(ConvAudienceRequest request, ServerCallContext context) => Run(async () =>
+        {
+            var consultantId = await _conversations.ResolveConsultantAsync(ParseId(request.ConsultantId, "consultantId"));
+            return Any.Pack(ToReply(consultantId is null
+                ? new AudienceView(new Dictionary<string, List<string>>(), core.domain.Services.Conversations.AudienceKinds.Supported, new core.domain.Services.Conversations.ConversationConfiguration().AudienceMaxCriteria, await _audience.PreviewAsync(new Dictionary<string, List<string>>()))
+                : await _audience.GetAsync(consultantId.Value)));
+        });
+
+        public override Task<defaultReply> SetAudience(ConvSetAudienceRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _audience.SetAsync(await ConsultantOf(request.ConsultantId, createIfMissing: true), ToCriteria(request.Criteria)))));
+
+        public override Task<defaultReply> PreviewAudience(ConvAudiencePreviewRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _audience.PreviewAsync(ToCriteria(request.Criteria)))));
+
+        // Um tipo repetido soma os valores (o servidor valida e tira as repetições).
+        private static Dictionary<string, List<string>> ToCriteria(IEnumerable<ConvAudienceCriterion> items)
+        {
+            var result = new Dictionary<string, List<string>>();
+            foreach (var item in items)
+            {
+                if (!result.TryGetValue(item.Kind, out var values))
+                    result[item.Kind] = values = [];
+                values.AddRange(item.Values);
+            }
+            return result;
+        }
+
+        private static ConvAudienceCountReply ToReply(AudienceCount count) => new() { BelowMinimum = count.BelowMinimum, Value = count.Value ?? 0, Minimum = count.Minimum };
+
+        private static ConvAudienceReply ToReply(AudienceView view)
+        {
+            var reply = new ConvAudienceReply { MaxCriteria = view.MaxCriteria, Count = ToReply(view.Count) };
+            reply.SupportedKinds.AddRange(view.SupportedKinds);
+            foreach (var (kind, values) in view.Criteria)
+            {
+                var criterion = new ConvAudienceCriterion { Kind = kind };
+                criterion.Values.AddRange(values);
+                reply.Criteria.Add(criterion);
+            }
+            return reply;
+        }
 
         private static ConvFirstConversationReply ToReply(FirstConversationStatus status) => new()
         {

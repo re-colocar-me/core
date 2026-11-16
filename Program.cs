@@ -110,6 +110,8 @@ builder.Services.AddTransient<IConversationRepository, ConversationRepository>()
 builder.Services.AddSingleton(new ConversationConfiguration());
 builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();
 builder.Services.AddTransient<IConversationService, ConversationService>();
+builder.Services.AddTransient<IAudienceRepository, AudienceRepository>();
+builder.Services.AddTransient<IAudienceService, AudienceService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on

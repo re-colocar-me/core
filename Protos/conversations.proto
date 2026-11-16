@@ -16,6 +16,10 @@ service Conversations {
   rpc ProposeFirstConversation (ConvConsultantActionRequest) returns (common.defaultReply);
   rpc GetFirstConversation (ConvFirstConversationRequest) returns (common.defaultReply);
   rpc SetFirstConversation (ConvSetFirstConversationRequest) returns (common.defaultReply);
+  // O "meu público" do consultor (seção 9): os critérios gravados com a contagem, gravar, e só a contagem de critérios ainda não gravados (a tela mostra enquanto ele escolhe).
+  rpc GetAudience (ConvAudienceRequest) returns (common.defaultReply);
+  rpc SetAudience (ConvSetAudienceRequest) returns (common.defaultReply);
+  rpc PreviewAudience (ConvAudiencePreviewRequest) returns (common.defaultReply);
   rpc Decline (ConvConsultantActionRequest) returns (common.defaultReply);
   // O talento confirma: nasce a conexão e a identidade é revelada ao consultor.
   rpc Confirm (ConvConfirmRequest) returns (common.defaultReply);
@@ -98,6 +102,40 @@ message ConvFirstConversationReply {
   int32 usedThisMonth = 4;
   // Já desconta as vagas confirmadas no mês.
   int32 remaining = 5;
+}
+
+message ConvAudienceCriterion {
+  // "situation" ou "timeSinceLayoff" (os tipos que a plataforma sabe contar hoje).
+  string kind = 1;
+  repeated string values = 2;
+}
+
+message ConvAudienceRequest {
+  // O id do PERFIL do consultor (traduzido para o Consultant.Id no core).
+  string consultantId = 1;
+}
+
+message ConvSetAudienceRequest {
+  string consultantId = 1;
+  repeated ConvAudienceCriterion criteria = 2;
+}
+
+message ConvAudiencePreviewRequest {
+  repeated ConvAudienceCriterion criteria = 1;
+}
+
+message ConvAudienceCountReply {
+  // Abaixo do mínimo a contagem some: belowMinimum = true e value = 0.
+  bool belowMinimum = 1;
+  int32 value = 2;
+  int32 minimum = 3;
+}
+
+message ConvAudienceReply {
+  repeated ConvAudienceCriterion criteria = 1;
+  repeated string supportedKinds = 2;
+  int32 maxCriteria = 3;
+  ConvAudienceCountReply count = 4;
 }
 
 message ConvActionReply {

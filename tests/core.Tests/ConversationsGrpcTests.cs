@@ -2,6 +2,7 @@ using core.domain.Entities;
 using core.domain.Enums;
 using core.domain.Interfaces.Infrastructure;
 using core.domain.Interfaces.Services;
+using core.domain.Services.Conversations;
 using Google.Protobuf;
 
 namespace core.Tests;
@@ -55,6 +56,25 @@ public class ConversationsGrpcTests
         public Task<int> ExpireDueAsync() => Task.FromResult(0);
     }
 
+    private sealed class FakeAudience : IAudienceService
+    {
+        public Guid? SetFor { get; private set; }
+        public Dictionary<string, List<string>>? SetCriteria { get; private set; }
+        public Exception? Throw { get; set; }
+        public AudienceCount Count { get; set; } = new(42, false, 10);
+
+        private AudienceView View(IReadOnlyDictionary<string, List<string>> criteria) => new(criteria, AudienceKinds.Supported, 3, Count);
+
+        public Task<AudienceView> GetAsync(Guid consultantId) => Task.FromResult(View(new Dictionary<string, List<string>> { [AudienceKinds.Situation] = ["desligado"] }));
+        public Task<AudienceView> SetAsync(Guid consultantId, IReadOnlyDictionary<string, List<string>> criteria)
+        {
+            if (Throw is not null) throw Throw;
+            SetFor = consultantId; SetCriteria = criteria.ToDictionary(x => x.Key, x => x.Value);
+            return Task.FromResult(View(criteria));
+        }
+        public Task<AudienceCount> PreviewAsync(IReadOnlyDictionary<string, List<string>> criteria) => Task.FromResult(Throw is not null ? throw Throw : Count);
+    }
+
     private static Conversation Sample(ConversationStatus status = ConversationStatus.Raised, Guid? connectionId = null)
     {
         var id = Guid.NewGuid();
@@ -70,7 +90,14 @@ public class ConversationsGrpcTests
     private static (core.Services.ConversationsService Grpc, FakeConversations Service) Create()
     {
         var service = new FakeConversations();
-        return (new core.Services.ConversationsService(service), service);
+        return (new core.Services.ConversationsService(service, new FakeAudience()), service);
+    }
+
+    private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeAudience Audience) CreateWithAudience()
+    {
+        var service = new FakeConversations();
+        var audience = new FakeAudience();
+        return (new core.Services.ConversationsService(service, audience), service, audience);
     }
 
     [Fact]
@@ -203,6 +230,63 @@ public class ConversationsGrpcTests
         var request = new ConvConsultantActionRequest { ConsultantId = Consultant.ToString(), ConversationId = Guid.NewGuid().ToString() };
         Assert.Equal(404, (await grpc.Decline(request, TestServerCallContext.Create())).Statuscode);
         Assert.Equal(404, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
+    }
+
+    [Fact]
+    public async Task Gravar_o_publico_traduz_o_perfil_cria_o_consultor_e_junta_os_valores_do_mesmo_tipo()
+    {
+        var (grpc, service, audience) = CreateWithAudience();
+        var request = new ConvSetAudienceRequest { ConsultantId = Consultant.ToString() };
+        request.Criteria.Add(new ConvAudienceCriterion { Kind = "situation", Values = { "desligado" } });
+        request.Criteria.Add(new ConvAudienceCriterion { Kind = "situation", Values = { "transicao" } });
+        request.Criteria.Add(new ConvAudienceCriterion { Kind = "timeSinceLayoff", Values = { "semana" } });
+
+        var reply = await grpc.SetAudience(request, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        Assert.Equal(FakeConversations.ConsultantOf(Consultant), audience.SetFor);
+        Assert.True(service.LastCreateIfMissing);
+        Assert.Equal(["desligado", "transicao"], audience.SetCriteria!["situation"]);
+        var view = reply.Data.Unpack<ConvAudienceReply>();
+        Assert.Equal(3, view.MaxCriteria);
+        Assert.Equal(["situation", "timeSinceLayoff"], view.SupportedKinds);
+    }
+
+    [Fact]
+    public async Task A_contagem_abaixo_do_minimo_sai_sem_numero()
+    {
+        var (grpc, _, audience) = CreateWithAudience();
+        audience.Count = new AudienceCount(null, true, 10);
+
+        var preview = await grpc.PreviewAudience(new ConvAudiencePreviewRequest(), TestServerCallContext.Create());
+
+        var count = preview.Data.Unpack<ConvAudienceCountReply>();
+        Assert.Equal((true, 0, 10), (count.BelowMinimum, count.Value, count.Minimum));
+    }
+
+    [Fact]
+    public async Task Ler_o_publico_de_quem_nunca_foi_consultor_mostra_vazio_com_a_contagem_geral_sem_criar_linha()
+    {
+        var (grpc, service, _) = CreateWithAudience();
+        service.UnknownProfile = Consultant;
+
+        var reply = await grpc.GetAudience(new ConvAudienceRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        var view = reply.Data.Unpack<ConvAudienceReply>();
+        Assert.Empty(view.Criteria);
+        Assert.Equal(42, view.Count.Value);
+        Assert.False(service.LastCreateIfMissing);
+    }
+
+    [Fact]
+    public async Task Criterio_invalido_vira_400()
+    {
+        var (grpc, _, audience) = CreateWithAudience();
+        audience.Throw = new ConversationRuleException("Há uma opção inválida no meu público.");
+
+        Assert.Equal(400, (await grpc.SetAudience(new ConvSetAudienceRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal(400, (await grpc.PreviewAudience(new ConvAudiencePreviewRequest(), TestServerCallContext.Create())).Statuscode);
     }
 
     [Fact]
