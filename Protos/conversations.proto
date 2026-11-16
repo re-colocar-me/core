@@ -20,6 +20,15 @@ service Conversations {
   rpc GetAudience (ConvAudienceRequest) returns (common.defaultReply);
   rpc SetAudience (ConvSetAudienceRequest) returns (common.defaultReply);
   rpc PreviewAudience (ConvAudiencePreviewRequest) returns (common.defaultReply);
+  // O convite do consultor (seção 10): a visão (cota, modelos, vagas, contagens) e o envio. O consultor não escolhe ninguém; o servidor seleciona.
+  rpc GetInviteOverview (ConvInviteOverviewRequest) returns (common.defaultReply);
+  rpc SendInvites (ConvSendInvitesRequest) returns (common.defaultReply);
+  // O talento e os convites (seção 11): preferências, "agora não", silenciar e desfazer o silêncio. Aceitar um convite é o Confirm de sempre.
+  rpc GetInvitePreferences (ConvInvitePreferencesRequest) returns (common.defaultReply);
+  rpc SetInvitePreferences (ConvSetInvitePreferencesRequest) returns (common.defaultReply);
+  rpc DismissInvite (ConvCandidateActionRequest) returns (common.defaultReply);
+  rpc SilenceInvite (ConvCandidateActionRequest) returns (common.defaultReply);
+  rpc UnsilenceConsultant (ConvUnsilenceRequest) returns (common.defaultReply);
   rpc Decline (ConvConsultantActionRequest) returns (common.defaultReply);
   // O talento confirma: nasce a conexão e a identidade é revelada ao consultor.
   rpc Confirm (ConvConfirmRequest) returns (common.defaultReply);
@@ -138,6 +147,92 @@ message ConvAudienceReply {
   ConvAudienceCountReply count = 4;
 }
 
+message ConvInviteOverviewRequest {
+  // O id do PERFIL do consultor (traduzido para o Consultant.Id no core).
+  string consultantId = 1;
+}
+
+message ConvSendInvitesRequest {
+  string consultantId = 1;
+  string templateId = 2;
+  // A frase própria do consultor (até 200 caracteres, sem contato); opcional.
+  optional string freeText = 3;
+  int32 count = 4;
+}
+
+message ConvInviteTemplate {
+  string id = 1;
+  string name = 2;
+  string text = 3;
+  bool isFirstConversation = 4;
+}
+
+message ConvInviteOverviewReply {
+  int32 monthlyQuota = 1;
+  int32 used = 2;
+  int32 remaining = 3;
+  // Consultor novo (primeiros 30 dias a contar do primeiro convite): cota menor.
+  bool isNew = 4;
+  repeated ConvInviteTemplate templates = 5;
+  bool firstConversationEnabled = 6;
+  int32 firstConversationMinutes = 7;
+  // Já desconta as vagas reservadas por convites abertos.
+  int32 firstConversationFreeSlots = 8;
+  bool canInvite = 9;
+  // O que falta para convidar (mensagens para a tela).
+  repeated string missing = 10;
+  // Quantas pessoas ele alcançaria; abaixo do mínimo o número some (reachableBelowMinimum = true e reachableValue = 0).
+  bool reachableBelowMinimum = 11;
+  int32 reachableValue = 12;
+  int32 reachableMinimum = 13;
+  // Contagens, sem identificar ninguém.
+  int32 sent = 14;
+  int32 open = 15;
+  int32 accepted = 16;
+  int32 dismissed = 17;
+  int32 silenced = 18;
+  int32 expired = 19;
+  int32 freeTextMaxChars = 20;
+}
+
+message ConvSendInvitesReply {
+  int32 requested = 1;
+  // Pode ser menor que o pedido: se há menos elegíveis, só se envia o que há.
+  int32 sent = 2;
+  int32 quotaRemaining = 3;
+}
+
+message ConvInvitePreferencesRequest {
+  string candidateId = 1;
+}
+
+message ConvSetInvitePreferencesRequest {
+  string candidateId = 1;
+  // Ausente não muda.
+  optional bool receiveInvites = 2;
+  // Verdadeiro registra que o aviso foi mostrado.
+  optional bool noticeSeen = 3;
+}
+
+message ConvSilencedConsultant {
+  string consultantId = 1;
+  string name = 2;
+  string pictureUrl = 3;
+  string at = 4;
+}
+
+message ConvInvitePreferencesReply {
+  bool receiveInvites = 1;
+  bool noticeSeen = 2;
+  repeated ConvSilencedConsultant silenced = 3;
+  int32 maxPerWeek = 4;
+}
+
+message ConvUnsilenceRequest {
+  string candidateId = 1;
+  string consultantId = 2;
+}
+
 message ConvActionReply {
   string id = 1;
   string status = 2;
@@ -176,6 +271,9 @@ message ConvCandidateItem {
   bool shareSuco = 15;
   string connectionId = 16;
   repeated ConvEventItem events = 17;
+  // Só no convite: o texto do modelo escolhido e o "combina com você porque" (fatos da própria pessoa).
+  string inviteText = 18;
+  string inviteReason = 19;
 }
 
 message ConvCandidateListReply {

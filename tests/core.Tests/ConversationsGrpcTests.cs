@@ -75,6 +75,45 @@ public class ConversationsGrpcTests
         public Task<AudienceCount> PreviewAsync(IReadOnlyDictionary<string, List<string>> criteria) => Task.FromResult(Throw is not null ? throw Throw : Count);
     }
 
+    private sealed class FakeInvites : IInviteService
+    {
+        public Exception? Throw { get; set; }
+        public (Guid Consultant, Guid Template, string? Text, int Count)? Sent { get; private set; }
+        public Guid? OverviewFor { get; private set; }
+        public (Guid Candidate, bool? Receive, bool? Seen)? PreferencesSet { get; private set; }
+        public (Guid Candidate, Guid Conversation, string Kind)? Closed { get; private set; }
+        public (Guid Candidate, Guid Consultant)? Unsilenced { get; private set; }
+        public List<Conversation> Items { get; } = [];
+
+        private static InvitePreferencesView Prefs(bool receive = true, bool seen = false) => new(receive, seen, [new SilencedConsultant(Guid.NewGuid(), "Marina Costa", "https://x/m.jpg", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc))], 3);
+
+        public Task<InviteOverview> GetOverviewAsync(Guid consultantId)
+        {
+            if (Throw is not null) throw Throw;
+            OverviewFor = consultantId;
+            return Task.FromResult(new InviteOverview(new InviteQuota(3, 1, 2, true), [new InviteTemplateView(Guid.NewGuid(), "Apresentação", "Oi!", false)], true, 15, 2,
+                new InviteReadiness(false, ["Defina o seu público em Conversas."]), new AudienceCount(null, true, 10), new InviteStats(4, 1, 1, 1, 1, 0), 200));
+        }
+
+        public Task<InviteSendResult> SendAsync(Guid consultantId, Guid templateId, string? freeText, int count)
+        {
+            if (Throw is not null) throw Throw;
+            Sent = (consultantId, templateId, freeText, count);
+            return Task.FromResult(new InviteSendResult(count, count - 1, 1));
+        }
+
+        public Task<InvitePreferencesView> GetPreferencesAsync(Guid candidateId) => Task.FromResult(Prefs());
+        public Task<InvitePreferencesView> SetPreferencesAsync(Guid candidateId, bool? receiveInvites, bool? noticeSeen)
+        {
+            if (Throw is not null) throw Throw;
+            PreferencesSet = (candidateId, receiveInvites, noticeSeen);
+            return Task.FromResult(Prefs(receiveInvites ?? true, noticeSeen ?? false));
+        }
+        public Task<Conversation> DismissAsync(Guid candidateId, Guid conversationId) { Closed = (candidateId, conversationId, "dismiss"); return Task.FromResult(Items.First()); }
+        public Task<Conversation> SilenceAsync(Guid candidateId, Guid conversationId) { Closed = (candidateId, conversationId, "silence"); return Task.FromResult(Items.First()); }
+        public Task UnsilenceAsync(Guid candidateId, Guid consultantId) { Unsilenced = (candidateId, consultantId); return Task.CompletedTask; }
+    }
+
     private static Conversation Sample(ConversationStatus status = ConversationStatus.Raised, Guid? connectionId = null)
     {
         var id = Guid.NewGuid();
@@ -90,14 +129,21 @@ public class ConversationsGrpcTests
     private static (core.Services.ConversationsService Grpc, FakeConversations Service) Create()
     {
         var service = new FakeConversations();
-        return (new core.Services.ConversationsService(service, new FakeAudience()), service);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites()), service);
+    }
+
+    private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeInvites Invites) CreateWithInvites()
+    {
+        var service = new FakeConversations();
+        var invites = new FakeInvites();
+        return (new core.Services.ConversationsService(service, new FakeAudience(), invites), service, invites);
     }
 
     private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeAudience Audience) CreateWithAudience()
     {
         var service = new FakeConversations();
         var audience = new FakeAudience();
-        return (new core.Services.ConversationsService(service, audience), service, audience);
+        return (new core.Services.ConversationsService(service, audience, new FakeInvites()), service, audience);
     }
 
     [Fact]
@@ -287,6 +333,118 @@ public class ConversationsGrpcTests
 
         Assert.Equal(400, (await grpc.SetAudience(new ConvSetAudienceRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create())).Statuscode);
         Assert.Equal(400, (await grpc.PreviewAudience(new ConvAudiencePreviewRequest(), TestServerCallContext.Create())).Statuscode);
+    }
+
+    // ---------- O convite (seções 10 e 11) ----------
+
+    [Fact]
+    public async Task A_visao_do_convite_traduz_o_perfil_e_leva_cota_modelos_o_que_falta_e_a_contagem_sem_numero()
+    {
+        var (grpc, _, invites) = CreateWithInvites();
+
+        var reply = await grpc.GetInviteOverview(new ConvInviteOverviewRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        Assert.Equal(FakeConversations.ConsultantOf(Consultant), invites.OverviewFor);   // o id do perfil virou o Consultant.Id
+        var view = reply.Data.Unpack<ConvInviteOverviewReply>();
+        Assert.Equal((3, 1, 2, true), (view.MonthlyQuota, view.Used, view.Remaining, view.IsNew));
+        Assert.Equal(["Apresentação"], view.Templates.Select(x => x.Name));
+        Assert.Equal(["Defina o seu público em Conversas."], view.Missing);
+        Assert.False(view.CanInvite);
+        Assert.Equal((true, 0, 10), (view.ReachableBelowMinimum, view.ReachableValue, view.ReachableMinimum));   // abaixo do mínimo, o número não sai
+        Assert.Equal((4, 1, 1, 1, 1, 0), (view.Sent, view.Open, view.Accepted, view.Dismissed, view.Silenced, view.Expired));
+        Assert.Equal(200, view.FreeTextMaxChars);
+    }
+
+    [Fact]
+    public async Task Enviar_convites_traduz_o_perfil_repassa_o_pedido_e_devolve_quantos_foram()
+    {
+        var (grpc, service, invites) = CreateWithInvites();
+        var template = Guid.NewGuid();
+
+        var reply = await grpc.SendInvites(new ConvSendInvitesRequest { ConsultantId = Consultant.ToString(), TemplateId = template.ToString(), FreeText = "Vamos conversar", Count = 3 }, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        Assert.Equal((FakeConversations.ConsultantOf(Consultant), template, "Vamos conversar", 3), invites.Sent);
+        var result = reply.Data.Unpack<ConvSendInvitesReply>();
+        Assert.Equal((3, 2, 1), (result.Requested, result.Sent, result.QuotaRemaining));
+        Assert.False(service.LastCreateIfMissing);   // convidar não cria linha de consultor
+
+        // A frase é opcional: ausente chega como nula.
+        await grpc.SendInvites(new ConvSendInvitesRequest { ConsultantId = Consultant.ToString(), TemplateId = template.ToString(), Count = 1 }, TestServerCallContext.Create());
+        Assert.Null(invites.Sent!.Value.Text);
+    }
+
+    [Fact]
+    public async Task Quem_nunca_foi_consultor_nao_ve_nem_envia_convites_e_a_regra_recusada_vira_400()
+    {
+        var (grpc, service, invites) = CreateWithInvites();
+        service.UnknownProfile = Consultant;
+
+        Assert.Equal(404, (await grpc.GetInviteOverview(new ConvInviteOverviewRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal(404, (await grpc.SendInvites(new ConvSendInvitesRequest { ConsultantId = Consultant.ToString(), TemplateId = Guid.NewGuid().ToString(), Count = 1 }, TestServerCallContext.Create())).Statuscode);
+
+        service.UnknownProfile = null;
+        invites.Throw = new ConversationRuleException("A sua cota de 3 convites deste mês acabou.");
+        var refused = await grpc.SendInvites(new ConvSendInvitesRequest { ConsultantId = Consultant.ToString(), TemplateId = Guid.NewGuid().ToString(), Count = 1 }, TestServerCallContext.Create());
+        Assert.Equal(400, refused.Statuscode);
+        Assert.Contains("cota", refused.Error.Message);
+    }
+
+    [Fact]
+    public async Task As_preferencias_do_talento_repassam_so_o_que_veio_e_listam_os_silenciados()
+    {
+        var (grpc, _, invites) = CreateWithInvites();
+
+        var seen = await grpc.SetInvitePreferences(new ConvSetInvitePreferencesRequest { CandidateId = Talent.ToString(), NoticeSeen = true }, TestServerCallContext.Create());
+        Assert.Equal((Talent, (bool?)null, (bool?)true), invites.PreferencesSet);   // o que não veio não muda
+
+        await grpc.SetInvitePreferences(new ConvSetInvitePreferencesRequest { CandidateId = Talent.ToString(), ReceiveInvites = false }, TestServerCallContext.Create());
+        Assert.Equal((Talent, (bool?)false, (bool?)null), invites.PreferencesSet);
+
+        var view = seen.Data.Unpack<ConvInvitePreferencesReply>();
+        Assert.True(view.NoticeSeen);
+        Assert.Equal(3, view.MaxPerWeek);
+        Assert.Equal(["Marina Costa"], view.Silenced.Select(x => x.Name));
+    }
+
+    [Fact]
+    public async Task Agora_nao_silenciar_e_desfazer_chegam_ao_servico_com_o_talento_certo()
+    {
+        var (grpc, _, invites) = CreateWithInvites();
+        invites.Items.Add(Sample());
+        var conversation = Guid.NewGuid();
+        var request = new ConvCandidateActionRequest { CandidateId = Talent.ToString(), ConversationId = conversation.ToString() };
+
+        Assert.Equal(200, (await grpc.DismissInvite(request, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal((Talent, conversation, "dismiss"), invites.Closed);
+        Assert.Equal(200, (await grpc.SilenceInvite(request, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal((Talent, conversation, "silence"), invites.Closed);
+
+        var undo = await grpc.UnsilenceConsultant(new ConvUnsilenceRequest { CandidateId = Talent.ToString(), ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+        Assert.Equal(200, undo.Statuscode);
+        Assert.Equal((Talent, Consultant), invites.Unsilenced);
+    }
+
+    [Fact]
+    public async Task O_convite_na_caixa_do_talento_leva_o_texto_e_o_motivo_e_na_do_consultor_nao_leva_identidade()
+    {
+        var (grpc, service, _) = CreateWithInvites();
+        var invite = Sample(ConversationStatus.Sent);
+        invite.Origin = ConversationOrigin.Invite;
+        invite.InviteText = "Oi! Sou consultor aqui.";
+        invite.InviteReason = "Combina com você porque você está desligado(a) há 1 a 3 meses.";
+        service.Items.Add(invite);
+
+        var candidate = (await grpc.ListForCandidate(new ConvListForCandidateRequest { CandidateId = Talent.ToString() }, TestServerCallContext.Create())).Data.Unpack<ConvCandidateListReply>().Items.Single();
+        Assert.Equal("Oi! Sou consultor aqui.", candidate.InviteText);
+        Assert.Equal("Combina com você porque você está desligado(a) há 1 a 3 meses.", candidate.InviteReason);
+        Assert.Equal("Invite", candidate.Origin);
+
+        // O item do consultor não tem campo de motivo nem de identidade do talento: o motivo é fato da pessoa, só para ela.
+        var consultantItem = core.Services.ConversationMapper.ToConsultantItem(invite);
+        var names = ConvConsultantItem.Descriptor.Fields.InFieldNumberOrder().Select(f => f.Name.ToLowerInvariant()).ToList();
+        Assert.DoesNotContain(names, n => n.Contains("reason") || n.Contains("candidate"));
     }
 
     [Fact]

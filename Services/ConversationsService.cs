@@ -17,11 +17,13 @@ namespace core.Services
         private readonly IConversationService _conversations;
 
         private readonly IAudienceService _audience;
+        private readonly IInviteService _invites;
 
-        public ConversationsService(IConversationService conversations, IAudienceService audience)
+        public ConversationsService(IConversationService conversations, IAudienceService audience, IInviteService invites)
         {
             _conversations = conversations;
             _audience = audience;
+            _invites = invites;
         }
 
         public override Task<defaultReply> RaiseHand(ConvRaiseHandRequest request, ServerCallContext context) => Run(async () =>
@@ -61,6 +63,58 @@ namespace core.Services
 
         public override Task<defaultReply> SetFirstConversation(ConvSetFirstConversationRequest request, ServerCallContext context) => Run(async () =>
             Any.Pack(ToReply(await _conversations.SetFirstConversationAsync(await ConsultantOf(request.ConsultantId, createIfMissing: true), request.Enabled, request.DurationMinutes, request.MonthlyQuota))));
+
+        // O convite do consultor (seção 10). O consultor nunca escolhe ninguém: o servidor seleciona. Sem linha de consultor, ler dá 404 e enviar também (não há o que convidar).
+        public override Task<defaultReply> GetInviteOverview(ConvInviteOverviewRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _invites.GetOverviewAsync(await ConsultantOf(request.ConsultantId)))));
+
+        public override Task<defaultReply> SendInvites(ConvSendInvitesRequest request, ServerCallContext context) => Run(async () =>
+        {
+            var result = await _invites.SendAsync(await ConsultantOf(request.ConsultantId), ParseId(request.TemplateId, "templateId"), request.HasFreeText ? request.FreeText : null, request.Count);
+            return Any.Pack(new ConvSendInvitesReply { Requested = result.Requested, Sent = result.Sent, QuotaRemaining = result.QuotaRemaining });
+        });
+
+        private static ConvInviteOverviewReply ToReply(InviteOverview overview)
+        {
+            var reply = new ConvInviteOverviewReply
+            {
+                MonthlyQuota = overview.Quota.Monthly, Used = overview.Quota.Used, Remaining = overview.Quota.Remaining, IsNew = overview.Quota.IsNew,
+                FirstConversationEnabled = overview.FirstConversationEnabled, FirstConversationMinutes = overview.FirstConversationMinutes, FirstConversationFreeSlots = overview.FirstConversationFreeSlots,
+                CanInvite = overview.Readiness.CanInvite,
+                ReachableBelowMinimum = overview.Reachable.BelowMinimum, ReachableValue = overview.Reachable.Value ?? 0, ReachableMinimum = overview.Reachable.Minimum,
+                Sent = overview.Stats.Sent, Open = overview.Stats.Open, Accepted = overview.Stats.Accepted, Dismissed = overview.Stats.Dismissed, Silenced = overview.Stats.Silenced, Expired = overview.Stats.Expired,
+                FreeTextMaxChars = overview.FreeTextMaxChars
+            };
+            reply.Missing.AddRange(overview.Readiness.Missing);
+            reply.Templates.AddRange(overview.Templates.Select(x => new ConvInviteTemplate { Id = x.Id.ToString(), Name = x.Name, Text = x.Text, IsFirstConversation = x.IsFirstConversation }));
+            return reply;
+        }
+
+        // O talento e os convites (seção 11).
+        public override Task<defaultReply> GetInvitePreferences(ConvInvitePreferencesRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _invites.GetPreferencesAsync(ParseId(request.CandidateId, "candidateId")))));
+
+        public override Task<defaultReply> SetInvitePreferences(ConvSetInvitePreferencesRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _invites.SetPreferencesAsync(ParseId(request.CandidateId, "candidateId"), request.HasReceiveInvites ? request.ReceiveInvites : null, request.HasNoticeSeen ? request.NoticeSeen : null))));
+
+        public override Task<defaultReply> DismissInvite(ConvCandidateActionRequest request, ServerCallContext context) => Run(async () =>
+            Pack(await _invites.DismissAsync(ParseId(request.CandidateId, "candidateId"), ParseId(request.ConversationId, "conversationId"))));
+
+        public override Task<defaultReply> SilenceInvite(ConvCandidateActionRequest request, ServerCallContext context) => Run(async () =>
+            Pack(await _invites.SilenceAsync(ParseId(request.CandidateId, "candidateId"), ParseId(request.ConversationId, "conversationId"))));
+
+        public override Task<defaultReply> UnsilenceConsultant(ConvUnsilenceRequest request, ServerCallContext context) => Run(async () =>
+        {
+            await _invites.UnsilenceAsync(ParseId(request.CandidateId, "candidateId"), ParseId(request.ConsultantId, "consultantId"));
+            return Any.Pack(ToReply(await _invites.GetPreferencesAsync(ParseId(request.CandidateId, "candidateId"))));
+        });
+
+        private static ConvInvitePreferencesReply ToReply(InvitePreferencesView view)
+        {
+            var reply = new ConvInvitePreferencesReply { ReceiveInvites = view.ReceiveInvites, NoticeSeen = view.NoticeSeen, MaxPerWeek = view.MaxPerWeek };
+            reply.Silenced.AddRange(view.Silenced.Select(x => new ConvSilencedConsultant { ConsultantId = x.ConsultantId.ToString(), Name = x.Name, PictureUrl = x.PictureUrl ?? string.Empty, At = x.At.ToString("O") }));
+            return reply;
+        }
 
         // O meu público (seção 9). Quem nunca foi consultor vê o público vazio e a contagem geral; só gravar cria a linha de consultor.
         public override Task<defaultReply> GetAudience(ConvAudienceRequest request, ServerCallContext context) => Run(async () =>
@@ -206,7 +260,8 @@ namespace core.Services
                 Origin = c.Origin.ToString(), Status = c.Status.ToString(), CreatedAt = Iso(c.CreatedAt), ExpiresAt = Iso(c.ExpiresAt),
                 RequestedOfferingId = c.RequestedOfferingId?.ToString() ?? string.Empty, ProposalKind = c.ProposalKind?.ToString() ?? string.Empty,
                 ProposedOfferingId = c.ProposedOfferingId?.ToString() ?? string.Empty, ProposedPriceInLemonCoins = c.ProposedPriceInLemonCoins ?? 0,
-                ProposedServiceName = c.ProposedServiceName ?? string.Empty, Note = c.Note ?? string.Empty, ShareSuco = c.ShareSuco, ConnectionId = c.ConnectionId?.ToString() ?? string.Empty
+                ProposedServiceName = c.ProposedServiceName ?? string.Empty, Note = c.Note ?? string.Empty, ShareSuco = c.ShareSuco, ConnectionId = c.ConnectionId?.ToString() ?? string.Empty,
+                InviteText = c.InviteText ?? string.Empty, InviteReason = c.InviteReason ?? string.Empty
             };
             item.Events.AddRange(Events(c));
             return item;
