@@ -68,6 +68,10 @@ message ModSuspensionItem {
   string suspendedAt = 3;
   string reason = 4;
   int32 heldInvites = 5;
+  // Como AVISAR o consultor (seção 32). Só o core-backoffice usa, para publicar o e-mail; NUNCA vai à tela da equipe.
+  string profileId = 6;
+  string firstName = 7;
+  string email = 8;
 }
 
 message ModListSuspensionsReply {

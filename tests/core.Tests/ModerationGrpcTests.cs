@@ -9,6 +9,7 @@ namespace core.Tests;
 public class ModerationGrpcTests
 {
     private static readonly Guid Consultant = Guid.Parse("cccccccc-1111-2222-3333-444444444444");
+    private static readonly Guid Profile = Guid.Parse("dddddddd-1111-2222-3333-444444444444");
 
     private sealed class FakeModeration : IModerationService
     {
@@ -35,7 +36,7 @@ public class ModerationGrpcTests
             Reviewed = (reportId, note);
             return Task.FromResult(Item() with { ReportId = reportId, Status = "Reviewed", ReviewNote = note, ReviewedAt = new DateTime(2026, 11, 16, 13, 0, 0, DateTimeKind.Utc) });
         }
-        public Task<List<SuspensionItem>> ListSuspensionsAsync() => Task.FromResult(new List<SuspensionItem> { new(Consultant, "Marina Costa", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "AutoReports", 2) });
+        public Task<List<SuspensionItem>> ListSuspensionsAsync() => Task.FromResult(new List<SuspensionItem> { new(Consultant, "Marina Costa", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "AutoReports", 2, Profile, "Marina", "marina@exemplo.com"), new(Guid.NewGuid(), "Sem Contato", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "Manual", 0) });
         public Task<int> CloseHeldInvitesAsync(Guid consultantId)
         {
             if (Throw is not null) throw Throw;
@@ -116,7 +117,10 @@ public class ModerationGrpcTests
         Assert.Equal((Consultant, "liberado"), service.Lifted);
         Assert.Equal(Consultant, service.Closed);
         Assert.Equal(2, closed.Closed);
-        Assert.Equal(2, Assert.Single(list.Items).HeldInvites);
+        Assert.Equal(2, list.Items[0].HeldInvites);
+        // O contato do consultor vai para o aviso a ele; quem não tem contato vai com os campos vazios (nunca nulos).
+        Assert.Equal((Profile.ToString(), "Marina", "marina@exemplo.com"), (list.Items[0].ProfileId, list.Items[0].FirstName, list.Items[0].Email));
+        Assert.Equal((string.Empty, string.Empty, string.Empty), (list.Items[1].ProfileId, list.Items[1].FirstName, list.Items[1].Email));
     }
 
     [Fact]

@@ -30,7 +30,8 @@ namespace core.Services
             var reply = new ModListSuspensionsReply();
             reply.Items.AddRange((await _moderation.ListSuspensionsAsync()).Select(x => new ModSuspensionItem
             {
-                ConsultantId = x.ConsultantId.ToString(), ConsultantName = x.ConsultantName, SuspendedAt = x.SuspendedAt.ToString("O"), Reason = x.Reason, HeldInvites = x.HeldInvites
+                ConsultantId = x.ConsultantId.ToString(), ConsultantName = x.ConsultantName, SuspendedAt = x.SuspendedAt.ToString("O"), Reason = x.Reason, HeldInvites = x.HeldInvites,
+                ProfileId = x.ProfileId == Guid.Empty ? string.Empty : x.ProfileId.ToString(), FirstName = x.FirstName ?? string.Empty, Email = x.Email ?? string.Empty
             }));
             return Any.Pack(reply);
         });
