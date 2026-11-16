@@ -465,7 +465,8 @@ namespace core.Services
                                                    Offeringid = x.Id.ToString(),
                                                    Priceinlemoncoins = x.PriceInLemonCoins,
                                                    Format = x.Format.ToString(),
-                                                   Sessioncount = x.SessionCount ?? 0
+                                                   Sessioncount = x.SessionCount ?? 0,
+                                                   IsSystem = x.ServiceItem.IsSystem
                                                }));
 
                 reply.Statuscode = Constants.SuccessStatusCode;

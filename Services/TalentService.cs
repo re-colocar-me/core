@@ -129,7 +129,8 @@ namespace core.Services
                     Offeringid = x.Id.ToString(),
                     Priceinlemoncoins = x.PriceInLemonCoins,
                     Format = x.Format.ToString(),
-                    Sessioncount = x.SessionCount ?? 0
+                    Sessioncount = x.SessionCount ?? 0,
+                    IsSystem = x.ServiceItem.IsSystem
                 }));
 
                 foreach (var grouped in weeklyAvailability.GroupBy(x => x.WeekDay))
@@ -901,6 +902,11 @@ namespace core.Services
                 if (offering.ConsultantId != Guid.Parse(request.ConsultantId))
                     throw new ArgumentException("Esta oferta não pertence ao consultor informado.");
 
+                // A primeira conversa grátis (item de sistema) não se compra por conta própria: só depois de o talento aceitar a proposta do consultor, e uma vez por par.
+                var isFirstConversation = offering.ServiceItem?.IsSystem == true;
+                if (isFirstConversation)
+                    await _conversationService.EnsureCanBuyFirstConversationAsync(Guid.Parse(request.CandidateId), offering.ConsultantId);
+
                 var totalSessions = offering.Format == ServiceFormat.Package ? (offering.SessionCount ?? 1) : 1;
                 var unitPrice = totalSessions > 0 ? offering.PriceInLemonCoins / totalSessions : offering.PriceInLemonCoins;
 
@@ -917,7 +923,8 @@ namespace core.Services
                     totalSessions,
                     unitPrice,
                     offering.PriceInLemonCoins,
-                    Guid.Parse(request.WalletDebitTransactionId));
+                    Guid.Parse(request.WalletDebitTransactionId),
+                    isFirstConversation);
 
                 // Sem passo associado na tabela 3.2: fica no registro de eventos da jornada, sem mudar o estado.
                 await _journeyRecorder.RecordAsync(Guid.Parse(request.CandidateId), JourneyEventType.ServicePurchased);

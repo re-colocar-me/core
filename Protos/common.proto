@@ -46,4 +46,6 @@ message service{
 	repeated string skillNames = 8;
 	string format = 9;
 	int32 sessioncount = 10;
+	// Item de sistema (a primeira conversa grátis): o cliente do consultor o tira da lista de serviços e o usa só nos horários.
+	bool isSystem = 11;
 }
