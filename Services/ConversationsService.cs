@@ -36,17 +36,25 @@ namespace core.Services
             return Pack(await _conversations.RaiseHandAsync(command));
         });
 
+        // Nas chamadas do consultor, o campo consultantId traz o id do PERFIL (o app do consultor só conhece esse); as conversas guardam o Consultant.Id, outro Guid. A tradução é aqui.
+        private async Task<Guid> ConsultantOf(string ownerProfileId, bool createIfMissing = false)
+            => await _conversations.ResolveConsultantAsync(ParseId(ownerProfileId, "consultantId"), createIfMissing) ?? throw new ConversationNotFoundException();
+
         public override Task<defaultReply> Propose(ConvProposeRequest request, ServerCallContext context) => Run(async () =>
-            Pack(await _conversations.ProposeAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"), ParseId(request.OfferingId, "offeringId"))));
+            Pack(await _conversations.ProposeAsync(await ConsultantOf(request.ConsultantId), ParseId(request.ConversationId, "conversationId"), ParseId(request.OfferingId, "offeringId"))));
 
         public override Task<defaultReply> ProposeFirstConversation(ConvConsultantActionRequest request, ServerCallContext context) => Run(async () =>
-            Pack(await _conversations.ProposeFirstConversationAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"))));
+            Pack(await _conversations.ProposeFirstConversationAsync(await ConsultantOf(request.ConsultantId), ParseId(request.ConversationId, "conversationId"))));
 
+        // Ler a configuração de quem nunca foi consultor mostra o padrão desligado, sem criar linha nenhuma; só gravar cria.
         public override Task<defaultReply> GetFirstConversation(ConvFirstConversationRequest request, ServerCallContext context) => Run(async () =>
-            Any.Pack(ToReply(await _conversations.GetFirstConversationAsync(ParseId(request.ConsultantId, "consultantId")))));
+        {
+            var consultantId = await _conversations.ResolveConsultantAsync(ParseId(request.ConsultantId, "consultantId")) ?? Guid.NewGuid();
+            return Any.Pack(ToReply(await _conversations.GetFirstConversationAsync(consultantId)));
+        });
 
         public override Task<defaultReply> SetFirstConversation(ConvSetFirstConversationRequest request, ServerCallContext context) => Run(async () =>
-            Any.Pack(ToReply(await _conversations.SetFirstConversationAsync(ParseId(request.ConsultantId, "consultantId"), request.Enabled, request.DurationMinutes, request.MonthlyQuota))));
+            Any.Pack(ToReply(await _conversations.SetFirstConversationAsync(await ConsultantOf(request.ConsultantId, createIfMissing: true), request.Enabled, request.DurationMinutes, request.MonthlyQuota))));
 
         private static ConvFirstConversationReply ToReply(FirstConversationStatus status) => new()
         {
@@ -54,7 +62,7 @@ namespace core.Services
         };
 
         public override Task<defaultReply> Decline(ConvConsultantActionRequest request, ServerCallContext context) => Run(async () =>
-            Pack(await _conversations.DeclineAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"))));
+            Pack(await _conversations.DeclineAsync(await ConsultantOf(request.ConsultantId), ParseId(request.ConversationId, "conversationId"))));
 
         public override Task<defaultReply> Confirm(ConvConfirmRequest request, ServerCallContext context) => Run(async () =>
         {
@@ -87,7 +95,9 @@ namespace core.Services
         {
             ConversationOrigin? origin = request.HasOrigin && Enum.TryParse<ConversationOrigin>(request.Origin, true, out var o) ? o : null;
             ConversationStatus? status = request.HasStatus && Enum.TryParse<ConversationStatus>(request.Status, true, out var s) ? s : null;
-            var items = await _conversations.ListForConsultantAsync(ParseId(request.ConsultantId, "consultantId"), origin, status);
+            // Quem nunca foi consultor não tem conversas: caixa vazia, não erro.
+            var consultantId = await _conversations.ResolveConsultantAsync(ParseId(request.ConsultantId, "consultantId"));
+            var items = consultantId is null ? [] : await _conversations.ListForConsultantAsync(consultantId.Value, origin, status);
             var data = new ConvConsultantListReply();
             data.Items.AddRange(items.Select(ConversationMapper.ToConsultantItem));
             return Any.Pack(data);

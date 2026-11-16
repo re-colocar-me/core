@@ -29,6 +29,16 @@ public class ConversationsGrpcTests
         public Task<FirstConversationStatus> GetFirstConversationAsync(Guid consultantId) => Task.FromResult(new FirstConversationStatus(true, 15, 4, 1, 3));
         public Task<Dictionary<Guid, int>> GetFirstConversationBadgesAsync(IEnumerable<Guid> consultantIds) => Task.FromResult(new Dictionary<Guid, int>());
         public Task EnsureCanBuyFirstConversationAsync(Guid candidateId, Guid consultantId) => Task.CompletedTask;
+        // O app do consultor só conhece o id do perfil: o fake o traduz para um Consultant.Id diferente, para o teste provar que o serviço usa o certo.
+        public static Guid ConsultantOf(Guid profileId) => new(profileId.ToByteArray().Reverse().ToArray());
+        public Guid? LastResolvedOwner { get; private set; }
+        public bool? LastCreateIfMissing { get; private set; }
+        public Guid? UnknownProfile { get; set; }
+        public Task<Guid?> ResolveConsultantAsync(Guid ownerProfileId, bool createIfMissing = false)
+        {
+            LastResolvedOwner = ownerProfileId; LastCreateIfMissing = createIfMissing;
+            return Task.FromResult(ownerProfileId == UnknownProfile && !createIfMissing ? null : (Guid?)ConsultantOf(ownerProfileId));
+        }
         public Task<FirstConversationStatus> SetFirstConversationAsync(Guid consultantId, bool enabled, int durationMinutes, int monthlyQuota)
         {
             if (Throw is not null) throw Throw;
@@ -144,7 +154,8 @@ public class ConversationsGrpcTests
         var set = await grpc.SetFirstConversation(new ConvSetFirstConversationRequest { ConsultantId = Consultant.ToString(), Enabled = true, DurationMinutes = 15, MonthlyQuota = 6 }, TestServerCallContext.Create());
         var got = await grpc.GetFirstConversation(new ConvFirstConversationRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
 
-        Assert.Equal((Consultant, true, 15, 6), service.FirstSet);
+        Assert.Equal((FakeConversations.ConsultantOf(Consultant), true, 15, 6), service.FirstSet);   // o id do perfil virou o Consultant.Id
+        Assert.True(service.LastCreateIfMissing is not null);
         Assert.Equal(6, set.Data.Unpack<ConvFirstConversationReply>().Remaining);
         var status = got.Data.Unpack<ConvFirstConversationReply>();
         Assert.Equal((true, 15, 4, 1, 3), (status.Enabled, status.DurationMinutes, status.MonthlyQuota, status.UsedThisMonth, status.Remaining));
@@ -158,10 +169,40 @@ public class ConversationsGrpcTests
         var request = new ConvConsultantActionRequest { ConsultantId = Consultant.ToString(), ConversationId = Guid.NewGuid().ToString() };
 
         Assert.Equal(200, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
-        Assert.Equal(Consultant, service.FirstProposedBy);
+        Assert.Equal(FakeConversations.ConsultantOf(Consultant), service.FirstProposedBy);   // o id do perfil virou o Consultant.Id
 
         service.Throw = new ConversationRuleException("As vagas acabaram");
         Assert.Equal(400, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
+    }
+
+    [Fact]
+    public async Task O_app_do_consultor_so_conhece_o_perfil_e_o_servico_recebe_o_Consultant_Id()
+    {
+        var (grpc, service) = Create();
+        service.Items.Add(Sample());
+
+        await grpc.SetFirstConversation(new ConvSetFirstConversationRequest { ConsultantId = Consultant.ToString(), Enabled = true, DurationMinutes = 30, MonthlyQuota = 4 }, TestServerCallContext.Create());
+        Assert.Equal(Consultant, service.LastResolvedOwner);
+        Assert.True(service.LastCreateIfMissing);   // gravar a configuração cria a linha de consultor se faltar
+
+        await grpc.GetFirstConversation(new ConvFirstConversationRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+        Assert.False(service.LastCreateIfMissing);  // ler não cria nada
+    }
+
+    [Fact]
+    public async Task Quem_nunca_foi_consultor_tem_caixa_vazia_e_nao_responde_conversas_de_ninguem()
+    {
+        var (grpc, service) = Create();
+        service.Items.Add(Sample());
+        service.UnknownProfile = Consultant;
+
+        var list = await grpc.ListForConsultant(new ConvListForConsultantRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+        Assert.Equal(200, list.Statuscode);
+        Assert.Empty(list.Data.Unpack<ConvConsultantListReply>().Items);
+
+        var request = new ConvConsultantActionRequest { ConsultantId = Consultant.ToString(), ConversationId = Guid.NewGuid().ToString() };
+        Assert.Equal(404, (await grpc.Decline(request, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal(404, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
     }
 
     [Fact]
