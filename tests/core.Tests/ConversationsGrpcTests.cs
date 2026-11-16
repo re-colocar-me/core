@@ -23,6 +23,16 @@ public class ConversationsGrpcTests
         public Task<Conversation> RaiseHandAsync(RaiseHandCommand command) { Raised = command; return Result(); }
         public Task<Conversation> ProposeAsync(Guid consultantId, Guid conversationId, Guid offeringId) => Result();
         public Task<Conversation> DeclineAsync(Guid consultantId, Guid conversationId) => Result();
+        public Task<Conversation> ProposeFirstConversationAsync(Guid consultantId, Guid conversationId) { FirstProposedBy = consultantId; return Result(); }
+        public Guid? FirstProposedBy { get; private set; }
+        public (Guid Consultant, bool Enabled, int Minutes, int Quota)? FirstSet { get; private set; }
+        public Task<FirstConversationStatus> GetFirstConversationAsync(Guid consultantId) => Task.FromResult(new FirstConversationStatus(true, 15, 4, 1, 3));
+        public Task<FirstConversationStatus> SetFirstConversationAsync(Guid consultantId, bool enabled, int durationMinutes, int monthlyQuota)
+        {
+            if (Throw is not null) throw Throw;
+            FirstSet = (consultantId, enabled, durationMinutes, monthlyQuota);
+            return Task.FromResult(new FirstConversationStatus(enabled, durationMinutes, monthlyQuota, 0, monthlyQuota));
+        }
         public Task<Conversation> ConfirmAsync(Guid candidateId, Guid conversationId, CandidateIdentity identity) => Result();
         public Task<Conversation> WithdrawAsync(Guid candidateId, Guid conversationId) => Result();
         public Task<Dictionary<Guid, ConversationConsultant>> GetConsultantsAsync(IEnumerable<Guid> ids)
@@ -122,6 +132,34 @@ public class ConversationsGrpcTests
         Assert.Equal(["A", "B"], service.Raised.AreasTop3);
         Assert.Equal("desligado", service.Raised.Situation);
         Assert.Null(service.Raised.Seniority);   // campo opcional ausente não vira texto vazio
+    }
+
+    [Fact]
+    public async Task A_primeira_conversa_gratis_repassa_a_configuracao_e_a_cota()
+    {
+        var (grpc, service) = Create();
+
+        var set = await grpc.SetFirstConversation(new ConvSetFirstConversationRequest { ConsultantId = Consultant.ToString(), Enabled = true, DurationMinutes = 15, MonthlyQuota = 6 }, TestServerCallContext.Create());
+        var got = await grpc.GetFirstConversation(new ConvFirstConversationRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+
+        Assert.Equal((Consultant, true, 15, 6), service.FirstSet);
+        Assert.Equal(6, set.Data.Unpack<ConvFirstConversationReply>().Remaining);
+        var status = got.Data.Unpack<ConvFirstConversationReply>();
+        Assert.Equal((true, 15, 4, 1, 3), (status.Enabled, status.DurationMinutes, status.MonthlyQuota, status.UsedThisMonth, status.Remaining));
+    }
+
+    [Fact]
+    public async Task Propor_a_primeira_conversa_repassa_o_consultor_e_os_erros_viram_codigo()
+    {
+        var (grpc, service) = Create();
+        service.Items.Add(Sample());
+        var request = new ConvConsultantActionRequest { ConsultantId = Consultant.ToString(), ConversationId = Guid.NewGuid().ToString() };
+
+        Assert.Equal(200, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal(Consultant, service.FirstProposedBy);
+
+        service.Throw = new ConversationRuleException("As vagas acabaram");
+        Assert.Equal(400, (await grpc.ProposeFirstConversation(request, TestServerCallContext.Create())).Statuscode);
     }
 
     [Fact]

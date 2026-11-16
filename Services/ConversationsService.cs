@@ -39,6 +39,20 @@ namespace core.Services
         public override Task<defaultReply> Propose(ConvProposeRequest request, ServerCallContext context) => Run(async () =>
             Pack(await _conversations.ProposeAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"), ParseId(request.OfferingId, "offeringId"))));
 
+        public override Task<defaultReply> ProposeFirstConversation(ConvConsultantActionRequest request, ServerCallContext context) => Run(async () =>
+            Pack(await _conversations.ProposeFirstConversationAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"))));
+
+        public override Task<defaultReply> GetFirstConversation(ConvFirstConversationRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _conversations.GetFirstConversationAsync(ParseId(request.ConsultantId, "consultantId")))));
+
+        public override Task<defaultReply> SetFirstConversation(ConvSetFirstConversationRequest request, ServerCallContext context) => Run(async () =>
+            Any.Pack(ToReply(await _conversations.SetFirstConversationAsync(ParseId(request.ConsultantId, "consultantId"), request.Enabled, request.DurationMinutes, request.MonthlyQuota))));
+
+        private static ConvFirstConversationReply ToReply(FirstConversationStatus status) => new()
+        {
+            Enabled = status.Enabled, DurationMinutes = status.DurationMinutes, MonthlyQuota = status.MonthlyQuota, UsedThisMonth = status.UsedThisMonth, Remaining = status.Remaining
+        };
+
         public override Task<defaultReply> Decline(ConvConsultantActionRequest request, ServerCallContext context) => Run(async () =>
             Pack(await _conversations.DeclineAsync(ParseId(request.ConsultantId, "consultantId"), ParseId(request.ConversationId, "conversationId"))));
 

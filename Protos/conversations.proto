@@ -12,6 +12,10 @@ service Conversations {
   rpc RaiseHand (ConvRaiseHandRequest) returns (common.defaultReply);
   // O consultor propõe um serviço da oferta dele; o preço vem da oferta cadastrada.
   rpc Propose (ConvProposeRequest) returns (common.defaultReply);
+  // A primeira conversa grátis (seção 8): propor no lugar de um serviço, e a configuração e a cota do consultor.
+  rpc ProposeFirstConversation (ConvConsultantActionRequest) returns (common.defaultReply);
+  rpc GetFirstConversation (ConvFirstConversationRequest) returns (common.defaultReply);
+  rpc SetFirstConversation (ConvSetFirstConversationRequest) returns (common.defaultReply);
   rpc Decline (ConvConsultantActionRequest) returns (common.defaultReply);
   // O talento confirma: nasce a conexão e a identidade é revelada ao consultor.
   rpc Confirm (ConvConfirmRequest) returns (common.defaultReply);
@@ -72,6 +76,28 @@ message ConvListForConsultantRequest {
   optional string origin = 2;
   // Raised | Proposed | Confirmed | Declined | Withdrawn | Expired ... (vazio = todos)
   optional string status = 3;
+}
+
+message ConvFirstConversationRequest {
+  string consultantId = 1;
+}
+
+message ConvSetFirstConversationRequest {
+  string consultantId = 1;
+  bool enabled = 2;
+  // 15 ou 30
+  int32 durationMinutes = 3;
+  // de 1 ao teto (10)
+  int32 monthlyQuota = 4;
+}
+
+message ConvFirstConversationReply {
+  bool enabled = 1;
+  int32 durationMinutes = 2;
+  int32 monthlyQuota = 3;
+  int32 usedThisMonth = 4;
+  // Já desconta as vagas confirmadas no mês.
+  int32 remaining = 5;
 }
 
 message ConvActionReply {
