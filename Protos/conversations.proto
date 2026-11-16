@@ -29,6 +29,8 @@ service Conversations {
   rpc DismissInvite (ConvCandidateActionRequest) returns (common.defaultReply);
   rpc SilenceInvite (ConvCandidateActionRequest) returns (common.defaultReply);
   rpc UnsilenceConsultant (ConvUnsilenceRequest) returns (common.defaultReply);
+  // Denúncia (seção 13). O BFF fixa o papel (Candidate ou Consultant); a resposta NUNCA diz se a denúncia suspendeu alguém.
+  rpc ReportConversation (ConvReportRequest) returns (common.defaultReply);
   rpc Decline (ConvConsultantActionRequest) returns (common.defaultReply);
   // O talento confirma: nasce a conexão e a identidade é revelada ao consultor.
   rpc Confirm (ConvConfirmRequest) returns (common.defaultReply);
@@ -231,6 +233,21 @@ message ConvInvitePreferencesReply {
 message ConvUnsilenceRequest {
   string candidateId = 1;
   string consultantId = 2;
+}
+
+// reporterRole: "Candidate" (reporterId = id do perfil do talento) ou "Consultant" (reporterId = id do PERFIL do consultor, traduzido no core).
+// reason: OutsideContact, Offensive, Misleading, Spam ou Other.
+message ConvReportRequest {
+  string reporterRole = 1;
+  string reporterId = 2;
+  string conversationId = 3;
+  string reason = 4;
+  optional string details = 5;
+}
+
+// created=false: este lado já tinha denunciado esta conversa.
+message ConvReportReply {
+  bool created = 1;
 }
 
 message ConvActionReply {

@@ -18,12 +18,14 @@ namespace core.Services
 
         private readonly IAudienceService _audience;
         private readonly IInviteService _invites;
+        private readonly IModerationService _moderation;
 
-        public ConversationsService(IConversationService conversations, IAudienceService audience, IInviteService invites)
+        public ConversationsService(IConversationService conversations, IAudienceService audience, IInviteService invites, IModerationService moderation)
         {
             _conversations = conversations;
             _audience = audience;
             _invites = invites;
+            _moderation = moderation;
         }
 
         public override Task<defaultReply> RaiseHand(ConvRaiseHandRequest request, ServerCallContext context) => Run(async () =>
@@ -107,6 +109,14 @@ namespace core.Services
         {
             await _invites.UnsilenceAsync(ParseId(request.CandidateId, "candidateId"), ParseId(request.ConsultantId, "consultantId"));
             return Any.Pack(ToReply(await _invites.GetPreferencesAsync(ParseId(request.CandidateId, "candidateId"))));
+        });
+
+        // A denúncia (seção 13). O consultor só conhece o id do perfil, traduzido para o Consultant.Id que a conversa guarda; o papel inválido não resolve nada e vira 400 no serviço.
+        public override Task<defaultReply> ReportConversation(ConvReportRequest request, ServerCallContext context) => Run(async () =>
+        {
+            var reporterId = request.ReporterRole == ReporterRoles.Consultant ? await ConsultantOf(request.ReporterId) : ParseId(request.ReporterId, "reporterId");
+            var result = await _moderation.ReportAsync(new ReportCommand(ParseId(request.ConversationId, "conversationId"), request.ReporterRole, reporterId, request.Reason, request.HasDetails ? request.Details : null));
+            return Any.Pack(new ConvReportReply { Created = result.Created });
         });
 
         private static ConvInvitePreferencesReply ToReply(InvitePreferencesView view)

@@ -41,6 +41,21 @@ public class InviteQueryTranslationTests
     }
 
     [Fact]
+    public void A_contagem_das_denuncias_traduz_para_SQL_e_so_conta_talentos_diferentes_de_convites()
+    {
+        var options = new DbContextOptionsBuilder<ReColocarmeContext>().UseNpgsql("Host=localhost;Database=nao-existe;Username=x;Password=x").Options;
+        using var context = new ReColocarmeContext(options);
+
+        var sql = new ModerationRepository(context).InviteReportersQuery(Guid.NewGuid(), new DateTime(2026, 10, 17, 12, 0, 0, DateTimeKind.Utc)).ToQueryString();
+
+        Assert.Contains("FROM \"ConversationReports\"", sql);
+        Assert.Contains("'Invite'", sql);                  // só convites (a mão levantada não suspende o direito de convidar)
+        Assert.Contains("'Candidate'", sql);               // só denúncia de talento
+        Assert.Contains("\"CreatedAt\" >=", sql);          // dentro da janela
+        Assert.Contains("DISTINCT", sql);                  // talentos diferentes
+    }
+
+    [Fact]
     public void Sem_criterio_de_publico_a_consulta_nao_filtra_situacao_nem_faixa()
     {
         var sql = Sql([], []);

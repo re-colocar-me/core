@@ -114,6 +114,22 @@ public class ConversationsGrpcTests
         public Task UnsilenceAsync(Guid candidateId, Guid consultantId) { Unsilenced = (candidateId, consultantId); return Task.CompletedTask; }
     }
 
+    private sealed class FakeModeration : IModerationService
+    {
+        public ReportCommand? Reported { get; private set; }
+        public Exception? Throw { get; set; }
+        public bool Created { get; set; } = true;
+        public Task<ReportResult> ReportAsync(ReportCommand command)
+        {
+            if (Throw is not null) throw Throw;
+            Reported = command;
+            return Task.FromResult(new ReportResult(Created));
+        }
+        public Task<ConsultantInviteSuspension?> GetActiveSuspensionAsync(Guid consultantId) => Task.FromResult<ConsultantInviteSuspension?>(null);
+        public Task<ConsultantInviteSuspension> SuspendAsync(Guid consultantId) => throw new NotSupportedException();
+        public Task LiftSuspensionAsync(Guid consultantId, string? note) => Task.CompletedTask;
+    }
+
     private static Conversation Sample(ConversationStatus status = ConversationStatus.Raised, Guid? connectionId = null)
     {
         var id = Guid.NewGuid();
@@ -129,21 +145,28 @@ public class ConversationsGrpcTests
     private static (core.Services.ConversationsService Grpc, FakeConversations Service) Create()
     {
         var service = new FakeConversations();
-        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites()), service);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), new FakeModeration()), service);
+    }
+
+    private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeModeration Moderation) CreateWithModeration()
+    {
+        var service = new FakeConversations();
+        var moderation = new FakeModeration();
+        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), moderation), service, moderation);
     }
 
     private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeInvites Invites) CreateWithInvites()
     {
         var service = new FakeConversations();
         var invites = new FakeInvites();
-        return (new core.Services.ConversationsService(service, new FakeAudience(), invites), service, invites);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), invites, new FakeModeration()), service, invites);
     }
 
     private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeAudience Audience) CreateWithAudience()
     {
         var service = new FakeConversations();
         var audience = new FakeAudience();
-        return (new core.Services.ConversationsService(service, audience, new FakeInvites()), service, audience);
+        return (new core.Services.ConversationsService(service, audience, new FakeInvites(), new FakeModeration()), service, audience);
     }
 
     [Fact]
@@ -445,6 +468,57 @@ public class ConversationsGrpcTests
         var consultantItem = core.Services.ConversationMapper.ToConsultantItem(invite);
         var names = ConvConsultantItem.Descriptor.Fields.InFieldNumberOrder().Select(f => f.Name.ToLowerInvariant()).ToList();
         Assert.DoesNotContain(names, n => n.Contains("reason") || n.Contains("candidate"));
+    }
+
+    [Fact]
+    public async Task A_denuncia_do_talento_usa_o_id_do_perfil_e_a_resposta_so_diz_se_foi_criada()
+    {
+        var (grpc, _, moderation) = CreateWithModeration();
+        var conversationId = Guid.NewGuid();
+
+        var reply = await grpc.ReportConversation(new ConvReportRequest
+        {
+            ReporterRole = "Candidate", ReporterId = Talent.ToString(), ConversationId = conversationId.ToString(), Reason = "OutsideContact", Details = "pediu meu zap"
+        }, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        Assert.Equal(new ReportCommand(conversationId, "Candidate", Talent, "OutsideContact", "pediu meu zap"), moderation.Reported);
+        // A resposta não tem campo que revele suspensão: quem denuncia não precisa saber o que aconteceu com o denunciado.
+        Assert.Equal(["created"], ConvReportReply.Descriptor.Fields.InFieldNumberOrder().Select(f => f.Name));
+        Assert.True(reply.Data.Unpack<ConvReportReply>().Created);
+    }
+
+    [Fact]
+    public async Task A_denuncia_do_consultor_traduz_o_id_do_perfil_para_o_consultant_id()
+    {
+        var (grpc, _, moderation) = CreateWithModeration();
+        var profile = Guid.NewGuid();
+
+        await grpc.ReportConversation(new ConvReportRequest { ReporterRole = "Consultant", ReporterId = profile.ToString(), ConversationId = Guid.NewGuid().ToString(), Reason = "Spam" }, TestServerCallContext.Create());
+
+        Assert.Equal(FakeConversations.ConsultantOf(profile), moderation.Reported!.ReporterId);
+        Assert.Equal("Consultant", moderation.Reported.ReporterRole);
+        Assert.Null(moderation.Reported.Details);
+    }
+
+    [Fact]
+    public async Task A_denuncia_de_quem_nao_e_consultor_da_404_e_os_erros_da_moderacao_viram_codigo()
+    {
+        var (grpc, service, moderation) = CreateWithModeration();
+        service.UnknownProfile = Guid.Parse("bbbbbbbb-1111-2222-3333-444444444444");
+        var request = new ConvReportRequest { ReporterRole = "Consultant", ReporterId = service.UnknownProfile.ToString(), ConversationId = Guid.NewGuid().ToString(), Reason = "Spam" };
+
+        Assert.Equal(404, (await grpc.ReportConversation(request, TestServerCallContext.Create())).Statuscode);
+        Assert.Null(moderation.Reported);
+
+        var talent = new ConvReportRequest { ReporterRole = "Candidate", ReporterId = Talent.ToString(), ConversationId = Guid.NewGuid().ToString(), Reason = "x" };
+        moderation.Throw = new ConversationRuleException("Escolha o motivo da denúncia.");
+        Assert.Equal(400, (await grpc.ReportConversation(talent, TestServerCallContext.Create())).Statuscode);
+        moderation.Throw = new ArgumentException("Papel de quem denuncia inválido.");
+        Assert.Equal(400, (await grpc.ReportConversation(talent, TestServerCallContext.Create())).Statuscode);
+        moderation.Throw = new ConversationNotFoundException();
+        Assert.Equal(404, (await grpc.ReportConversation(talent, TestServerCallContext.Create())).Statuscode);
+        Assert.Equal(400, (await grpc.ReportConversation(new ConvReportRequest { ReporterRole = "Candidate", ReporterId = "x", ConversationId = "y" }, TestServerCallContext.Create())).Statuscode);
     }
 
     [Fact]

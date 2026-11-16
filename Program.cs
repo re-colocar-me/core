@@ -114,6 +114,8 @@ builder.Services.AddTransient<IAudienceRepository, AudienceRepository>();
 builder.Services.AddTransient<IAudienceService, AudienceService>();
 builder.Services.AddTransient<IInviteRepository, InviteRepository>();
 builder.Services.AddTransient<IInviteService, InviteService>();
+builder.Services.AddTransient<IModerationRepository, ModerationRepository>();
+builder.Services.AddTransient<IModerationService, ModerationService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
