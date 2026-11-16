@@ -128,6 +128,11 @@ public class ConversationsGrpcTests
         public Task<ConsultantInviteSuspension?> GetActiveSuspensionAsync(Guid consultantId) => Task.FromResult<ConsultantInviteSuspension?>(null);
         public Task<ConsultantInviteSuspension> SuspendAsync(Guid consultantId) => throw new NotSupportedException();
         public Task LiftSuspensionAsync(Guid consultantId, string? note) => Task.CompletedTask;
+        // A fila da equipe é testada em ModerationGrpcTests.
+        public Task<List<ReportQueueItem>> ListReportsAsync(string? status, int take) => throw new NotSupportedException();
+        public Task<ReportQueueItem> ReviewReportAsync(Guid reportId, string? note) => throw new NotSupportedException();
+        public Task<List<SuspensionItem>> ListSuspensionsAsync() => throw new NotSupportedException();
+        public Task<int> CloseHeldInvitesAsync(Guid consultantId) => throw new NotSupportedException();
     }
 
     private static Conversation Sample(ConversationStatus status = ConversationStatus.Raised, Guid? connectionId = null)

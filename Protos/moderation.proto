@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package moderation;
+
+// A moderação da ponte talento-consultor para a EQUIPE (docs/specs/ponte-talento-consultor.md, seção 29). Só o core-backoffice chama isto, depois de conferir o JWT do backoffice.
+// Nada aqui identifica o talento: a fila mostra o papel de quem denunciou, o consultor e o texto da conversa.
+service Moderation {
+  rpc ListReports (ModListReportsRequest) returns (common.defaultReply);
+  rpc ReviewReport (ModReviewReportRequest) returns (common.defaultReply);
+  rpc ListSuspensions (ModEmptyRequest) returns (common.defaultReply);
+  // consultantId é o Consultant.Id (o que a fila devolve), não o id do perfil.
+  rpc SuspendInviting (ModConsultantRequest) returns (common.defaultReply);
+  rpc LiftInviting (ModLiftRequest) returns (common.defaultReply);
+  rpc CloseHeldInvites (ModConsultantRequest) returns (common.defaultReply);
+}
+
+message ModEmptyRequest {}
+
+message ModListReportsRequest {
+  // "Open", "Reviewed" ou vazio (todas).
+  string status = 1;
+  int32 take = 2;
+}
+
+message ModReviewReportRequest {
+  string reportId = 1;
+  string note = 2;
+}
+
+message ModConsultantRequest {
+  string consultantId = 1;
+}
+
+message ModLiftRequest {
+  string consultantId = 1;
+  string note = 2;
+}
+
+message ModReportItem {
+  string reportId = 1;
+  string conversationId = 2;
+  string createdAt = 3;
+  string status = 4;
+  string reporterRole = 5;
+  string reason = 6;
+  string details = 7;
+  string reviewedAt = 8;
+  string reviewNote = 9;
+  string consultantId = 10;
+  string consultantName = 11;
+  string origin = 12;
+  string conversationStatus = 13;
+  string conversationText = 14;
+  bool consultantSuspended = 15;
+  int32 distinctInviteReporters30Days = 16;
+}
+
+message ModListReportsReply {
+  repeated ModReportItem items = 1;
+}
+
+message ModSuspensionItem {
+  string consultantId = 1;
+  string consultantName = 2;
+  string suspendedAt = 3;
+  string reason = 4;
+  int32 heldInvites = 5;
+}
+
+message ModListSuspensionsReply {
+  repeated ModSuspensionItem items = 1;
+}
+
+message ModSuspensionReply {
+  string consultantId = 1;
+  string suspendedAt = 2;
+  string reason = 3;
+}
+
+message ModEmptyReply {}
+
+message ModClosedReply {
+  int32 closed = 1;
+}

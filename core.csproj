@@ -28,6 +28,7 @@
     <Protobuf Include="Protos\account.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\leads.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\conversations.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\moderation.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\common.proto" GrpcServices="None" />
   </ItemGroup>
 
