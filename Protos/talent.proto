@@ -141,6 +141,8 @@ message consultant {
 	// Nota pública (só com 3 ou mais avaliações gerais; senão 0 e 0: "Nova aqui").
 	double ratingAverage = 8;
 	int32 ratingCount = 9;
+	// Selo "1ª conversa grátis": a duração em minutos (15 ou 30) quando o consultor está com ela ligada e ainda tem vaga no mês; 0 = sem selo. O número de vagas nunca sai do core.
+	int32 firstConversationMinutes = 10;
 }
 
 message ConnectRequest{

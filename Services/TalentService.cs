@@ -21,9 +21,11 @@ namespace core.Services
         private readonly IJourneyRecorder _journeyRecorder;
         private readonly IReviewService _reviewService;
         private readonly IMatchService _matchService;
+        private readonly IConversationService _conversationService;
 
-        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder, IReviewService reviewService, IMatchService matchService)
+        public TalentService(IConsultantServices services, IProfileService profileService, ITalentServices talentServices, IResumeSuggestionService resumeSuggestionService, IScheduleService scheduleService, ISwotAnalysisRepository swotAnalysisRepository, ISkillGapAnalysisRepository skillGapAnalysisRepository, ILinkedinSuggestionRepository linkedinSuggestionRepository, IJourneyRecorder journeyRecorder, IReviewService reviewService, IMatchService matchService, IConversationService conversationService)
         {
+            _conversationService = conversationService;
             _matchService = matchService;
             _reviewService = reviewService;
             _journeyRecorder = journeyRecorder;
@@ -204,10 +206,13 @@ namespace core.Services
                     .ToDictionary(x => x.Id);
                 var data = new ListConsultantsReply();
                 var ratings = await _reviewService.GetPublicRatingsAsync(response.Select(x => x.Id));
+                var firstConversationBadges = await _conversationService.GetFirstConversationBadgesAsync(response.Select(x => x.Id));
 
                 foreach (var item in response)
                 {
                     var newConsultant = new consultant();
+                    if (firstConversationBadges.TryGetValue(item.Id, out var firstConversationMinutes))
+                        newConsultant.FirstConversationMinutes = firstConversationMinutes;
                     if (ratings.TryGetValue(item.Id, out var rating))
                     {
                         newConsultant.RatingAverage = rating.Average;

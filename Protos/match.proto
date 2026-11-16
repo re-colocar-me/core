@@ -36,6 +36,8 @@ message MatchedConsultantItem {
   // "Por que combina": só com etiqueta, só com fatos do catálogo.
   optional string reason = 12;
   bool newHere = 13;
+  // Selo "1ª conversa grátis": duração em minutos (15 ou 30) enquanto o consultor tem vaga no mês; 0 = sem selo. O número de vagas nunca sai do core.
+  int32 firstConversationMinutes = 14;
 }
 
 message ListForTalentReply {

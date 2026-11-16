@@ -27,6 +27,7 @@ public class ConversationsGrpcTests
         public Guid? FirstProposedBy { get; private set; }
         public (Guid Consultant, bool Enabled, int Minutes, int Quota)? FirstSet { get; private set; }
         public Task<FirstConversationStatus> GetFirstConversationAsync(Guid consultantId) => Task.FromResult(new FirstConversationStatus(true, 15, 4, 1, 3));
+        public Task<Dictionary<Guid, int>> GetFirstConversationBadgesAsync(IEnumerable<Guid> consultantIds) => Task.FromResult(new Dictionary<Guid, int>());
         public Task<FirstConversationStatus> SetFirstConversationAsync(Guid consultantId, bool enabled, int durationMinutes, int monthlyQuota)
         {
             if (Throw is not null) throw Throw;

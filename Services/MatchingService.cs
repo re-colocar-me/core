@@ -10,11 +10,13 @@ namespace core.Services
     {
         private readonly IMatchService _match;
         private readonly IProfileService _profiles;
+        private readonly IConversationService _conversations;
 
-        public MatchingService(IMatchService match, IProfileService profiles)
+        public MatchingService(IMatchService match, IProfileService profiles, IConversationService conversations)
         {
             _match = match;
             _profiles = profiles;
+            _conversations = conversations;
         }
 
         public override async Task<defaultReply> ListConsultantsForTalent(ListForTalentRequest request, ServerCallContext context)
@@ -28,6 +30,9 @@ namespace core.Services
                 var listing = await _match.ListForTalentAsync(candidateId, request.HasServiceName ? request.ServiceName : null, request.UseAffinity);
                 var profiles = (await _profiles.GetByIdsAsync(listing.Items.Select(x => x.Consultant.ProfileId))).ToDictionary(x => x.Id);
 
+                // O selo "1ª conversa grátis" não entra na pontuação (a ordem do match não muda); só enfeita o cartão.
+                var firstConversationBadges = await _conversations.GetFirstConversationBadgesAsync(listing.Items.Select(x => x.Consultant.Id));
+
                 var data = new ListForTalentReply { AffinityUsed = listing.AffinityUsed };
                 foreach (var item in listing.Items)
                 {
@@ -37,6 +42,8 @@ namespace core.Services
                         Id = consultant.Id.ToString(), Name = consultant.Name.FullName, RatingAverage = item.RatingAverage, RatingCount = item.RatingCount,
                         Position = item.Position, BestMatch = item.BestMatch, NewHere = item.NewHere
                     };
+                    if (firstConversationBadges.TryGetValue(consultant.Id, out var firstConversationMinutes))
+                        message.FirstConversationMinutes = firstConversationMinutes;
                     message.Services.AddRange(item.Services);
                     message.Skills.AddRange(consultant.Skills.Select(x => x.Name));
                     if (profiles.TryGetValue(consultant.ProfileId, out var profile))
