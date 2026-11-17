@@ -86,6 +86,10 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secrets
                   key: password
+            # O aviso por e-mail e push ao talento dos convites recebidos (docs/specs/ponte-talento-consultor.md, seção 33). DESLIGADO de propósito:
+            # só ligar depois de o tipo talento.convite-recebido estar publicado no catálogo do motor e de o texto do e-mail ter sido lido pelo fundador.
+            - name: InviteNotices__Enabled
+              value: "false"
           resources:
             requests:
               cpu: 100m

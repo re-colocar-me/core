@@ -116,7 +116,10 @@ builder.Services.AddTransient<IInviteRepository, InviteRepository>();
 builder.Services.AddTransient<IInviteService, InviteService>();
 builder.Services.AddTransient<IModerationRepository, ModerationRepository>();
 builder.Services.AddTransient<IModerationService, ModerationService>();
+builder.Services.AddSingleton<IInviteNoticePublisher, core.infrastructure.Publishers.RabbitInviteNoticePublisher>();
+builder.Services.AddTransient<IInviteNoticeService, InviteNoticeService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
+builder.Services.AddHostedService<core.IoC.InviteNoticeJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.
