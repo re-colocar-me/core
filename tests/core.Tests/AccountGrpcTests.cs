@@ -32,6 +32,8 @@ public class AccountGrpcTests
         Assert.True(data.TalentRemoved);
         Assert.Equal((2, 14, 3, 5), (data.Cycles, data.EventLogs, data.Notifications, data.TutorialRecords));
         Assert.Equal((1, 2, 1, 3), (data.ConnectionsAnonymized, data.PurchasesAnonymized, data.SchedulesAnonymized, data.Documents));
+        // A ponte talento-consultor (seção 37): conversas anonimizadas, denúncias desvinculadas e preferências de convite apagadas.
+        Assert.Equal((4, 1, 2), (data.ConversationsAnonymized, data.ReportsAnonymized, data.InvitePreferencesRemoved));
     }
 
     [Theory]

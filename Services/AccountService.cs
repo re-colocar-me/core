@@ -27,7 +27,8 @@ namespace core.Services
                 {
                     ProfileFound = db.ProfileFound, TalentRemoved = db.TalentRemoved, Cycles = db.Cycles, EventLogs = db.EventLogs,
                     Notifications = db.Notifications, TutorialRecords = db.TutorialRecords, ConnectionsAnonymized = db.ConnectionsAnonymized,
-                    PurchasesAnonymized = db.PurchasesAnonymized, SchedulesAnonymized = db.SchedulesAnonymized, Documents = result.Documents
+                    PurchasesAnonymized = db.PurchasesAnonymized, SchedulesAnonymized = db.SchedulesAnonymized, Documents = result.Documents,
+                    ConversationsAnonymized = db.ConversationsAnonymized, ReportsAnonymized = db.ReportsAnonymized, InvitePreferencesRemoved = db.InvitePreferencesRemoved
                 });
                 reply.Statuscode = Constants.SuccessStatusCode;
             }

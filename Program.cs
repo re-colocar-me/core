@@ -120,6 +120,7 @@ builder.Services.AddSingleton<IInviteNoticePublisher, core.infrastructure.Publis
 builder.Services.AddTransient<IInviteNoticeService, InviteNoticeService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
 builder.Services.AddHostedService<core.IoC.InviteNoticeJob>();
+builder.Services.AddHostedService<core.IoC.ConversationRetentionJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
 // purpose: business audit trail, not application logs. See docs/specs/activity-log-backoffice.md.

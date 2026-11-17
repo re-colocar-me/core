@@ -54,6 +54,7 @@ public class ConversationsGrpcTests
         public Task<List<Conversation>> ListForConsultantAsync(Guid consultantId, ConversationOrigin? origin, ConversationStatus? status)
             => Task.FromResult(Items.Where(x => (origin is null || x.Origin == origin) && (status is null || x.Status == status)).ToList());
         public Task<int> ExpireDueAsync() => Task.FromResult(0);
+        public Task<int> ApplyRetentionAsync(CancellationToken ct = default) => Task.FromResult(0);
     }
 
     private sealed class FakeAudience : IAudienceService
@@ -133,6 +134,7 @@ public class ConversationsGrpcTests
         public Task<ReportQueueItem> ReviewReportAsync(Guid reportId, string? note) => throw new NotSupportedException();
         public Task<List<SuspensionItem>> ListSuspensionsAsync() => throw new NotSupportedException();
         public Task<int> CloseHeldInvitesAsync(Guid consultantId) => throw new NotSupportedException();
+        public Task<int> ApplyRetentionAsync() => throw new NotSupportedException();
     }
 
     private static Conversation Sample(ConversationStatus status = ConversationStatus.Raised, Guid? connectionId = null)

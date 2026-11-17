@@ -37,6 +37,7 @@ public class ModerationGrpcTests
             return Task.FromResult(Item() with { ReportId = reportId, Status = "Reviewed", ReviewNote = note, ReviewedAt = new DateTime(2026, 11, 16, 13, 0, 0, DateTimeKind.Utc) });
         }
         public Task<List<SuspensionItem>> ListSuspensionsAsync() => Task.FromResult(new List<SuspensionItem> { new(Consultant, "Marina Costa", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "AutoReports", 2, Profile, "Marina", "marina@exemplo.com"), new(Guid.NewGuid(), "Sem Contato", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "Manual", 0) });
+        public Task<int> ApplyRetentionAsync() => throw new NotSupportedException();
         public Task<int> CloseHeldInvitesAsync(Guid consultantId)
         {
             if (Throw is not null) throw Throw;
