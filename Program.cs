@@ -107,7 +107,14 @@ builder.Services.AddTransient<IMatchService, MatchService>();
 
 // A ponte talento-consultor (docs/specs/ponte-talento-consultor.md): conversas, aceite que cria a conexão, e o job que expira as sem resposta.
 builder.Services.AddTransient<IConversationRepository, ConversationRepository>();
-builder.Services.AddSingleton(new ConversationConfiguration());
+// Os parâmetros da ponte são ajustáveis no backoffice (seção 39 de ponte-talento-consultor.md): UMA instância guarda a configuração em vigor (os padrões do código até a primeira leitura do banco), e
+// cada serviço, que é Transient, recebe a que está em vigor no momento em que é criado.
+builder.Services.AddSingleton<core.domain.Interfaces.Services.ConversationConfigurationHolder>();
+builder.Services.AddTransient(sp => sp.GetRequiredService<core.domain.Interfaces.Services.ConversationConfigurationHolder>().Current);
+builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.ISettingsRepository, core.infrastructure.Repositories.SettingsRepository>();
+builder.Services.AddTransient<core.domain.Interfaces.Services.ISettingsService, core.domain.Services.Settings.SettingsService>();
+// Registrado ANTES dos outros serviços de segundo plano: a primeira leitura roda no StartAsync, antes de eles começarem.
+builder.Services.AddHostedService<core.IoC.SettingsRefreshJob>();
 builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();
 builder.Services.AddTransient<IConversationService, ConversationService>();
 builder.Services.AddTransient<IAudienceRepository, AudienceRepository>();
@@ -190,6 +197,7 @@ app.MapGrpcService<coreServices.MatchingService>();
 app.MapGrpcService<coreServices.LeadsService>();
 app.MapGrpcService<coreServices.ConversationsService>();
 app.MapGrpcService<coreServices.ModerationGrpcService>();
+app.MapGrpcService<coreServices.SettingsGrpcService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

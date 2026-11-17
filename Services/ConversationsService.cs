@@ -19,13 +19,17 @@ namespace core.Services
         private readonly IAudienceService _audience;
         private readonly IInviteService _invites;
         private readonly IModerationService _moderation;
+        // A configuração EM VIGOR (ajustável no backoffice, seção 39): quem ainda não é consultor também vê o limite que a equipe definiu, e não o padrão do código.
+        private readonly core.domain.Services.Conversations.ConversationConfiguration _config;
 
-        public ConversationsService(IConversationService conversations, IAudienceService audience, IInviteService invites, IModerationService moderation)
+        public ConversationsService(IConversationService conversations, IAudienceService audience, IInviteService invites, IModerationService moderation,
+            core.domain.Services.Conversations.ConversationConfiguration config)
         {
             _conversations = conversations;
             _audience = audience;
             _invites = invites;
             _moderation = moderation;
+            _config = config;
         }
 
         public override Task<defaultReply> RaiseHand(ConvRaiseHandRequest request, ServerCallContext context) => Run(async () =>
@@ -131,7 +135,7 @@ namespace core.Services
         {
             var consultantId = await _conversations.ResolveConsultantAsync(ParseId(request.ConsultantId, "consultantId"));
             return Any.Pack(ToReply(consultantId is null
-                ? new AudienceView(new Dictionary<string, List<string>>(), core.domain.Services.Conversations.AudienceKinds.Supported, new core.domain.Services.Conversations.ConversationConfiguration().AudienceMaxCriteria, await _audience.PreviewAsync(new Dictionary<string, List<string>>()))
+                ? new AudienceView(new Dictionary<string, List<string>>(), core.domain.Services.Conversations.AudienceKinds.Supported, _config.AudienceMaxCriteria, await _audience.PreviewAsync(new Dictionary<string, List<string>>()))
                 : await _audience.GetAsync(consultantId.Value)));
         });
 

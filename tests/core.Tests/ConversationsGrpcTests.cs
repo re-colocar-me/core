@@ -149,31 +149,31 @@ public class ConversationsGrpcTests
         };
     }
 
-    private static (core.Services.ConversationsService Grpc, FakeConversations Service) Create()
+    private static (core.Services.ConversationsService Grpc, FakeConversations Service) Create(ConversationConfiguration? config = null)
     {
         var service = new FakeConversations();
-        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), new FakeModeration()), service);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), new FakeModeration(), config ?? new ConversationConfiguration()), service);
     }
 
     private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeModeration Moderation) CreateWithModeration()
     {
         var service = new FakeConversations();
         var moderation = new FakeModeration();
-        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), moderation), service, moderation);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), new FakeInvites(), moderation, new ConversationConfiguration()), service, moderation);
     }
 
     private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeInvites Invites) CreateWithInvites()
     {
         var service = new FakeConversations();
         var invites = new FakeInvites();
-        return (new core.Services.ConversationsService(service, new FakeAudience(), invites, new FakeModeration()), service, invites);
+        return (new core.Services.ConversationsService(service, new FakeAudience(), invites, new FakeModeration(), new ConversationConfiguration()), service, invites);
     }
 
-    private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeAudience Audience) CreateWithAudience()
+    private static (core.Services.ConversationsService Grpc, FakeConversations Service, FakeAudience Audience) CreateWithAudience(ConversationConfiguration? config = null)
     {
         var service = new FakeConversations();
         var audience = new FakeAudience();
-        return (new core.Services.ConversationsService(service, audience, new FakeInvites(), new FakeModeration()), service, audience);
+        return (new core.Services.ConversationsService(service, audience, new FakeInvites(), new FakeModeration(), config ?? new ConversationConfiguration()), service, audience);
     }
 
     [Fact]
@@ -353,6 +353,17 @@ public class ConversationsGrpcTests
         Assert.Empty(view.Criteria);
         Assert.Equal(42, view.Count.Value);
         Assert.False(service.LastCreateIfMissing);
+    }
+
+    [Fact]
+    public async Task Quem_nunca_foi_consultor_ve_o_limite_de_criterios_que_a_equipe_definiu_e_nao_o_padrao_do_codigo()
+    {
+        var (grpc, service, _) = CreateWithAudience(new ConversationConfiguration { AudienceMaxCriteria = 5 });      // a equipe subiu de 3 para 5 no backoffice
+        service.UnknownProfile = Consultant;
+
+        var reply = await grpc.GetAudience(new ConvAudienceRequest { ConsultantId = Consultant.ToString() }, TestServerCallContext.Create());
+
+        Assert.Equal(5, reply.Data.Unpack<ConvAudienceReply>().MaxCriteria);
     }
 
     [Fact]

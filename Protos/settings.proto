@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package settings;
+
+// Os parâmetros da ponte talento-consultor que a EQUIPE ajusta no backoffice (docs/specs/ponte-talento-consultor.md, seção 39). Só o core-backoffice chama isto, depois de conferir o JWT do
+// backoffice e o perfil de administração; `actor` é quem da equipe está mudando, para o histórico. Cada mudança é validada no core (faixa de cada parâmetro e regras entre eles).
+service PlatformSettingsAdmin {
+  rpc ListSettings (SetEmptyRequest) returns (common.defaultReply);
+  rpc UpdateSetting (SetUpdateRequest) returns (common.defaultReply);
+  // Volta o parâmetro ao padrão do código.
+  rpc ResetSetting (SetResetRequest) returns (common.defaultReply);
+  rpc ListChanges (SetChangesRequest) returns (common.defaultReply);
+}
+
+message SetEmptyRequest {}
+
+message SetUpdateRequest {
+  string key = 1;
+  int32 value = 2;
+  string actor = 3;
+  string note = 4;
+}
+
+message SetResetRequest {
+  string key = 1;
+  string actor = 2;
+  string note = 3;
+}
+
+message SetChangesRequest {
+  int32 take = 1;
+}
+
+message SetItem {
+  string key = 1;
+  string group = 2;
+  string label = 3;
+  string description = 4;
+  string unit = 5;
+  int32 min = 6;
+  int32 max = 7;
+  int32 default = 8;
+  int32 value = 9;
+  bool isCustom = 10;
+  // ISO 8601; vazio se nunca foi mudado.
+  string updatedAt = 11;
+  string updatedBy = 12;
+}
+
+message SetListReply {
+  repeated SetItem items = 1;
+}
+
+message SetChangeItem {
+  string id = 1;
+  string key = 2;
+  string label = 3;
+  // hasOldValue/hasNewValue = false: estava no padrão / voltou ao padrão.
+  bool hasOldValue = 4;
+  int32 oldValue = 5;
+  bool hasNewValue = 6;
+  int32 newValue = 7;
+  string changedAt = 8;
+  string changedBy = 9;
+  string note = 10;
+}
+
+message SetChangesReply {
+  repeated SetChangeItem items = 1;
+}
