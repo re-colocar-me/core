@@ -116,10 +116,15 @@ builder.Services.AddTransient<IInviteRepository, InviteRepository>();
 builder.Services.AddTransient<IInviteService, InviteService>();
 builder.Services.AddTransient<IModerationRepository, ModerationRepository>();
 builder.Services.AddTransient<IModerationService, ModerationService>();
-builder.Services.AddSingleton<IInviteNoticePublisher, core.infrastructure.Publishers.RabbitInviteNoticePublisher>();
+// Um só publicador (uma só conexão com o RabbitMQ) para todos os avisos do core: o do convite e os das conversas.
+builder.Services.AddSingleton<core.infrastructure.Publishers.RabbitNotificationPublisher>();
+builder.Services.AddSingleton<IInviteNoticePublisher>(sp => sp.GetRequiredService<core.infrastructure.Publishers.RabbitNotificationPublisher>());
+builder.Services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<core.infrastructure.Publishers.RabbitNotificationPublisher>());
+builder.Services.AddTransient<IConversationNoticeService, ConversationNoticeService>();
 builder.Services.AddTransient<IInviteNoticeService, InviteNoticeService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
 builder.Services.AddHostedService<core.IoC.InviteNoticeJob>();
+builder.Services.AddHostedService<core.IoC.ConversationNoticeJob>();
 builder.Services.AddHostedService<core.IoC.ConversationRetentionJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on

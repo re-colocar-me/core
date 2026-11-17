@@ -42,7 +42,7 @@ public class InviteNoticeTests
     // ---- a mensagem ao motor ----------------------------------------------------------------------------------------------------
 
     private static JsonElement Message(InviteNotice notice)
-        => JsonDocument.Parse(RabbitInviteNoticePublisher.Build(notice)).RootElement;
+        => JsonDocument.Parse(RabbitNotificationPublisher.Build(notice)).RootElement;
 
     private static InviteNotice Notice(string? email = "ana@exemplo.com", string? first = "Ana") =>
         new(Conversation, Candidate, email, first, "Marina Costa", "Combina com você porque você está desligado(a) há 1 a 3 meses.", new DateTime(2026, 11, 17, 12, 0, 0, DateTimeKind.Utc));
@@ -73,7 +73,7 @@ public class InviteNoticeTests
     [Fact]
     public void A_mensagem_so_leva_o_consultor_e_o_motivo_nunca_o_texto_do_convite_nem_dado_sensivel()
     {
-        var json = System.Text.Encoding.UTF8.GetString(RabbitInviteNoticePublisher.Build(Notice())).ToLowerInvariant();
+        var json = System.Text.Encoding.UTF8.GetString(RabbitNotificationPublisher.Build(Notice())).ToLowerInvariant();
 
         Assert.DoesNotContain("swot", json);
         Assert.DoesNotContain("resume", json);
@@ -97,7 +97,7 @@ public class InviteNoticeTests
     [Fact]
     public async Task Sem_RabbitMQ_configurado_a_publicacao_falha_com_uma_mensagem_clara_para_a_rodada_parar()
     {
-        using var publisher = new RabbitInviteNoticePublisher(new ConfigurationBuilder().Build());
+        using var publisher = new RabbitNotificationPublisher(new ConfigurationBuilder().Build());
 
         var error = await Assert.ThrowsAsync<InvalidOperationException>(() => publisher.PublishAsync(Notice(), default));
 

@@ -90,6 +90,10 @@ spec:
             # só ligar depois de o tipo talento.convite-recebido estar publicado no catálogo do motor e de o texto do e-mail ter sido lido pelo fundador.
             - name: InviteNotices__Enabled
               value: "false"
+            # Os avisos por e-mail das conversas da ponte (mão levantada, proposta, aceite, expiração e encerramento; seção 38). DESLIGADO de propósito: só ligar depois de os seis tipos
+            # estarem publicados no catálogo do motor e de os textos terem sido lidos pelo fundador.
+            - name: ConversationNotices__Enabled
+              value: "false"
           resources:
             requests:
               cpu: 100m
