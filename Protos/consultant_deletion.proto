@@ -36,4 +36,6 @@ message CdStatusReply {
   int32 openEngagements = 5;
   // Sessões futuras não canceladas.
   int32 futureSessions = 6;
+  // Esta chamada MUDOU o pedido (Request gravou um pedido novo; Cancel cancelou um existente). Sempre falso em GetStatus.
+  bool changed = 7;
 }

@@ -96,6 +96,7 @@ public class ConsultantDeletionGrpcTests
         Assert.Equal(200, reply.Statuscode);
         var s = reply.Data.Unpack<CdStatusReply>();
         Assert.Equal((true, false, 2, 1), (s.Requested, s.Completed, s.OpenEngagements, s.FutureSessions));
+        Assert.False(s.Changed);
         Assert.Equal("2026-11-18T12:00:00.0000000Z", s.RequestedAt);
         Assert.Equal("2026-11-25T12:00:00.0000000Z", s.ScheduledFor);
     }
@@ -121,6 +122,16 @@ public class ConsultantDeletionGrpcTests
         Assert.Equal("EXCLUIR", _deletion.LastConfirmation);
         Assert.Equal(Profile, _deletion.LastProfile);
         Assert.Equal(200, cancel.Statuscode);
+    }
+
+    [Fact]
+    public async Task O_campo_changed_chega_para_o_login_saber_se_cancelou()
+    {
+        _deletion.Result = _deletion.Result with { Changed = true };
+
+        var s = (await Grpc().Cancel(new CdProfileRequest { ProfileId = Profile.ToString() }, TestServerCallContext.Create())).Data.Unpack<CdStatusReply>();
+
+        Assert.True(s.Changed);
     }
 
     [Theory]
