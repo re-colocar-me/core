@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package consultantdeletion;
+
+// O pedido de exclusão de conta do CONSULTOR e o que, no core, ainda impede concluí-la (docs/specs/exclusao-de-conta-consultor.md, D-EC1, D-EC4 e D-EC9). Só o consultant-bff chama isto, depois de
+// conferir que o token é do próprio consultor. Os impedimentos da carteira (saldo e saque pendente) o BFF lê na core-wallet.
+// Erros: 400 (palavra de confirmação errada), 403 (a conta não é de consultor), 404 (conta não encontrada), 409 (conta já excluída).
+service ConsultantDeletion {
+  // O estado do pedido e o que impede, mesmo sem pedido (a tela mostra o que falta antes de a pessoa pedir).
+  rpc GetStatus (CdProfileRequest) returns (common.defaultReply);
+  // Pede com a carência de 7 dias. Idempotente: pedir de novo não renova o prazo.
+  rpc Request (CdRequest) returns (common.defaultReply);
+  // Cancela (também é o que o login faz). Sem pedido, não faz nada.
+  rpc Cancel (CdProfileRequest) returns (common.defaultReply);
+}
+
+message CdProfileRequest {
+  string profileId = 1;
+}
+
+message CdRequest {
+  string profileId = 1;
+  string confirmation = 2;
+}
+
+message CdStatusReply {
+  bool requested = 1;
+  // ISO 8601 em UTC; vazio sem pedido.
+  string requestedAt = 2;
+  string scheduledFor = 3;
+  bool completed = 4;
+  // Atendimentos pagos por talentos que ainda não terminaram.
+  int32 openEngagements = 5;
+  // Sessões futuras não canceladas.
+  int32 futureSessions = 6;
+}

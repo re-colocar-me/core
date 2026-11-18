@@ -116,6 +116,9 @@ builder.Services.AddTransient<core.domain.Interfaces.Services.ISettingsService, 
 // A medição da ponte para a equipe (seção 40): só leitura, agregada e sem identidade.
 builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.IPonteMetricsRepository, core.infrastructure.Repositories.PonteMetricsRepository>();
 builder.Services.AddTransient<core.domain.Interfaces.Services.IPonteMetricsService, core.domain.Services.Metrics.PonteMetricsService>();
+// O pedido de exclusão de conta do consultor (docs/specs/exclusao-de-conta-consultor.md, EC1): só o pedido, a carência e o que impede. A EXECUÇÃO (os apagadores) é a EC2 e a EC3.
+builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.IConsultantDeletionRepository, core.infrastructure.Repositories.ConsultantDeletionRepository>();
+builder.Services.AddTransient<core.domain.Interfaces.Services.IConsultantDeletionService, core.domain.Services.Deletion.ConsultantDeletionService>();
 // Registrado ANTES dos outros serviços de segundo plano: a primeira leitura roda no StartAsync, antes de eles começarem.
 builder.Services.AddHostedService<core.IoC.SettingsRefreshJob>();
 builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();
@@ -202,6 +205,7 @@ app.MapGrpcService<coreServices.ConversationsService>();
 app.MapGrpcService<coreServices.ModerationGrpcService>();
 app.MapGrpcService<coreServices.SettingsGrpcService>();
 app.MapGrpcService<coreServices.PonteMetricsGrpcService>();
+app.MapGrpcService<coreServices.ConsultantDeletionGrpcService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
