@@ -15,6 +15,11 @@ service ConsultantDeletion {
   rpc Request (CdRequest) returns (common.defaultReply);
   // Cancela (também é o que o login faz). Sem pedido, não faz nada.
   rpc Cancel (CdProfileRequest) returns (common.defaultReply);
+  // A EXECUÇÃO (EC2). IRREVERSÍVEIS e atrás de uma trava própria do core (ConsultantDeletion:ExecutionEnabled, desligada por padrão: 501). EraseData apaga os dados do consultor e NÃO toca no
+  // perfil; Complete anonimiza o perfil e grava a data (só depois de EraseData). Ambos reconferem tudo (pedido, carência, acesso depois do pedido, atendimentos) e são idempotentes.
+  // Erros: 403 (não é consultor), 404 (não existe), 409 (uma pré-condição barrou: a mensagem diz qual), 501 (trava desligada).
+  rpc EraseData (CdProfileRequest) returns (common.defaultReply);
+  rpc Complete (CdProfileRequest) returns (common.defaultReply);
 }
 
 message CdProfileRequest {
@@ -25,6 +30,27 @@ message CdRequest {
   string profileId = 1;
   string confirmation = 2;
 }
+
+// O que EraseData fez (só contagens, nada que identifique alguém). alreadyCompleted: a conta já estava excluída e nada foi feito.
+message CdErasureReply {
+  bool alreadyCompleted = 1;
+  bool consultantFound = 2;
+  int32 availabilities = 3;
+  int32 offerings = 4;
+  int32 reviews = 5;
+  int32 tratativas = 6;
+  int32 connectionsAnonymized = 7;
+  int32 conversationsClosed = 8;
+  int32 conversationsAnonymized = 9;
+  int32 notifications = 10;
+  int32 tutorialRecords = 11;
+  int32 leads = 12;
+  int32 silencingsRemoved = 13;
+  // Documentos pessoais do Elasticsearch apagados.
+  int32 documents = 14;
+}
+
+message CdEmptyReply {}
 
 message CdStatusReply {
   bool requested = 1;

@@ -119,6 +119,9 @@ builder.Services.AddTransient<core.domain.Interfaces.Services.IPonteMetricsServi
 // O pedido de exclusão de conta do consultor (docs/specs/exclusao-de-conta-consultor.md, EC1): só o pedido, a carência e o que impede. A EXECUÇÃO (os apagadores) é a EC2 e a EC3.
 builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.IConsultantDeletionRepository, core.infrastructure.Repositories.ConsultantDeletionRepository>();
 builder.Services.AddTransient<core.domain.Interfaces.Services.IConsultantDeletionService, core.domain.Services.Deletion.ConsultantDeletionService>();
+// A EXECUÇÃO da exclusão (EC2): apaga os dados do consultor e, por último, conclui (anonimiza o perfil). Reconfere tudo aqui; quem chama (o consultant-bff, EC3) só orquestra.
+builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.IConsultantErasureRepository, core.infrastructure.Repositories.ConsultantErasureRepository>();
+builder.Services.AddTransient<core.domain.Interfaces.Services.IConsultantErasureService, core.domain.Services.Deletion.ConsultantErasureService>();
 // Registrado ANTES dos outros serviços de segundo plano: a primeira leitura roda no StartAsync, antes de eles começarem.
 builder.Services.AddHostedService<core.IoC.SettingsRefreshJob>();
 builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();

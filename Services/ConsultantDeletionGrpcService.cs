@@ -1,4 +1,5 @@
 using core.domain;
+using core.domain.Interfaces.Infrastructure;
 using core.domain.Interfaces.Services;
 using Grpc.Core;
 using Any = Google.Protobuf.WellKnownTypes.Any;
@@ -11,14 +12,23 @@ namespace core.Services
     /// </summary>
     public class ConsultantDeletionGrpcService : ConsultantDeletion.ConsultantDeletionBase
     {
+        public const string ExecutionEnabledKey = "ConsultantDeletion:ExecutionEnabled";
+
         private readonly IConsultantDeletionService _deletion;
+        private readonly IConsultantErasureService _erasure;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<ConsultantDeletionGrpcService> _logger;
 
-        public ConsultantDeletionGrpcService(IConsultantDeletionService deletion, ILogger<ConsultantDeletionGrpcService> logger)
+        public ConsultantDeletionGrpcService(IConsultantDeletionService deletion, IConsultantErasureService erasure, IConfiguration configuration, ILogger<ConsultantDeletionGrpcService> logger)
         {
             _deletion = deletion;
+            _erasure = erasure;
+            _configuration = configuration;
             _logger = logger;
         }
+
+        /// <summary>A trava da EXECUÇÃO: desligada por padrão, e valor que não é <c>true</c> (vazio, "sim") conta como desligado. Lida a cada chamada. Existe ALÉM da trava do BFF: a exclusão é irreversível.</summary>
+        private bool ExecutionEnabled => bool.TryParse(_configuration[ExecutionEnabledKey], out var enabled) && enabled;
 
         public override Task<defaultReply> GetStatus(CdProfileRequest request, ServerCallContext context)
             => Run(async () => Pack(await _deletion.GetAsync(ParseId(request.ProfileId))));
@@ -28,6 +38,38 @@ namespace core.Services
 
         public override Task<defaultReply> Cancel(CdProfileRequest request, ServerCallContext context)
             => Run(async () => Pack(await _deletion.CancelAsync(ParseId(request.ProfileId))));
+
+        public override Task<defaultReply> EraseData(CdProfileRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                RequireExecution();
+                var result = await _erasure.EraseDataAsync(ParseId(request.ProfileId), context.CancellationToken);
+                var db = result.Database;
+                _logger.LogInformation("Exclusão de conta do consultor: dados apagados (já concluída: {AlreadyCompleted}).", db.AlreadyCompleted);
+                return Any.Pack(new CdErasureReply
+                {
+                    AlreadyCompleted = db.AlreadyCompleted, ConsultantFound = db.ConsultantFound, Availabilities = db.Availabilities, Offerings = db.Offerings, Reviews = db.Reviews, Tratativas = db.Tratativas,
+                    ConnectionsAnonymized = db.ConnectionsAnonymized, ConversationsClosed = db.ConversationsClosed, ConversationsAnonymized = db.ConversationsAnonymized, Notifications = db.Notifications,
+                    TutorialRecords = db.TutorialRecords, Leads = db.Leads, SilencingsRemoved = db.SilencingsRemoved, Documents = result.Documents
+                });
+            });
+
+        public override Task<defaultReply> Complete(CdProfileRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                RequireExecution();
+                await _erasure.CompleteAsync(ParseId(request.ProfileId), context.CancellationToken);
+                _logger.LogInformation("Exclusão de conta do consultor: concluída.");
+                return Any.Pack(new CdEmptyReply());
+            });
+
+        private void RequireExecution()
+        {
+            if (!ExecutionEnabled)
+                throw new ExecutionDisabledException();
+        }
+
+        private sealed class ExecutionDisabledException() : Exception("A execução da exclusão de conta está desligada.");
 
         internal static Any Pack(ConsultantDeletionStatus s) => Any.Pack(new CdStatusReply
         {
@@ -50,6 +92,23 @@ namespace core.Services
             {
                 reply.Statuscode = 400;
                 reply.Error = new error { Code = 400, Message = ex.Message };
+            }
+            catch (ExecutionDisabledException ex)
+            {
+                reply.Statuscode = 501;
+                reply.Error = new error { Code = 501, Message = ex.Message };
+            }
+            catch (ConsultantErasureException ex)
+            {
+                // Uma pré-condição barrou (pedido, carência, acesso depois do pedido, atendimento, dados ainda não apagados): 409, e a mensagem diz qual. Não nasce de erro do chamador a ser corrigido na tela.
+                var code = ex.Error switch { ConsultantErasureError.NotFound => 404, ConsultantErasureError.NotConsultant => 403, _ => 409 };
+                reply.Statuscode = code;
+                reply.Error = new error { Code = code, Message = ex.Message };
+            }
+            catch (AccountErasureRefusedException ex)
+            {
+                reply.Statuscode = 409;
+                reply.Error = new error { Code = 409, Message = ex.Message };
             }
             catch (ConsultantDeletionException ex)
             {

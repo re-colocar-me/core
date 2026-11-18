@@ -86,7 +86,8 @@ public class ConsultantDeletionGrpcTests
     }
 
     private readonly FakeDeletion _deletion = new();
-    private core.Services.ConsultantDeletionGrpcService Grpc() => new(_deletion, NullLogger<core.Services.ConsultantDeletionGrpcService>.Instance);
+    // A execução (EraseData e Complete) tem os testes dela em ConsultantErasureGrpcTests; aqui só o pedido, que não toca no apagador nem na configuração.
+    private core.Services.ConsultantDeletionGrpcService Grpc() => new(_deletion, null!, new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build(), NullLogger<core.Services.ConsultantDeletionGrpcService>.Instance);
 
     [Fact]
     public async Task O_estado_chega_completo_com_datas_ISO_e_o_que_impede()

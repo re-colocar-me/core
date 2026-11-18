@@ -94,6 +94,10 @@ spec:
             # estarem publicados no catálogo do motor e de os textos terem sido lidos pelo fundador.
             - name: ConversationNotices__Enabled
               value: "false"
+            # A EXECUÇÃO da exclusão de conta do consultor (docs/specs/exclusao-de-conta-consultor.md, EC2): irreversível, DESLIGADA de propósito. Só ligar depois da EC3, da confirmação do contador (D-EC3) e de
+            # provar o apagador em Postgres real. Existe além da trava do consultant-bff (AccountDeletion__Enabled).
+            - name: ConsultantDeletion__ExecutionEnabled
+              value: "false"
           resources:
             requests:
               cpu: 100m
