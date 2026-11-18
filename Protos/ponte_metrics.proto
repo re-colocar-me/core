@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package pontemetrics;
+
+// A medição da ponte talento-consultor para a EQUIPE (docs/specs/ponte-talento-consultor.md, seções 16 e 40). Só o core-backoffice chama isto, depois de conferir o JWT do backoffice.
+// AGREGADA E SEM IDENTIDADE: nenhuma mensagem traz id de talento, de consultor ou de conversa; só contagens e a distribuição do tempo de resposta.
+service PonteMetricsAdmin {
+  rpc GetMetrics (PmMetricsRequest) returns (common.defaultReply);
+}
+
+message PmMetricsRequest {
+  // Os últimos N dias (1 a 365); fora disso, 30.
+  int32 days = 1;
+}
+
+message PmHandRaiseFunnel {
+  int32 raised = 1;
+  int32 withProposal = 2;
+  int32 confirmed = 3;
+  int32 declined = 4;
+  int32 expiredNoResponse = 5;
+  int32 expiredAfterProposal = 6;
+  int32 withdrawn = 7;
+  int32 open = 8;
+}
+
+message PmFirstConversation {
+  int32 proposed = 1;
+  int32 confirmed = 2;
+}
+
+message PmInviteFunnel {
+  int32 sent = 1;
+  int32 accepted = 2;
+  int32 dismissed = 3;
+  int32 silenced = 4;
+  int32 expired = 5;
+  int32 held = 6;
+  int32 open = 7;
+}
+
+message PmReports {
+  int32 inviteByTalent = 1;
+  int32 handRaiseByTalent = 2;
+  int32 byConsultant = 3;
+  int32 open = 4;
+  int32 reviewed = 5;
+  int32 suspensionsAuto = 6;
+  int32 suspensionsManual = 7;
+  int32 suspensionsLifted = 8;
+}
+
+message PmBucket {
+  // lt1h, 1to6h, 6to24h, 1to3d, 3to7d, gt7d
+  string key = 1;
+  int32 count = 2;
+}
+
+message PmResponseTime {
+  int32 measured = 1;
+  // Mãos levantadas da coorte já anonimizadas (os eventos foram apagados): ficam fora do tempo.
+  int32 noData = 2;
+  // hasMedian/hasP90 = false: sem dados (não é "zero minutos").
+  bool hasMedian = 3;
+  int32 medianMinutes = 4;
+  bool hasP90 = 5;
+  int32 p90Minutes = 6;
+  repeated PmBucket buckets = 7;
+}
+
+message PmMetricsReply {
+  // ISO 8601 em UTC.
+  string from = 1;
+  string to = 2;
+  int32 days = 3;
+  // A coorte passou do teto de leitura: os números são do que coube.
+  bool truncated = 4;
+  PmHandRaiseFunnel handRaise = 5;
+  PmFirstConversation firstConversation = 6;
+  PmInviteFunnel invites = 7;
+  PmReports reports = 8;
+  PmResponseTime responseTime = 9;
+}

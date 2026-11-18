@@ -113,6 +113,9 @@ builder.Services.AddSingleton<core.domain.Interfaces.Services.ConversationConfig
 builder.Services.AddTransient(sp => sp.GetRequiredService<core.domain.Interfaces.Services.ConversationConfigurationHolder>().Current);
 builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.ISettingsRepository, core.infrastructure.Repositories.SettingsRepository>();
 builder.Services.AddTransient<core.domain.Interfaces.Services.ISettingsService, core.domain.Services.Settings.SettingsService>();
+// A medição da ponte para a equipe (seção 40): só leitura, agregada e sem identidade.
+builder.Services.AddTransient<core.domain.Interfaces.Infrastructure.IPonteMetricsRepository, core.infrastructure.Repositories.PonteMetricsRepository>();
+builder.Services.AddTransient<core.domain.Interfaces.Services.IPonteMetricsService, core.domain.Services.Metrics.PonteMetricsService>();
 // Registrado ANTES dos outros serviços de segundo plano: a primeira leitura roda no StartAsync, antes de eles começarem.
 builder.Services.AddHostedService<core.IoC.SettingsRefreshJob>();
 builder.Services.AddTransient<IConversationConnections, ConsultantServicesConversationConnections>();
@@ -198,6 +201,7 @@ app.MapGrpcService<coreServices.LeadsService>();
 app.MapGrpcService<coreServices.ConversationsService>();
 app.MapGrpcService<coreServices.ModerationGrpcService>();
 app.MapGrpcService<coreServices.SettingsGrpcService>();
+app.MapGrpcService<coreServices.PonteMetricsGrpcService>();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

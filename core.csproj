@@ -30,6 +30,7 @@
     <Protobuf Include="Protos\conversations.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\moderation.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\settings.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\ponte_metrics.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\common.proto" GrpcServices="None" />
   </ItemGroup>
 
