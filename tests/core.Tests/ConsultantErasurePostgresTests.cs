@@ -85,7 +85,7 @@ public class ConsultantErasurePostgresTests
         db.Profiles.Add(new Profile
         {
             Id = profileId, Email = email, Name = new PersonName { FirstName = first, LastName = "Costa" }, PictureUrl = "https://cdn.exemplo.com/" + first + ".jpg", BioText = "Coach de carreira",
-            Role = RoleType.Consultant, PlatformId = "li-" + first, Telephone = new Telephone { CountryCode = "55", AreaCode = "11", Number = "999990000" }, BirthDate = new DateTime(1985, 5, 5),
+            Role = RoleType.Consultant, PlatformId = "li-" + first, Telephone = new Telephone { CountryCode = "55", AreaCode = "11", Number = "999990000" }, BirthDate = new DateTime(1985, 5, 5, 0, 0, 0, DateTimeKind.Utc),
             GenderCode = "F", TermsAcceptedAt = Now.AddDays(-90), TermsAcceptedVersion = "v1", DeletionRequestedAt = Now.AddDays(-8), DeletionScheduledFor = Now.AddDays(-1), LastAccess = Now.AddDays(-9)
         });
 
