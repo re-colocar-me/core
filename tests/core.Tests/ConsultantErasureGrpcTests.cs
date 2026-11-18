@@ -15,6 +15,17 @@ public class ConsultantErasureGrpcTests
 
     private sealed class FakeErasure : IConsultantErasureService
     {
+        public List<Guid> Due { get; set; } = [];
+        public int? AskedTake { get; private set; }
+        public int DueCalls { get; private set; }
+
+        public Task<IReadOnlyList<Guid>> ListDueAsync(int take, CancellationToken ct = default)
+        {
+            DueCalls++;
+            AskedTake = take;
+            return Task.FromResult<IReadOnlyList<Guid>>(Due);
+        }
+
         public int EraseCalls { get; private set; }
         public int CompleteCalls { get; private set; }
         public ConsultantErasureException? Throw { get; set; }
@@ -138,6 +149,35 @@ public class ConsultantErasureGrpcTests
 
         Assert.Equal(500, reply.Statuscode);
         Assert.DoesNotContain("password", reply.Error.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("false")]
+    [InlineData("sim")]
+    public async Task A_lista_dos_vencidos_tambem_fica_atras_da_trava_e_nada_e_lido_com_ela_desligada(string? enabled)
+    {
+        _erasure.Due = [Profile];
+
+        var reply = await Grpc(enabled).ListDue(new CdDueRequest { Take = 10 }, TestServerCallContext.Create());
+
+        Assert.Equal(501, reply.Statuscode);
+        Assert.Equal(0, _erasure.DueCalls);
+    }
+
+    [Fact]
+    public async Task Ligada_a_lista_devolve_so_os_ids_dos_perfis_vencidos_e_repassa_o_tamanho()
+    {
+        var other = Guid.Parse("cccccccc-0000-0000-0000-000000000002");
+        _erasure.Due = [Profile, other];
+
+        var reply = await Grpc("true").ListDue(new CdDueRequest { Take = 25 }, TestServerCallContext.Create());
+
+        Assert.Equal(200, reply.Statuscode);
+        Assert.Equal([Profile.ToString(), other.ToString()], reply.Data.Unpack<CdDueReply>().ProfileIds);
+        Assert.Equal(25, _erasure.AskedTake);
+        var names = CdDueReply.Descriptor.Fields.InFieldNumberOrder().Select(f => f.Name.ToLowerInvariant()).ToList();
+        Assert.Equal(["profileids"], names);                                           // nada além de ids
     }
 
     [Fact]

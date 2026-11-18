@@ -331,6 +331,40 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task A_lista_dos_vencidos_traz_so_consultor_com_carencia_acabada_e_sem_conclusao_do_mais_antigo_ao_mais_novo()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var due = await SeedAsync(setup, "vencido@exemplo.com", "Vencido", withLead: false);                // pedido de 8 dias atrás, carência acabou ontem
+            var older = await SeedAsync(setup, "maisantigo@exemplo.com", "Antigo", withLead: false);
+            var inGrace = await SeedAsync(setup, "carencia@exemplo.com", "Carencia", withLead: false);
+            var done = await SeedAsync(setup, "concluido@exemplo.com", "Concluido", withLead: false);
+            var talent = new Profile { Id = Guid.NewGuid(), Email = "talento@exemplo.com", Name = new PersonName { FirstName = "T", LastName = "X" }, Role = RoleType.Talent, DeletionRequestedAt = Now.AddDays(-20), DeletionScheduledFor = Now.AddDays(-13) };
+
+            await using (var db = fresh())
+            {
+                await db.Profiles.Where(x => x.Id == older.ProfileId).ExecuteUpdateAsync(s => s.SetProperty(x => x.DeletionScheduledFor, Now.AddDays(-5)));
+                await db.Profiles.Where(x => x.Id == inGrace.ProfileId).ExecuteUpdateAsync(s => s.SetProperty(x => x.DeletionScheduledFor, Now.AddDays(2)));
+                await db.Profiles.Where(x => x.Id == done.ProfileId).ExecuteUpdateAsync(s => s.SetProperty(x => x.DeletionCompletedAt, Now.AddDays(-1)));
+                db.Profiles.Add(talent);
+                await db.SaveChangesAsync();
+            }
+
+            await using var read = fresh();
+            var repository = new ConsultantDeletionRepository(read);
+
+            Assert.Equal([older.ProfileId, due.ProfileId], await repository.ListDueAsync(Now, 10));             // do que venceu há mais tempo; sem carência, concluído nem talento
+            Assert.Equal([older.ProfileId], await repository.ListDueAsync(Now, 1));                            // o tamanho da rodada vale
+            Assert.Empty(await repository.ListDueAsync(Now.AddDays(-10), 10));                                  // antes de qualquer carência acabar
+        }
+        finally
+        {
+            await drop();
+        }
+    }
+
+    [PostgresFact]
     public async Task O_pedido_e_o_que_impede_funcionam_no_banco_de_verdade_colunas_updates_condicionais_e_as_duas_contagens()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();

@@ -54,6 +54,15 @@ namespace core.Services
                 });
             });
 
+        public override Task<defaultReply> ListDue(CdDueRequest request, ServerCallContext context)
+            => Run(async () =>
+            {
+                RequireExecution();
+                var reply = new CdDueReply();
+                reply.ProfileIds.AddRange((await _erasure.ListDueAsync(request.Take, context.CancellationToken)).Select(x => x.ToString()));
+                return Any.Pack(reply);
+            });
+
         public override Task<defaultReply> Complete(CdProfileRequest request, ServerCallContext context)
             => Run(async () =>
             {

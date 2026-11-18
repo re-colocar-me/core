@@ -35,6 +35,24 @@ public class ConsultantDeletionGrpcTests
     }
 
     [Fact]
+    public void Os_pedidos_vencidos_so_de_consultor_com_carencia_acabada_e_sem_conclusao_do_mais_antigo_ao_mais_novo()
+    {
+        using var context = Context();
+
+        var sql = new ConsultantDeletionRepository(context).DueQuery(new DateTime(2026, 11, 26, 12, 0, 0, DateTimeKind.Utc)).ToQueryString();
+
+        Assert.Contains("FROM \"Users\"", sql);
+        Assert.Contains("\"DeletionRequestedAt\" IS NOT NULL", sql);
+        Assert.Contains("\"DeletionCompletedAt\" IS NULL", sql);                      // o mesmo filtro do índice parcial IX_Users_DeletionDue
+        Assert.Contains("\"DeletionScheduledFor\" <=", sql);
+        Assert.Contains("\"Role\" = 0", sql);                                         // só consultor (RoleType.Consultant = 0)
+        Assert.Contains("ORDER BY", sql);
+        var select = sql[sql.IndexOf("SELECT ", StringComparison.Ordinal)..sql.IndexOf("FROM", StringComparison.Ordinal)];
+        Assert.DoesNotContain("Email", select);                                       // só o id
+        Assert.DoesNotContain("Name", select);
+    }
+
+    [Fact]
     public void As_sessoes_futuras_usam_o_perfil_como_dono_excluem_as_canceladas_e_comparam_o_fim_com_o_relogio_dos_horarios()
     {
         using var context = Context();

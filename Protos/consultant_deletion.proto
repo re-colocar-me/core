@@ -20,6 +20,8 @@ service ConsultantDeletion {
   // Erros: 403 (não é consultor), 404 (não existe), 409 (uma pré-condição barrou: a mensagem diz qual), 501 (trava desligada).
   rpc EraseData (CdProfileRequest) returns (common.defaultReply);
   rpc Complete (CdProfileRequest) returns (common.defaultReply);
+  // Os pedidos vencidos a executar (só os ids), para o job diário. Só leitura, mas atrás da MESMA trava da execução (501 desligada).
+  rpc ListDue (CdDueRequest) returns (common.defaultReply);
 }
 
 message CdProfileRequest {
@@ -51,6 +53,15 @@ message CdErasureReply {
 }
 
 message CdEmptyReply {}
+
+message CdDueRequest {
+  // De 1 a 100; 0 usa 100.
+  int32 take = 1;
+}
+
+message CdDueReply {
+  repeated string profileIds = 1;
+}
 
 message CdStatusReply {
   bool requested = 1;
