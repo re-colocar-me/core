@@ -181,6 +181,16 @@ public class ConsultantErasureGrpcTests
     }
 
     [Fact]
+    public async Task Aviso_de_conclusao_que_o_broker_nao_guardou_vira_503_para_o_job_repetir_na_proxima_noite()
+    {
+        _erasure.Throw = new ConsultantErasureException(ConsultantErasureError.NoticeNotPublished, "broker fora do ar");
+
+        var reply = await Grpc("true").Complete(new CdProfileRequest { ProfileId = Profile.ToString() }, TestServerCallContext.Create());
+
+        Assert.Equal(503, reply.Statuscode);
+    }
+
+    [Fact]
     public async Task Concluir_chama_a_conclusao_e_devolve_200()
     {
         var reply = await Grpc("true").Complete(new CdProfileRequest { ProfileId = Profile.ToString() }, TestServerCallContext.Create());

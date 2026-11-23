@@ -110,7 +110,7 @@ namespace core.Services
             catch (ConsultantErasureException ex)
             {
                 // Uma pré-condição barrou (pedido, carência, acesso depois do pedido, atendimento, dados ainda não apagados): 409, e a mensagem diz qual. Não nasce de erro do chamador a ser corrigido na tela.
-                var code = ex.Error switch { ConsultantErasureError.NotFound => 404, ConsultantErasureError.NotConsultant => 403, _ => 409 };
+                var code = ex.Error switch { ConsultantErasureError.NotFound => 404, ConsultantErasureError.NotConsultant => 403, ConsultantErasureError.NoticeNotPublished => 503, _ => 409 };
                 reply.Statuscode = code;
                 reply.Error = new error { Code = code, Message = ex.Message };
             }
