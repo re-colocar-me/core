@@ -89,7 +89,7 @@ public class ConsultantDeletionGrpcTests
         public string? LastConfirmation { get; private set; }
         public Guid? LastProfile { get; private set; }
 
-        public ConsultantDeletionStatus Result { get; set; } = new(true, new DateTime(2026, 11, 18, 12, 0, 0, DateTimeKind.Utc), new DateTime(2026, 11, 25, 12, 0, 0, DateTimeKind.Utc), false, 2, 1, 3);
+        public ConsultantDeletionStatus Result { get; set; } = new(true, new DateTime(2026, 11, 18, 12, 0, 0, DateTimeKind.Utc), new DateTime(2026, 11, 25, 12, 0, 0, DateTimeKind.Utc), false, 2, 1, 3, new DateTime(2026, 12, 25, 12, 0, 0, DateTimeKind.Utc));
 
         private Task<ConsultantDeletionStatus> Run(Guid profileId)
         {
@@ -116,6 +116,7 @@ public class ConsultantDeletionGrpcTests
         var s = reply.Data.Unpack<CdStatusReply>();
         Assert.Equal((true, false, 2, 1, 3), (s.Requested, s.Completed, s.OpenEngagements, s.FutureSessions, s.PendingModeration));          // D-EC8: a moderação pendente chega ao BFF
         Assert.False(s.Changed);
+        Assert.Equal("2026-12-25T12:00:00.0000000Z", s.ModerationHoldUntil);                       // até quando a pendência segura a exclusão
         Assert.Equal("2026-11-18T12:00:00.0000000Z", s.RequestedAt);
         Assert.Equal("2026-11-25T12:00:00.0000000Z", s.ScheduledFor);
     }

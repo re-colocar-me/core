@@ -83,7 +83,7 @@ namespace core.Services
         internal static Any Pack(ConsultantDeletionStatus s) => Any.Pack(new CdStatusReply
         {
             Requested = s.Requested, RequestedAt = s.RequestedAt?.ToString("O") ?? string.Empty, ScheduledFor = s.ScheduledFor?.ToString("O") ?? string.Empty, Completed = s.Completed,
-            OpenEngagements = s.OpenEngagements, FutureSessions = s.FutureSessions, PendingModeration = s.PendingModeration, Changed = s.Changed
+            OpenEngagements = s.OpenEngagements, FutureSessions = s.FutureSessions, PendingModeration = s.PendingModeration, ModerationHoldUntil = s.ModerationHoldUntil?.ToString("O") ?? string.Empty, Changed = s.Changed
         });
 
         private static Guid ParseId(string value)
