@@ -269,6 +269,60 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task A_apagacao_marca_Deleting_na_mesma_transacao_o_pedido_nao_se_cancela_mais_o_login_ve_Deleting_e_a_conclusao_grava_Inactive()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var target = await SeedAsync(setup, "marina@exemplo.com", "Marina", withLead: false);
+            var other = await SeedAsync(setup, "outro@exemplo.com", "Outro", withLead: false);
+
+            // Antes: Active, e o pedido SE cancelaria (prova de que a recusa abaixo vem do Deleting, não de outra coisa).
+            await using (var db = fresh())
+            {
+                Assert.Equal(ProfileStatus.Active, (await db.Profiles.SingleAsync(x => x.Id == target.ProfileId)).Status);
+                Assert.False((await new ConsultantDeletionRepository(db).FindProfileAsync(target.ProfileId))!.ErasureStarted);
+            }
+
+            await using (var db = fresh())
+                await new ConsultantErasureRepository(db).EraseDataAsync(target.ProfileId, Now);
+
+            // Depois: só o alvo ficou Deleting; o outro consultor continua Active e a linha enxerga a apagação como começada.
+            await using (var db = fresh())
+            {
+                var profile = await db.Profiles.SingleAsync(x => x.Id == target.ProfileId);
+                Assert.Equal(ProfileStatus.Deleting, profile.Status);
+                Assert.Equal(Now, profile.ModifiedAt);
+                Assert.Equal(ProfileStatus.Active, (await db.Profiles.SingleAsync(x => x.Id == other.ProfileId)).Status);
+                Assert.True((await new ConsultantDeletionRepository(db).FindProfileAsync(target.ProfileId))!.ErasureStarted);
+                Assert.False((await new ConsultantDeletionRepository(db).FindProfileAsync(other.ProfileId))!.ErasureStarted);
+            }
+
+            // O pedido NÃO se cancela mais (o do outro consultor, sim): a exclusão só anda para a frente.
+            await using (var db = fresh())
+                Assert.False(await new ConsultantDeletionRepository(db).TryCancelAsync(target.ProfileId));
+            await using (var db = fresh())
+            {
+                Assert.NotNull((await db.Profiles.SingleAsync(x => x.Id == target.ProfileId)).DeletionRequestedAt);
+                Assert.True(await new ConsultantDeletionRepository(db).TryCancelAsync(other.ProfileId));
+            }
+
+            // Repetir o apagador continua seguro e o perfil continua Deleting (não volta, não pula para Inactive).
+            await using (var db = fresh())
+                await new ConsultantErasureRepository(db).EraseDataAsync(target.ProfileId, Now.AddHours(1));
+            await using (var db = fresh())
+                Assert.Equal(ProfileStatus.Deleting, (await db.Profiles.SingleAsync(x => x.Id == target.ProfileId)).Status);
+
+            // A conclusão grava Inactive.
+            await using (var db = fresh())
+                Assert.True(await new ConsultantErasureRepository(db).CompleteAsync(target.ProfileId, Now.AddHours(2)));
+            await using (var db = fresh())
+                Assert.Equal(ProfileStatus.Inactive, (await db.Profiles.SingleAsync(x => x.Id == target.ProfileId)).Status);
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task Repetir_o_apagador_e_seguro_a_conclusao_anonimiza_o_perfil_so_depois_e_so_uma_vez_e_o_talento_e_o_outro_consultor_ficam_de_fora()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();
