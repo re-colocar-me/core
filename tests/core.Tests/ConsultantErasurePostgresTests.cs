@@ -323,6 +323,79 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task O_aviso_aos_talentos_D_EC5_lista_so_quem_tem_mao_levantada_ou_proposta_aberta_com_este_consultor_e_o_inicio_marcado_nao_toca_em_dados_nem_em_talento()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var target = await SeedAsync(setup, "marina@exemplo.com", "Marina", withLead: false);
+            var other = await SeedAsync(setup, "outro@exemplo.com", "Outro", withLead: false);
+
+            Profile Talent(string first, string? email) => new() { Id = Guid.NewGuid(), Email = email ?? string.Empty, Name = new PersonName { FirstName = first, LastName = "Silva" }, Role = RoleType.Talent };
+            Conversation Conv(Guid consultantId, Guid candidateId, ConversationOrigin origin, ConversationStatus status) => new()
+            {
+                Id = Guid.NewGuid(), ConsultantId = consultantId, CandidateId = candidateId, Origin = origin, Status = status, CreatedAt = Now.AddDays(-3), UpdatedAt = Now.AddDays(-3),
+                ExpiresAt = Now.AddDays(4), Card = new ConversationProfileCard { Situation = "desligado" },
+                Events = [new ConversationEvent { Id = Guid.NewGuid(), Type = status == ConversationStatus.Sent ? "Sent" : "Raised", Actor = "Candidate", At = Now.AddDays(-3) }]
+            };
+
+            var raised = Talent("Ana", "ana@exemplo.com");
+            var proposed = Talent("Bia", "bia@exemplo.com");
+            var inviteOnly = Talent("Caio", "caio@exemplo.com");
+            var noEmail = Talent("Duda", null);
+            var ofOther = Talent("Eva", "eva@exemplo.com");
+            setup.Profiles.AddRange(raised, proposed, inviteOnly, noEmail, ofOther);
+            setup.Conversations.AddRange(
+                Conv(target.ConsultantId, raised.Id, ConversationOrigin.HandRaised, ConversationStatus.Raised),
+                Conv(target.ConsultantId, proposed.Id, ConversationOrigin.HandRaised, ConversationStatus.Proposed),
+                Conv(target.ConsultantId, inviteOnly.Id, ConversationOrigin.Invite, ConversationStatus.Sent),               // convite: expira em silêncio
+                Conv(target.ConsultantId, noEmail.Id, ConversationOrigin.HandRaised, ConversationStatus.Raised),
+                Conv(other.ConsultantId, ofOther.Id, ConversationOrigin.HandRaised, ConversationStatus.Raised));            // de OUTRO consultor
+            await setup.SaveChangesAsync();
+
+            // A consulta: Raised e Proposed do alvo, uma linha por talento; convite não entra; outro consultor não entra; a semente já tem mão levantada de um talento sem cadastro (não volta, sem e-mail a quem enviar).
+            await using (var db = fresh())
+            {
+                var talents = await new ConsultantErasureRepository(db).ListTalentsWithOpenRequestsAsync(target.ProfileId);
+
+                Assert.Equal(new[] { raised.Id, proposed.Id, noEmail.Id }.OrderBy(x => x), talents.Select(t => t.TalentProfileId).OrderBy(x => x));
+                Assert.Equal("ana@exemplo.com", talents.Single(t => t.TalentProfileId == raised.Id).Email);
+                Assert.Equal("Ana", talents.Single(t => t.TalentProfileId == raised.Id).FirstName);
+                Assert.Equal(string.Empty, talents.Single(t => t.TalentProfileId == noEmail.Id).Email);                      // o domínio não avisa quem não tem e-mail
+                Assert.Empty(await new ConsultantErasureRepository(db).ListTalentsWithOpenRequestsAsync(Guid.NewGuid()));  // perfil sem consultor
+            }
+
+            // O início: o alvo vira Deleting; o outro consultor e um TALENTO (mesmo chamado com o id dele) ficam como estavam; os dados do alvo continuam intactos.
+            await using (var db = fresh())
+            {
+                await new ConsultantErasureRepository(db).BeginErasureAsync(target.ProfileId, Now);
+                await new ConsultantErasureRepository(db).BeginErasureAsync(raised.Id, Now);
+            }
+            await using (var db = fresh())
+            {
+                Assert.Equal(ProfileStatus.Deleting, (await db.Profiles.SingleAsync(x => x.Id == target.ProfileId)).Status);
+                Assert.Equal(ProfileStatus.Active, (await db.Profiles.SingleAsync(x => x.Id == other.ProfileId)).Status);
+                Assert.Equal(ProfileStatus.Active, (await db.Profiles.SingleAsync(x => x.Id == raised.Id)).Status);             // um talento nunca é marcado por este caminho
+                Assert.NotNull((await db.Consultants.SingleAsync(x => x.Id == target.ConsultantId)).Resume);                   // nada foi apagado
+                Assert.Equal(4, await db.Conversations.CountAsync(x => x.ConsultantId == target.ConsultantId && (x.Status == ConversationStatus.Raised || x.Status == ConversationStatus.Proposed)));   // as 3 dos talentos + a da semente
+                Assert.Equal(3, (await new ConsultantErasureRepository(db).ListTalentsWithOpenRequestsAsync(target.ProfileId)).Count);
+            }
+
+            // Repetir o início é inofensivo; depois do apagador não há mais pedido aberto (as conversas foram encerradas), então uma repetição do job não avisa de novo.
+            await using (var db = fresh())
+                await new ConsultantErasureRepository(db).BeginErasureAsync(target.ProfileId, Now.AddMinutes(5));
+            await using (var db = fresh())
+                await new ConsultantErasureRepository(db).EraseDataAsync(target.ProfileId, Now.AddMinutes(10));
+            await using (var db = fresh())
+            {
+                Assert.Empty(await new ConsultantErasureRepository(db).ListTalentsWithOpenRequestsAsync(target.ProfileId));
+                Assert.Equal(2, await db.Conversations.CountAsync(x => x.ConsultantId == other.ConsultantId && x.Status == ConversationStatus.Raised));   // as do outro consultor (a da semente e a da Eva) seguem abertas
+            }
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task Repetir_o_apagador_e_seguro_a_conclusao_anonimiza_o_perfil_so_depois_e_so_uma_vez_e_o_talento_e_o_outro_consultor_ficam_de_fora()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();
