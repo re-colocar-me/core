@@ -75,4 +75,6 @@ message CdStatusReply {
   int32 futureSessions = 6;
   // Esta chamada MUDOU o pedido (Request gravou um pedido novo; Cancel cancelou um existente). Sempre falso em GetStatus.
   bool changed = 7;
+  // D-EC8: denúncias de talentos contra o consultor ainda em análise + suspensão de convites ativa. A exclusão espera a análise da equipe.
+  int32 pendingModeration = 8;
 }

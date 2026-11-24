@@ -323,6 +323,61 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task A_moderacao_pendente_D_EC8_conta_so_denuncia_de_talento_aberta_e_suspensao_ativa_do_proprio_consultor()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var target = await SeedAsync(setup, "marina@exemplo.com", "Marina", withLead: false);
+            var other = await SeedAsync(setup, "outro@exemplo.com", "Outro", withLead: false);
+
+            // A semente já tem, por consultor: uma denúncia FEITA POR ELE (não conta) e uma denúncia de talento ainda aberta (conta 1).
+            await using (var db = fresh())
+                Assert.Equal(1, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(target.ProfileId));
+
+            ConversationReport Report(Guid consultantId, string role, ReportStatus status) => new()
+            {
+                Id = Guid.NewGuid(), ConversationId = Guid.NewGuid(), ConsultantId = consultantId, CandidateId = Guid.NewGuid(), ReporterRole = role, Origin = ConversationOrigin.Invite,
+                Reason = ReportReason.Spam, CreatedAt = Now.AddDays(-2), Status = status, ReviewedAt = status == ReportStatus.Reviewed ? Now.AddDays(-1) : null
+            };
+            setup.ConversationReports.AddRange(
+                Report(target.ConsultantId, ReporterRoles.Candidate, ReportStatus.Open),            // conta
+                Report(target.ConsultantId, ReporterRoles.Candidate, ReportStatus.Reviewed),        // já analisada: não conta
+                Report(target.ConsultantId, ReporterRoles.Consultant, ReportStatus.Open),           // feita pelo consultor: não é contra ele
+                Report(other.ConsultantId, ReporterRoles.Candidate, ReportStatus.Open));            // de outro consultor: não conta para o alvo
+            await setup.SaveChangesAsync();
+
+            await using (var db = fresh())
+                Assert.Equal(2, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(target.ProfileId));         // as duas abertas de talento
+
+            // Suspensão de convites: a ativa conta uma; a já levantada não conta.
+            setup.ConsultantInviteSuspensions.AddRange(
+                new ConsultantInviteSuspension { Id = Guid.NewGuid(), ConsultantId = target.ConsultantId, SuspendedAt = Now.AddDays(-10), Reason = SuspensionReasons.Manual, LiftedAt = Now.AddDays(-5) },
+                new ConsultantInviteSuspension { Id = Guid.NewGuid(), ConsultantId = target.ConsultantId, SuspendedAt = Now.AddDays(-2), Reason = SuspensionReasons.Manual });
+            await setup.SaveChangesAsync();
+            await using (var db = fresh())
+                Assert.Equal(3, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(target.ProfileId));
+
+            // A equipe analisa tudo: levanta a suspensão e dá as denúncias por analisadas. A contagem zera e a exclusão pode seguir.
+            await using (var db = fresh())
+            {
+                await db.ConsultantInviteSuspensions.Where(x => x.ConsultantId == target.ConsultantId && x.LiftedAt == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.LiftedAt, Now));
+                await db.ConversationReports.Where(x => x.ConsultantId == target.ConsultantId).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ReportStatus.Reviewed).SetProperty(x => x.ReviewedAt, Now));
+            }
+            await using (var db = fresh())
+                Assert.Equal(0, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(target.ProfileId));
+
+            // O outro consultor continua com a dele; e um perfil sem registro de consultor não tem moderação a esperar.
+            await using (var db = fresh())
+            {
+                Assert.Equal(2, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(other.ProfileId));       // a da semente + a aberta de talento
+                Assert.Equal(0, await new ConsultantDeletionRepository(db).CountPendingModerationAsync(Guid.NewGuid()));
+            }
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task O_aviso_aos_talentos_D_EC5_lista_so_quem_tem_mao_levantada_ou_proposta_aberta_com_este_consultor_e_o_inicio_marcado_nao_toca_em_dados_nem_em_talento()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();
