@@ -141,6 +141,8 @@ builder.Services.AddTransient<IInviteNoticeService, InviteNoticeService>();
 builder.Services.AddHostedService<core.IoC.ConversationExpirationJob>();
 builder.Services.AddHostedService<core.IoC.InviteNoticeJob>();
 builder.Services.AddHostedService<core.IoC.ConversationNoticeJob>();
+// A sessão em vídeo (docs/specs/sessao-em-video-e-chat.md): desligada por padrão (Sessions:Enabled).
+core.IoC.SessionRegistration.AddVideoSessions(builder.Services, configuration);
 builder.Services.AddHostedService<core.IoC.ConversationRetentionJob>();
 
 // Activity log (audit) — separate from the app's own Serilog pipeline/data stream on
@@ -206,6 +208,7 @@ app.MapGrpcService<coreServices.MatchingService>();
 app.MapGrpcService<coreServices.LeadsService>();
 app.MapGrpcService<coreServices.ConversationsService>();
 app.MapGrpcService<coreServices.ModerationGrpcService>();
+app.MapGrpcService<coreServices.SessionsGrpcService>();
 app.MapGrpcService<coreServices.SettingsGrpcService>();
 app.MapGrpcService<coreServices.PonteMetricsGrpcService>();
 app.MapGrpcService<coreServices.ConsultantDeletionGrpcService>();

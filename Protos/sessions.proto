@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "Protos/common.proto";
+option csharp_namespace = "core";
+
+package sessions;
+
+// A sessão em vídeo (docs/specs/sessao-em-video-e-chat.md). Só os BFFs chamam, depois de conferir o JWT: profileId é o do token, NUNCA o que veio do cliente.
+// Códigos de erro: 400 pedido inválido; 403 não é quem pode; 404 não existe (ou não é sua); 409 horário não confirmado; 410 sessão já encerrada; 425 fora da janela da sala; 501 sessão desligada.
+service Sessions {
+  rpc GetSession (SesRequest) returns (common.defaultReply);
+  rpc SignalSession (SesSignalRequest) returns (common.defaultReply);
+  // "Encerrar sessão", só o consultor.
+  rpc EndSession (SesRequest) returns (common.defaultReply);
+}
+
+message SesRequest {
+  string scheduleId = 1;
+  string profileId = 2;
+}
+
+message SesSignalRequest {
+  string scheduleId = 1;
+  string profileId = 2;
+  // join, heartbeat, connection-lost, reconnected, leave ou join-failed.
+  string signal = 3;
+}
+
+message SesSessionReply {
+  // Vazio enquanto ninguém entrou.
+  string sessionId = 1;
+  string scheduleId = 2;
+  // Scheduled, Open, InProgress, Completed, NoShowTalent, NoShowConsultant, NoShowBoth, Incomplete, UnderReview ou Canceled.
+  string status = 3;
+  // consultant ou talent: o lado de quem perguntou.
+  string role = 4;
+  // ISO 8601 em UTC.
+  string start = 5;
+  string end = 6;
+  string opensAt = 7;
+  string closesAt = 8;
+  bool canJoin = 9;
+}
