@@ -15,6 +15,8 @@ service Moderation {
   rpc SuspendInviting (ModConsultantRequest) returns (common.defaultReply);
   rpc LiftInviting (ModLiftRequest) returns (common.defaultReply);
   rpc CloseHeldInvites (ModConsultantRequest) returns (common.defaultReply);
+  // As exclusões de conta de consultor que esperam a análise da equipe (docs/specs/exclusao-de-conta-consultor.md, D-EC8). Só para o aviso no sino.
+  rpc ListHeldDeletions (ModEmptyRequest) returns (common.defaultReply);
 }
 
 message ModEmptyRequest {}
@@ -82,6 +84,23 @@ message ModSuspensionReply {
   string consultantId = 1;
   string suspendedAt = 2;
   string reason = 3;
+}
+
+message ModHeldDeletionItem {
+  string consultantId = 1;
+  string consultantName = 2;
+  // ISO 8601 em UTC. holdUntil é a data em que a exclusão executa MESMO SEM a análise.
+  string requestedAt = 3;
+  string scheduledFor = 4;
+  string holdUntil = 5;
+  // A denúncia aberta mais antiga; vazio quando só há suspensão.
+  string oldestOpenReportId = 6;
+  int32 openReports = 7;
+  bool suspended = 8;
+}
+
+message ModListHeldDeletionsReply {
+  repeated ModHeldDeletionItem items = 1;
 }
 
 message ModEmptyReply {}

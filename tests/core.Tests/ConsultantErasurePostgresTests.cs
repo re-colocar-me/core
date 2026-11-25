@@ -378,6 +378,66 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task A_lista_das_exclusoes_esperando_a_moderacao_usa_o_mesmo_criterio_da_guarda_e_para_no_prazo_limite_e_no_inicio_da_apagacao()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            // A semente pede a exclusão há 8 dias (carência até Now-1) e já deixa uma denúncia de talento aberta e uma feita pelo consultor.
+            var target = await SeedAsync(setup, "marina@exemplo.com", "Marina", withLead: false);
+            var other = await SeedAsync(setup, "outro@exemplo.com", "Outro", withLead: false);
+
+            async Task<List<core.domain.Interfaces.Infrastructure.HeldDeletionRow>> ListAsync(DateTime? after = null)
+            {
+                await using var db = fresh();
+                return await new ModerationRepository(db).ListHeldDeletionsAsync(after ?? Now.AddDays(-30), 200);
+            }
+
+            var both = await ListAsync();
+            Assert.Equal(new[] { target.ConsultantId, other.ConsultantId }.Order(), both.Select(x => x.ConsultantId).Order());
+            var row = both.Single(x => x.ConsultantId == target.ConsultantId);
+            Assert.Equal((Now.AddDays(-8), Now.AddDays(-1), 1, false), (row.RequestedAt, row.ScheduledFor, row.OpenReports, row.Suspended));
+            Assert.NotNull(row.OldestOpenReportId);
+
+            // A denúncia mais antiga é a que vai no link; a suspensão ativa aparece marcada.
+            var older = new ConversationReport
+            {
+                Id = Guid.NewGuid(), ConversationId = Guid.NewGuid(), ConsultantId = target.ConsultantId, CandidateId = Guid.NewGuid(), ReporterRole = ReporterRoles.Candidate, Origin = ConversationOrigin.Invite,
+                Reason = ReportReason.Spam, CreatedAt = Now.AddDays(-20), Status = ReportStatus.Open
+            };
+            setup.ConversationReports.Add(older);
+            setup.ConsultantInviteSuspensions.Add(new ConsultantInviteSuspension { Id = Guid.NewGuid(), ConsultantId = target.ConsultantId, SuspendedAt = Now.AddDays(-2), Reason = SuspensionReasons.Manual });
+            await setup.SaveChangesAsync();
+            row = (await ListAsync()).Single(x => x.ConsultantId == target.ConsultantId);
+            Assert.Equal((2, (Guid?)older.Id, true), (row.OpenReports, row.OldestOpenReportId, row.Suspended));
+
+            // Carência terminada antes do corte (passou o prazo-limite): sai da lista. No instante exato também.
+            Assert.Empty(await ListAsync(Now.AddDays(-1)));
+            Assert.Equal(2, (await ListAsync(Now.AddDays(-1).AddMinutes(-1))).Count);
+
+            // Só a suspensão (denúncias analisadas): continua na lista, sem id de denúncia.
+            await using (var db = fresh())
+                await db.ConversationReports.Where(x => x.ConsultantId == target.ConsultantId).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ReportStatus.Reviewed).SetProperty(x => x.ReviewedAt, Now));
+            row = (await ListAsync()).Single(x => x.ConsultantId == target.ConsultantId);
+            Assert.Equal((0, (Guid?)null, true), (row.OpenReports, row.OldestOpenReportId, row.Suspended));
+
+            // A equipe levanta a suspensão: nada mais espera.
+            await using (var db = fresh())
+                await db.ConsultantInviteSuspensions.Where(x => x.ConsultantId == target.ConsultantId && x.LiftedAt == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.LiftedAt, Now));
+            Assert.Equal(other.ConsultantId, Assert.Single(await ListAsync()).ConsultantId);
+
+            // Apagação já começada não espera mais; pedido cancelado também não.
+            await using (var db = fresh())
+                await db.Profiles.Where(p => p.Id == other.ProfileId).ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, ProfileStatus.Deleting));
+            Assert.Empty(await ListAsync());
+            await using (var db = fresh())
+                await db.Profiles.Where(p => p.Id == other.ProfileId).ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, ProfileStatus.Active).SetProperty(p => p.DeletionRequestedAt, (DateTime?)null).SetProperty(p => p.DeletionScheduledFor, (DateTime?)null));
+            Assert.Empty(await ListAsync());
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task O_aviso_aos_talentos_D_EC5_lista_so_quem_tem_mao_levantada_ou_proposta_aberta_com_este_consultor_e_o_inicio_marcado_nao_toca_em_dados_nem_em_talento()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();

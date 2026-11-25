@@ -37,6 +37,16 @@ public class ModerationGrpcTests
             return Task.FromResult(Item() with { ReportId = reportId, Status = "Reviewed", ReviewNote = note, ReviewedAt = new DateTime(2026, 11, 16, 13, 0, 0, DateTimeKind.Utc) });
         }
         public Task<List<SuspensionItem>> ListSuspensionsAsync() => Task.FromResult(new List<SuspensionItem> { new(Consultant, "Marina Costa", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "AutoReports", 2, Profile, "Marina", "marina@exemplo.com"), new(Guid.NewGuid(), "Sem Contato", new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc), "Manual", 0) });
+        public Task<List<HeldDeletionItem>> ListHeldDeletionsAsync()
+        {
+            if (Throw is not null) throw Throw;
+            var requested = new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc);
+            return Task.FromResult(new List<HeldDeletionItem>
+            {
+                new(Consultant, "Marina Costa", requested, requested.AddDays(7), requested.AddDays(37), Profile, 2, true),
+                new(Guid.NewGuid(), "Só Suspensa", requested, requested.AddDays(7), requested.AddDays(37), null, 0, true)
+            });
+        }
         public Task<int> ApplyRetentionAsync() => throw new NotSupportedException();
         public Task<int> CloseHeldInvitesAsync(Guid consultantId)
         {
@@ -122,6 +132,21 @@ public class ModerationGrpcTests
         // O contato do consultor vai para o aviso a ele; quem não tem contato vai com os campos vazios (nunca nulos).
         Assert.Equal((Profile.ToString(), "Marina", "marina@exemplo.com"), (list.Items[0].ProfileId, list.Items[0].FirstName, list.Items[0].Email));
         Assert.Equal((string.Empty, string.Empty, string.Empty), (list.Items[1].ProfileId, list.Items[1].FirstName, list.Items[1].Email));
+    }
+
+    [Fact]
+    public async Task As_exclusoes_esperando_a_moderacao_vao_com_as_datas_em_ISO_e_sem_denuncia_o_id_vai_vazio()
+    {
+        var (grpc, service) = Create();
+
+        var items = (await grpc.ListHeldDeletions(new ModEmptyRequest(), TestServerCallContext.Create())).Data.Unpack<ModListHeldDeletionsReply>().Items;
+
+        Assert.Equal((Consultant.ToString(), "Marina Costa", "2026-11-16T12:00:00.0000000Z", "2026-11-23T12:00:00.0000000Z", "2026-12-23T12:00:00.0000000Z"),
+            (items[0].ConsultantId, items[0].ConsultantName, items[0].RequestedAt, items[0].ScheduledFor, items[0].HoldUntil));
+        Assert.Equal((Profile.ToString(), 2, true), (items[0].OldestOpenReportId, items[0].OpenReports, items[0].Suspended));
+        Assert.Equal(string.Empty, items[1].OldestOpenReportId);
+        service.Throw = new InvalidOperationException("banco fora");
+        Assert.NotEqual(200, (await grpc.ListHeldDeletions(new ModEmptyRequest(), TestServerCallContext.Create())).Statuscode);
     }
 
     [Fact]

@@ -36,6 +36,17 @@ namespace core.Services
             return Any.Pack(reply);
         });
 
+        public override Task<defaultReply> ListHeldDeletions(ModEmptyRequest request, ServerCallContext context) => Run(async () =>
+        {
+            var reply = new ModListHeldDeletionsReply();
+            reply.Items.AddRange((await _moderation.ListHeldDeletionsAsync()).Select(x => new ModHeldDeletionItem
+            {
+                ConsultantId = x.ConsultantId.ToString(), ConsultantName = x.ConsultantName, RequestedAt = Iso(x.RequestedAt), ScheduledFor = Iso(x.ScheduledFor), HoldUntil = Iso(x.HoldUntil),
+                OldestOpenReportId = x.OldestOpenReportId?.ToString() ?? string.Empty, OpenReports = x.OpenReports, Suspended = x.Suspended
+            }));
+            return Any.Pack(reply);
+        });
+
         public override Task<defaultReply> SuspendInviting(ModConsultantRequest request, ServerCallContext context) => Run(async () =>
         {
             var suspension = await _moderation.SuspendAsync(ParseId(request.ConsultantId, "consultantId"));

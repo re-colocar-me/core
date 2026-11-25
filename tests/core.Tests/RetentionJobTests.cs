@@ -46,6 +46,7 @@ public class RetentionJobTests
         public Task<List<ReportQueueItem>> ListReportsAsync(string? status, int take) => throw new NotSupportedException();
         public Task<ReportQueueItem> ReviewReportAsync(Guid reportId, string? note) => throw new NotSupportedException();
         public Task<List<SuspensionItem>> ListSuspensionsAsync() => throw new NotSupportedException();
+        public Task<List<HeldDeletionItem>> ListHeldDeletionsAsync() => throw new NotSupportedException();
         public Task<int> CloseHeldInvitesAsync(Guid consultantId) => throw new NotSupportedException();
         public Task<core.domain.Entities.ConsultantInviteSuspension?> GetActiveSuspensionAsync(Guid consultantId) => throw new NotSupportedException();
         public Task<core.domain.Entities.ConsultantInviteSuspension> SuspendAsync(Guid consultantId) => throw new NotSupportedException();
