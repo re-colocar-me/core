@@ -438,6 +438,41 @@ public class ConsultantErasurePostgresTests
     }
 
     [PostgresFact]
+    public async Task A_exclusao_do_consultor_mantem_a_sessao_e_o_resultado_e_apaga_a_trilha_e_o_id_da_reuniao_so_das_dele()
+    {
+        var (setup, fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var target = await SeedAsync(setup, "marina@exemplo.com", "Marina", withLead: false);
+            var other = await SeedAsync(setup, "outro@exemplo.com", "Outro", withLead: false);
+            Session Session(Guid consultantId) => new()
+            {
+                Id = Guid.NewGuid(), ScheduleId = Guid.NewGuid(), ServicePurchaseId = Guid.NewGuid(), ConsultantId = consultantId, CandidateId = Guid.NewGuid(), Status = SessionStatus.NoShowTalent,
+                ScheduledStart = Now.AddDays(-3), ScheduledEnd = Now.AddDays(-3).AddHours(1), ClosedAt = Now.AddDays(-3).AddHours(2), ChimeMeetingId = "reuniao-1", OverlapSeconds = 7,
+                Consultant = new SessionPresence { Connections = 2, Reconnects = 1 }
+            };
+            var mine = Session(target.ConsultantId);
+            var theirs = Session(other.ConsultantId);
+            setup.Sessions.AddRange(mine, theirs);
+            setup.SessionEvents.AddRange(
+                new SessionEvent { Id = Guid.NewGuid(), SessionId = mine.Id, Actor = "consultant", Type = "Join", At = Now.AddDays(-3) },
+                new SessionEvent { Id = Guid.NewGuid(), SessionId = mine.Id, Actor = "talent", Type = "ConnectionLost", At = Now.AddDays(-3) },
+                new SessionEvent { Id = Guid.NewGuid(), SessionId = theirs.Id, Actor = "consultant", Type = "Join", At = Now.AddDays(-3) });
+            await setup.SaveChangesAsync();
+
+            await using (var db = fresh()) await new ConsultantErasureRepository(db).EraseDataAsync(target.ProfileId, Now);
+            await using (var db = fresh()) await new ConsultantErasureRepository(db).EraseDataAsync(target.ProfileId, Now.AddMinutes(1));      // repetir não muda nada
+
+            await using var check = fresh();
+            var kept = await check.Sessions.AsNoTracking().SingleAsync(x => x.Id == mine.Id);
+            Assert.Equal((SessionStatus.NoShowTalent, 7, 2, 1, (string?)null), (kept.Status, kept.OverlapSeconds, kept.Consultant.Connections, kept.Consultant.Reconnects, kept.ChimeMeetingId));
+            Assert.Equal(theirs.Id, Assert.Single(await check.SessionEvents.AsNoTracking().ToListAsync()).SessionId);
+            Assert.Equal("reuniao-1", (await check.Sessions.AsNoTracking().SingleAsync(x => x.Id == theirs.Id)).ChimeMeetingId);
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task O_aviso_aos_talentos_D_EC5_lista_so_quem_tem_mao_levantada_ou_proposta_aberta_com_este_consultor_e_o_inicio_marcado_nao_toca_em_dados_nem_em_talento()
     {
         var (setup, fresh, drop) = await CreateDatabaseAsync();

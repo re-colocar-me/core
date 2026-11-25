@@ -98,7 +98,8 @@ spec:
             # provar o apagador em Postgres real. Existe além da trava do consultant-bff (AccountDeletion__Enabled).
             - name: ConsultantDeletion__ExecutionEnabled
               value: "false"
-            # A sessão em vídeo (docs/specs/sessao-em-video-e-chat.md). Ligar SÓ depois de aplicar à mão a migração AddSessions (docs/operacao/2026-11-25/migracao-AddSessions.sql).
+            # A sessão em vídeo (docs/specs/sessao-em-video-e-chat.md). A migração AddSessions (docs/operacao/2026-11-25/migracao-AddSessions.sql) tem de ser aplicada à mão ANTES de publicar este core,
+            # mesmo com a chave desligada: a exclusão de contas já lê as tabelas novas.
             - name: Sessions__Enabled
               value: "false"
           resources:

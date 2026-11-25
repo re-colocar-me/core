@@ -118,6 +118,42 @@ public class SessionPostgresTests
     }
 
     [PostgresFact]
+    public async Task A_exclusao_do_talento_mantem_a_sessao_e_o_resultado_e_apaga_a_trilha_e_o_id_da_reuniao_so_das_dele()
+    {
+        var (fresh, drop) = await CreateDatabaseAsync();
+        try
+        {
+            var talent = Guid.NewGuid();
+            Session Session(Guid candidateId) => new()
+            {
+                Id = Guid.NewGuid(), ScheduleId = Guid.NewGuid(), ServicePurchaseId = Guid.NewGuid(), ConsultantId = Guid.NewGuid(), CandidateId = candidateId, Status = SessionStatus.Completed,
+                ScheduledStart = StartUtc, ScheduledEnd = StartUtc.AddHours(1), ClosedAt = StartUtc.AddHours(2), ChimeMeetingId = "reuniao-1", OverlapSeconds = 2000
+            };
+            var mine = Session(talent);
+            var theirs = Session(Guid.NewGuid());
+            await using (var db = fresh())
+            {
+                db.Sessions.AddRange(mine, theirs);
+                db.SessionEvents.AddRange(
+                    new SessionEvent { Id = Guid.NewGuid(), SessionId = mine.Id, Actor = "talent", Type = "Join", At = StartUtc },
+                    new SessionEvent { Id = Guid.NewGuid(), SessionId = mine.Id, Actor = "consultant", Type = "Join", At = StartUtc },
+                    new SessionEvent { Id = Guid.NewGuid(), SessionId = theirs.Id, Actor = "talent", Type = "Join", At = StartUtc });
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = fresh()) await new AccountErasureRepository(db).EraseTalentAsync(talent);
+            await using (var db = fresh()) await new AccountErasureRepository(db).EraseTalentAsync(talent);
+
+            await using var check = fresh();
+            var kept = await check.Sessions.AsNoTracking().SingleAsync(x => x.Id == mine.Id);
+            Assert.Equal((SessionStatus.Completed, 2000, (string?)null), (kept.Status, kept.OverlapSeconds, kept.ChimeMeetingId));
+            Assert.Equal(theirs.Id, Assert.Single(await check.SessionEvents.AsNoTracking().ToListAsync()).SessionId);
+            Assert.Equal("reuniao-1", (await check.Sessions.AsNoTracking().SingleAsync(x => x.Id == theirs.Id)).ChimeMeetingId);
+        }
+        finally { await drop(); }
+    }
+
+    [PostgresFact]
     public async Task Pelo_servico_uma_sessao_inteira_entra_conta_o_tempo_junto_e_o_job_fecha_como_realizada()
     {
         var (fresh, drop) = await CreateDatabaseAsync();
