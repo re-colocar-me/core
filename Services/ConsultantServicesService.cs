@@ -325,6 +325,36 @@ namespace core.Services
             return reply;
         }
 
+        public override async Task<defaultReply> GetServiceEligibility(GetConsultantSkillsRequest request, ServerCallContext context)
+        {
+            var reply = new defaultReply();
+            try
+            {
+                var eligibility = await _services.GetServiceEligibility(Guid.Parse(request.ConsultantProfileId));
+                var data = new GetServiceEligibilityReply
+                {
+                    MinimumSkillMatchPercentage = (double)(eligibility.Count > 0 ? eligibility[0].MinimumPercentage : await _services.GetMinimumSkillMatchPercentage())
+                };
+                data.Services.AddRange(eligibility.Select(x => new ServiceEligibilityItem
+                {
+                    ServiceId = x.ServiceId.ToString(),
+                    Eligible = x.Eligible,
+                    Percentage = (double)x.Match.Percentage,
+                    MatchedSkills = { x.Match.Matched },
+                    MissingSkills = { x.Match.Missing }
+                }));
+
+                reply.Data = Any.Pack(data);
+                reply.Statuscode = Constants.SuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                reply.Statuscode = Constants.FailStatusCode;
+                reply.Error = new error { Message = ex.Message };
+            }
+            return reply;
+        }
+
         public override async Task<defaultReply> SuggestSkills(GetConsultantSkillsRequest request, ServerCallContext context)
         {
             var reply = new defaultReply();

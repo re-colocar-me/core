@@ -29,6 +29,7 @@ service ConsultantServices{
 	rpc SuggestSkills (GetConsultantSkillsRequest) returns (common.defaultReply);
 	rpc GetCurationConfig (common.Empty) returns (common.defaultReply);
 	rpc SetCurationConfig (SetCurationConfigRequest) returns (common.defaultReply);
+	rpc GetServiceEligibility (GetConsultantSkillsRequest) returns (common.defaultReply);
 }
 
 message ListCategoriesReply{
@@ -139,6 +140,20 @@ message GetConsultantSkillsRequest {
 
 message GetConsultantSkillsReply {
 	repeated string skillNames = 1;
+}
+
+// A situação de cada serviço do catálogo para um consultor, pela mesma regra que barra uma oferta nova.
+message GetServiceEligibilityReply {
+	double minimumSkillMatchPercentage = 1;
+	repeated ServiceEligibilityItem services = 2;
+}
+
+message ServiceEligibilityItem {
+	string serviceId = 1;
+	bool eligible = 2;
+	double percentage = 3;
+	repeated string matchedSkills = 4;
+	repeated string missingSkills = 5;
 }
 
 message SuggestSkillsReply {
