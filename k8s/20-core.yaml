@@ -86,14 +86,14 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secrets
                   key: password
-            # O aviso por e-mail e push ao talento dos convites recebidos (docs/specs/ponte-talento-consultor.md, seção 33). DESLIGADO de propósito:
-            # só ligar depois de o tipo talento.convite-recebido estar publicado no catálogo do motor e de o texto do e-mail ter sido lido pelo fundador.
+            # O aviso ao talento dos convites recebidos (docs/specs/ponte-talento-consultor.md, seção 33). LIGADO em 2026-11-25 (seção 42): o motor usa um canal por aviso, e-mail, e o push
+            # só sai se o e-mail não puder. O tipo talento.convite-recebido precisa estar publicado no catálogo do motor.
             - name: InviteNotices__Enabled
-              value: "false"
-            # Os avisos por e-mail das conversas da ponte (mão levantada, proposta, aceite, expiração e encerramento; seção 38). DESLIGADO de propósito: só ligar depois de os seis tipos
-            # estarem publicados no catálogo do motor e de os textos terem sido lidos pelo fundador.
+              value: "true"
+            # Os avisos por e-mail das conversas da ponte (mão levantada, proposta, aceite, expiração e encerramento; seção 38). LIGADO em 2026-11-25 (seção 42): os seis tipos precisam
+            # estar publicados no catálogo do motor.
             - name: ConversationNotices__Enabled
-              value: "false"
+              value: "true"
             # A EXECUÇÃO da exclusão de conta do consultor (docs/specs/exclusao-de-conta-consultor.md, EC2): irreversível, DESLIGADA de propósito. Só ligar depois da EC3, da confirmação do contador (D-EC3) e de
             # provar o apagador em Postgres real. Existe além da trava do consultant-bff (AccountDeletion__Enabled).
             - name: ConsultantDeletion__ExecutionEnabled
