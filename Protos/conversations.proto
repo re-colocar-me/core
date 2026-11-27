@@ -300,6 +300,8 @@ message ConvCandidateListReply {
   // Mãos levantadas em uso (esperando resposta ou proposta) e o teto ajustável no backoffice.
   int32 openHandRaises = 2;
   int32 maxOpenHandRaises = 3;
+  // A espera, em dias, depois de uma mão encerrada (o app avisa antes de recusar uma proposta).
+  int32 handRaiseRetryDays = 4;
 }
 
 // O que o consultor vê: a ficha anônima. NÃO há candidateId aqui, de propósito.

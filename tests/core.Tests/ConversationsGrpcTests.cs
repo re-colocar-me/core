@@ -51,7 +51,7 @@ public class ConversationsGrpcTests
         public Task<Dictionary<Guid, ConversationConsultant>> GetConsultantsAsync(IEnumerable<Guid> ids)
             => Task.FromResult(ids.Distinct().ToDictionary(x => x, _ => new ConversationConsultant("Marina Costa", "https://x/m.jpg")));
         public Task<List<Conversation>> ListForCandidateAsync(Guid candidateId) => Task.FromResult(Items.ToList());
-        public HandRaiseState HandRaises { get; set; } = new(0, 3, new Dictionary<Guid, DateTime>());
+        public HandRaiseState HandRaises { get; set; } = new(0, 3, 30, new Dictionary<Guid, DateTime>());
         public Task<HandRaiseState> GetHandRaiseStateAsync(Guid candidateId, IReadOnlyCollection<Conversation> conversations) => Task.FromResult(HandRaises);
         public Task<List<Conversation>> ListForConsultantAsync(Guid consultantId, ConversationOrigin? origin, ConversationStatus? status)
             => Task.FromResult(Items.Where(x => (origin is null || x.Origin == origin) && (status is null || x.Status == status)).ToList());
@@ -487,9 +487,9 @@ public class ConversationsGrpcTests
 
         // As mãos em uso e a espera vão só para o talento, e a espera só na conversa que ainda trava.
         var waiting = new DateTime(2026, 12, 16, 12, 0, 0, DateTimeKind.Utc);
-        service.HandRaises = new HandRaiseState(2, 3, new Dictionary<Guid, DateTime> { [invite.Id] = waiting });
+        service.HandRaises = new HandRaiseState(2, 3, 30, new Dictionary<Guid, DateTime> { [invite.Id] = waiting });
         var box = (await grpc.ListForCandidate(new ConvListForCandidateRequest { CandidateId = Talent.ToString() }, TestServerCallContext.Create())).Data.Unpack<ConvCandidateListReply>();
-        Assert.Equal((2, 3), (box.OpenHandRaises, box.MaxOpenHandRaises));
+        Assert.Equal((2, 3, 30), (box.OpenHandRaises, box.MaxOpenHandRaises, box.HandRaiseRetryDays));
         Assert.Equal(waiting.ToString("O"), box.Items.Single().RaiseAgainAt);
         Assert.Equal(string.Empty, candidate.RaiseAgainAt);
         Assert.DoesNotContain(ConvConsultantItem.Descriptor.Fields.InFieldNumberOrder(), f => f.Name.Contains("raise", StringComparison.OrdinalIgnoreCase));

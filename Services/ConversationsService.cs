@@ -205,7 +205,7 @@ namespace core.Services
             var items = await _conversations.ListForCandidateAsync(candidateId);
             var consultants = await _conversations.GetConsultantsAsync(items.Select(x => x.ConsultantId));
             var handRaises = await _conversations.GetHandRaiseStateAsync(candidateId, items);
-            var data = new ConvCandidateListReply { OpenHandRaises = handRaises.Open, MaxOpenHandRaises = handRaises.Max };
+            var data = new ConvCandidateListReply { OpenHandRaises = handRaises.Open, MaxOpenHandRaises = handRaises.Max, HandRaiseRetryDays = handRaises.RetryDays };
             data.Items.AddRange(items.Select(x => ConversationMapper.ToCandidateItem(x, consultants.GetValueOrDefault(x.ConsultantId),
                 handRaises.RaiseAgainAt.TryGetValue(x.Id, out var raiseAgainAt) ? raiseAgainAt : null)));
             return Any.Pack(data);
