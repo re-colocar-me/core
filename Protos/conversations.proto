@@ -291,10 +291,15 @@ message ConvCandidateItem {
   // Só no convite: o texto do modelo escolhido e o "combina com você porque" (fatos da própria pessoa).
   string inviteText = 18;
   string inviteReason = 19;
+  // Só na última mão encerrada com um consultor, enquanto ela ainda impede um novo pedido: quando ele volta a valer. Vazio nas demais.
+  string raiseAgainAt = 20;
 }
 
 message ConvCandidateListReply {
   repeated ConvCandidateItem items = 1;
+  // Mãos levantadas em uso (esperando resposta ou proposta) e o teto ajustável no backoffice.
+  int32 openHandRaises = 2;
+  int32 maxOpenHandRaises = 3;
 }
 
 // O que o consultor vê: a ficha anônima. NÃO há candidateId aqui, de propósito.

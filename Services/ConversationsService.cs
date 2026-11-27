@@ -201,10 +201,13 @@ namespace core.Services
 
         public override Task<defaultReply> ListForCandidate(ConvListForCandidateRequest request, ServerCallContext context) => Run(async () =>
         {
-            var items = await _conversations.ListForCandidateAsync(ParseId(request.CandidateId, "candidateId"));
+            var candidateId = ParseId(request.CandidateId, "candidateId");
+            var items = await _conversations.ListForCandidateAsync(candidateId);
             var consultants = await _conversations.GetConsultantsAsync(items.Select(x => x.ConsultantId));
-            var data = new ConvCandidateListReply();
-            data.Items.AddRange(items.Select(x => ConversationMapper.ToCandidateItem(x, consultants.GetValueOrDefault(x.ConsultantId))));
+            var handRaises = await _conversations.GetHandRaiseStateAsync(candidateId, items);
+            var data = new ConvCandidateListReply { OpenHandRaises = handRaises.Open, MaxOpenHandRaises = handRaises.Max };
+            data.Items.AddRange(items.Select(x => ConversationMapper.ToCandidateItem(x, consultants.GetValueOrDefault(x.ConsultantId),
+                handRaises.RaiseAgainAt.TryGetValue(x.Id, out var raiseAgainAt) ? raiseAgainAt : null)));
             return Any.Pack(data);
         });
 
@@ -266,7 +269,7 @@ namespace core.Services
             => c.Events.OrderBy(e => e.At).Select(e => new ConvEventItem { Type = e.Type, Actor = e.Actor, At = e.At.ToString("O") });
 
         /// <summary>O talento vê o consultor identificado desde o início.</summary>
-        public static ConvCandidateItem ToCandidateItem(Conversation c, ConversationConsultant? consultant)
+        public static ConvCandidateItem ToCandidateItem(Conversation c, ConversationConsultant? consultant, DateTime? raiseAgainAt = null)
         {
             var item = new ConvCandidateItem
             {
@@ -275,7 +278,7 @@ namespace core.Services
                 RequestedOfferingId = c.RequestedOfferingId?.ToString() ?? string.Empty, ProposalKind = c.ProposalKind?.ToString() ?? string.Empty,
                 ProposedOfferingId = c.ProposedOfferingId?.ToString() ?? string.Empty, ProposedPriceInLemonCoins = c.ProposedPriceInLemonCoins ?? 0,
                 ProposedServiceName = c.ProposedServiceName ?? string.Empty, Note = c.Note ?? string.Empty, ShareSuco = c.ShareSuco, ConnectionId = c.ConnectionId?.ToString() ?? string.Empty,
-                InviteText = c.InviteText ?? string.Empty, InviteReason = c.InviteReason ?? string.Empty
+                InviteText = c.InviteText ?? string.Empty, InviteReason = c.InviteReason ?? string.Empty, RaiseAgainAt = Iso(raiseAgainAt)
             };
             item.Events.AddRange(Events(c));
             return item;

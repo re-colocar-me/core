@@ -33,6 +33,7 @@ public class RetentionJobTests
         public Task<core.domain.Entities.Conversation> WithdrawAsync(Guid candidateId, Guid conversationId) => throw new NotSupportedException();
         public Task<Dictionary<Guid, core.domain.Interfaces.Infrastructure.ConversationConsultant>> GetConsultantsAsync(IEnumerable<Guid> ids) => throw new NotSupportedException();
         public Task<List<core.domain.Entities.Conversation>> ListForCandidateAsync(Guid candidateId) => throw new NotSupportedException();
+        public Task<HandRaiseState> GetHandRaiseStateAsync(Guid candidateId, IReadOnlyCollection<core.domain.Entities.Conversation> conversations) => throw new NotSupportedException();
         public Task<List<core.domain.Entities.Conversation>> ListForConsultantAsync(Guid consultantId, core.domain.Enums.ConversationOrigin? origin, core.domain.Enums.ConversationStatus? status) => throw new NotSupportedException();
         public Task<int> ExpireDueAsync() => throw new NotSupportedException();
     }
